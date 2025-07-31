@@ -39,7 +39,11 @@
                     <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                         <li><a class="dropdown-item" href="../UserDashboard/UserProfile">Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                        <li>
+                            <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item">Sign out</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -73,9 +77,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="UserAccount" asp-action="Logout">
-                                <i class="bi bi-box-arrow-left"></i>Logout
-                            </a>
+                            <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="nav-link btn btn-link p-0">
+                                    <i class="bi bi-box-arrow-left"></i>Logout
+                                </button>
+                            </form>
                         </li>
                     </ul>
 
