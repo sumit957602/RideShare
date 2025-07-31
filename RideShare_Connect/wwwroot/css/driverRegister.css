@@ -1,0 +1,130 @@
+﻿:root {
+    --primary-color: #ff6600; /* Orange */
+    --secondary-color: #ffc107; /* Yellow */
+    --dark-color: #1a1a1a;
+    --light-color: #f8f9fa;
+    --text-dark: #333;
+    --text-light: #fff;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--light-color);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+}
+
+/* --- Navbar Styles --- */
+.navbar {
+    background-color: var(--dark-color);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--text-light) !important;
+}
+
+.nav-link {
+    color: var(--text-light) !important;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+    .nav-link:hover, .nav-link.active {
+        color: var(--secondary-color) !important;
+    }
+
+/* --- Button Styles --- */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+}
+
+    .btn-primary:hover {
+        background-color: #e65c00;
+        border-color: #e65c00;
+    }
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: var(--dark-color);
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+}
+
+    .btn-secondary:hover {
+        background-color: #e9b006;
+        border-color: #e9b006;
+    }
+
+/* --- Sign Up Form Styles --- */
+.signup-section {
+    padding: 4rem 0;
+}
+
+.signup-card {
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.signup-card-header {
+    background-color: var(--dark-color);
+    color: var(--text-light);
+    padding: 2rem;
+}
+
+.signup-card-body {
+    padding: 2rem;
+}
+
+.form-control {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+/* --- Footer Styles --- */
+.footer {
+    background-color: var(--dark-color);
+    color: rgba(255, 255, 255, 0.7);
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+    margin-top: auto;
+}
+
+    .footer h5 {
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .footer a:hover {
+            color: var(--text-light);
+        }
+
+    .footer .social-icons a {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }

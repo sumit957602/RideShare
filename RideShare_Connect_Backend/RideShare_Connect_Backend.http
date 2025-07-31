@@ -1,0 +1,4 @@
+@RideShare_Connect_HostAddress = https://localhost:7221
+
+GET {{RideShare_Connect_HostAddress}}/
+Accept: text/html

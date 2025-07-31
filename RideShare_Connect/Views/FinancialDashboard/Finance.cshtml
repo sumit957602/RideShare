@@ -1,0 +1,272 @@
+﻿@{
+    ViewData["Title"] = "Payment & Financial";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/finance.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Header & Navbar from Main Site -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="index.html">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../UserDashboard/User">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Payments & Finance</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>Alex Rodriguez</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content: Payments & Financial Management -->
+    <main class="flex-grow-1 py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Left Sidebar Navigation -->
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Financials</h5>
+                            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                <button class="nav-link active text-start" id="v-pills-wallet-tab" data-bs-toggle="pill" data-bs-target="#v-pills-wallet" type="button" role="tab" aria-controls="v-pills-wallet" aria-selected="true"><i class="bi bi-pie-chart-fill me-2"></i>Financial Dashboard</button>
+                                <button class="nav-link text-start" id="v-pills-methods-tab" data-bs-toggle="pill" data-bs-target="#v-pills-methods" type="button" role="tab" aria-controls="v-pills-methods" aria-selected="false"><i class="bi bi-credit-card-2-front-fill me-2"></i>Payment Methods</button>
+                                <button class="nav-link text-start" id="v-pills-history-tab" data-bs-toggle="pill" data-bs-target="#v-pills-history" type="button" role="tab" aria-controls="v-pills-history" aria-selected="false"><i class="bi bi-clock-history me-2"></i>Transaction History</button>
+                                <button class="nav-link text-start" id="v-pills-refunds-tab" data-bs-toggle="pill" data-bs-target="#v-pills-refunds" type="button" role="tab" aria-controls="v-pills-refunds" aria-selected="false"><i class="bi bi-arrow-counterclockwise me-2"></i>Request Refund</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content Area -->
+                <div class="col-lg-9">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <!-- Wallet & Financial Reports Dashboard Tab -->
+                        <div class="tab-pane fade show active" id="v-pills-wallet" role="tabpanel" aria-labelledby="v-pills-wallet-tab" tabindex="0">
+                            <h4 class="mb-4">Financial Reports Dashboard</h4>
+                            <div class="card wallet-card mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="mb-0 fs-5">Wallet Balance</p>
+                                            <h2 class="display-5 fw-bold mb-0">₹1,250.75</h2>
+                                        </div>
+                                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addMoneyModal"><i class="bi bi-plus-circle-fill me-2"></i>Add Money</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p class="text-muted mb-1">Total Spent This Month</p>
+                                            <h3 class="fw-bold">₹2,350.00</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p class="text-muted mb-1">Total Saved on Rides</p>
+                                            <h3 class="fw-bold text-success">₹1,880.00</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Recent Transactions</h5>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Ride Payment to Ravi Kumar</span><span class="text-danger fw-bold">-₹80.00</span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Added to Wallet</span><span class="text-success fw-bold">+₹500.00</span></li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>Ride Payment to Priya Sharma</span><span class="text-danger fw-bold">-₹150.00</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Methods Tab -->
+                        <div class="tab-pane fade" id="v-pills-methods" role="tabpanel" aria-labelledby="v-pills-methods-tab" tabindex="0">
+                            <h4 class="mb-4">Saved Payment Methods</h4>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body d-flex align-items-center">
+                                            <i class="bi bi-credit-card-fill fs-1 text-primary me-3"></i>
+                                            <div>
+                                                <h5 class="mb-1">Visa **** 1234</h5>
+                                                <p class="mb-1 text-muted">Expires 12/2028</p>
+                                                <a href="#" class="text-danger small">Remove</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100 payment-method-card">
+                                        <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                                                <i class="bi bi-plus-lg"></i> Add New Payment Method
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History Tab -->
+                        <div class="tab-pane fade" id="v-pills-history" role="tabpanel" aria-labelledby="v-pills-history-tab" tabindex="0">
+                            <h4 class="mb-4">Full Transaction History</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Transaction ID</th>
+                                                    <th>Date</th>
+                                                    <th>Description</th>
+                                                    <th>Amount</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr><td>TXN123456</td><td>2025-07-26</td><td>Ride Payment to Ravi Kumar</td><td class="text-danger">-₹80.00</td><td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Success</span></td></tr>
+                                                <tr><td>TXN123455</td><td>2025-07-25</td><td>Added to Wallet</td><td class="text-success">+₹500.00</td><td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Success</span></td></tr>
+                                                <tr><td>TXN123454</td><td>2025-07-24</td><td>Ride Payment to Priya Sharma</td><td class="text-danger">-₹150.00</td><td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Success</span></td></tr>
+                                                <tr><td>TXN123453</td><td>2025-07-23</td><td>Refund from cancelled ride</td><td class="text-success">+₹100.00</td><td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Success</span></td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Refunds Tab -->
+                        <div class="tab-pane fade" id="v-pills-refunds" role="tabpanel" aria-labelledby="v-pills-refunds-tab" tabindex="0">
+                            <h4 class="mb-4">Refunds</h4>
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Request a Refund</h5>
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="refundRideId" class="form-label">Ride/Transaction ID</label>
+                                            <input type="text" class="form-control" id="refundRideId" placeholder="Enter the ID of the transaction">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="refundReason" class="form-label">Reason for Refund</label>
+                                            <textarea class="form-control" id="refundReason" rows="3" placeholder="Please explain why you are requesting a refund..."></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Your Refund Status</h5>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead><tr><th>Request ID</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                                            <tbody>
+                                                <tr><td>REF5678</td><td>2025-07-23</td><td>₹100.00</td><td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Completed</span></td></tr>
+                                                <tr><td>REF5679</td><td>2025-07-26</td><td>₹50.00</td><td><span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">Processing</span></td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer from Main Site -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4"><h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5><p>Your trusted platform for safe, comfortable, and affordable shared rides. Building a community, one ride at a time.</p></div>
+                <div class="col-lg-2 col-md-4 col-6"><h5>Quick Links</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">About Us</a></li><li class="mb-2"><a href="#">Contact</a></li></ul></div>
+                <div class="col-lg-3 col-md-4 col-6"><h5>Legal</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">Privacy Policy</a></li><li class="mb-2"><a href="#">Terms of Service</a></li></ul></div>
+                <div class="col-lg-3 col-md-4"><h5>Contact Us</h5><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li><li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li></ul></div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);"><div class="text-center"><p>&copy; 2025 RideShare Connect. All Rights Reserved.</p></div>
+        </div>
+    </footer>
+
+    <!-- Add Money Modal -->
+    <div class="modal fade" id="addMoneyModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Money to Wallet</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"><form><div class="mb-3"><label for="addAmount" class="form-label">Amount (₹)</label><input type="number" class="form-control" id="addAmount" placeholder="e.g., 500"></div><div class="mb-3"><label class="form-label">Select Payment Method</label><select class="form-select"><option selected>Visa **** 1234</option><option>Add New Card...</option></select></div></form></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary">Proceed to Pay</button></div></div></div></div>
+
+    <!-- Add Payment Method Modal (Gateway Integration) -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Payment Method</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Your payment information is securely handled by our PCI-compliant payment partner.</p>
+                    <form>
+                        <div class="mb-3">
+                            <label for="cardName" class="form-label">Name on Card</label>
+                            <input type="text" class="form-control" id="cardName" placeholder="John Doe">
+                        </div>
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Card Number</label>
+                            <div id="card-element" class="form-control">
+                                <!-- A Stripe/Razorpay Element will be inserted here -->
+                                <span class="text-muted">•••• •••• •••• ••••</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cardExpiry" class="form-label">Expiry</label>
+                                <div id="card-expiry-element" class="form-control"><span class="text-muted">MM / YY</span></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cardCvc" class="form-label">CVC</label>
+                                <div id="card-cvc-element" class="form-control"><span class="text-muted">•••</span></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Save Method</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

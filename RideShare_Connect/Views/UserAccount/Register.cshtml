@@ -1,0 +1,248 @@
+﻿@model RideShare_Connect.DTOs.UserRegisterDto
+@{
+    ViewData["Title"] = "Customer Sign-Up";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/userRegister.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Header & Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="index.html">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Login">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <section class="signup-section">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-7 col-xl-6">
+                        <div class="signup-card">
+                            <div class="signup-card-header text-center">
+                                <h2 class="mb-0">Create Your Account</h2>
+                                <p class="mb-0">Join our community of trusted riders and drivers.</p>
+                            </div>
+                            <div class="signup-card-body">
+                                <form asp-action="Register">
+                                    <!-- Full Name -->
+                                    <div class="mb-3">
+                                        <label for="fullName" class="form-label">Full Name</label>
+                                        <input type="text" asp-for="FullName" class="form-control" id="fullName" placeholder="John Doe" required>
+                                    </div>
+
+                                    <!-- Email Address -->
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address</label>
+                                        <input type="email" asp-for="Email" class="form-control" id="email" placeholder="you@example.com" required>
+                                    </div>
+
+                                    <!-- Password -->
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" asp-for="Password" class="form-control" id="password" placeholder="••••••••" required>
+                                    </div>
+
+                                    <!-- Emergency Contact -->
+                                    <div class="mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" asp-for="PhoneNumber" class="form-control" id="emergencyContact" placeholder="e.g., +91 9876543210">
+                                    </div>
+
+   
+
+                                    <!-- Terms and Conditions -->
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" value="" id="termsCheck" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            I agree to the <a href="#">Terms and Conditions</a>
+                                        </label>
+                                    </div>
+
+                                    <!-- Submit Button -->
+                                    <div class="d-grid">
+                                        <button type="submit" value="Register" class="btn btn-primary btn-lg">Sign Up</button>
+                                    </div>
+
+                                    <div class="divider-text"><span>OR</span></div>
+
+                                    <!-- Social Logins -->
+                                    <div class="d-grid gap-2">
+                                        <a href="#" class="btn btn-outline-dark"><i class="bi bi-google me-2"></i>Sign up with Google</a>
+                                        <a href="#" class="btn btn-outline-primary"><i class="bi bi-facebook me-2"></i>Sign up with Facebook</a>
+                                    </div>
+                                </form>
+                                <div class="text-center mt-4">
+                                    <p class="text-muted">Already have an account? <a href="Login">Log In</a></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5>
+                    <p>Your trusted platform for safe, comfortable, and affordable shared rides. Building a community, one ride at a time.</p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">About Us</a></li>
+                        <li class="mb-2"><a href="index.html#how-it-works">How It Works</a></li>
+                        <li class="mb-2"><a href="index.html#features">Features</a></li>
+                        <li class="mb-2"><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li>
+                        <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li>
+                        <li class="mb-2"><i class="bi bi-telephone-fill me-2"></i> +91 123-456-7890</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+            <div class="text-center">
+                <p>&copy; 2025 RideShare Connect. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    @* <script>
+        const roleBtns = document.querySelectorAll('.role-btn');
+        const regBtns = document.querySelectorAll('.reg-btn');
+        const registeredSection = document.getElementById('registeredSection');
+        const loginForm = document.getElementById('loginForm');
+        const roleInput = document.getElementById('role');
+        const statusInput = document.getElementById('status');
+        const regRoleModal = document.getElementById('regRoleModal');
+        const roleIcon = document.getElementById('roleIcon');
+
+        roleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const role = btn.dataset.role;
+                roleInput.value = role;
+                regRoleModal.value = role;
+
+                if (role === 'admin') {
+                    showLoginForm(role);
+                    registeredSection.classList.add('d-none');
+                } else {
+                    registeredSection.classList.remove('d-none');
+                    loginForm.classList.add('d-none');
+                }
+
+                updateRoleIcon(role);
+            });
+        });
+
+        regBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const status = btn.dataset.registered;
+                statusInput.value = status;
+
+                if (status === 'yes') showLoginForm(roleInput.value);
+                else showRegisterModal(roleInput.value);
+            });
+        });
+
+        function showLoginForm(role) {
+            loginForm.classList.remove('d-none');
+            roleInput.value = role;
+        }
+
+        function showRegisterModal(role) {
+            regRoleModal.value = role;
+            const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+            modal.show();
+        }
+
+        function updateRoleIcon(role) {
+            const iconMap = {
+                consumer: 'fa-user',
+                worker: 'fa-hard-hat',
+                admin: 'fa-user-shield'
+            };
+            roleIcon.className = `fa-solid ${iconMap[role]} fa-3x text-primary`;
+        }
+
+
+        // ✅ Register Handler
+        document.getElementById('registerBtnModal').addEventListener('click', async () => {
+            const inputs = document.querySelectorAll('#registerFormModal input');
+            const name = inputs[0].value;
+            const phone = inputs[3].value;
+            const email = inputs[4].value;
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (password !== confirm) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName: name, email, phone, password })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert("Registration successful. Please login.");
+                bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+            } else {
+                alert(data.message || "Registration failed");
+            }
+        });
+
+        particlesJS.load('particles-js', '/js/particles.json');
+    </script> *@
+
+</body>

@@ -1,0 +1,211 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 0px;
+}
+
+.dashboard-container {
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    color: #fff;
+    background: #191919;
+    padding: 0 0 0 0;
+    margin: 0;
+    width: 100%;
+}
+
+.dashboard-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(90deg, #191919 70%, #ffc107 30%);
+    padding: 3rem 2rem;
+    border-radius: 1.5rem;
+    margin: 2rem 0;
+}
+
+    .dashboard-hero h1 {
+        font-size: 2.6rem;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+    }
+
+        .dashboard-hero h1 span {
+            color: #ffc107;
+        }
+
+    .dashboard-hero p {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+
+.learn-btn {
+    display: inline-block;
+    background: #ff4500;
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+    box-shadow: 2px 2px 8px #00000050;
+}
+
+.taxi-illustration {
+    width: 240px;
+    height: 160px;
+    background: url('/images/taxi-dashboard-vector.svg') center/contain no-repeat, #222;
+    border-radius: 18px;
+}
+
+.dashboard-awards {
+    text-align: center;
+    margin: 2rem 0 1.5rem 0;
+}
+
+    .dashboard-awards h2 {
+        font-size: 1.3rem;
+        font-weight: bold;
+        letter-spacing: 0.03em;
+        color: #ffc107;
+        margin-bottom: 0.8rem;
+    }
+
+.awards-list {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.award {
+    background: #262626;
+    border: 1.5px solid #ffc10755;
+    padding: 0.8rem 1.4rem;
+    border-radius: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+
+.dashboard-stats {
+    display: flex;
+    margin: 2rem 0 0 0;
+    gap: 2rem;
+}
+
+.stats-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.satisfied-circle {
+    background: #ffc107;
+    color: #191919;
+    width: 110px;
+    height: 110px;
+    border-radius: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: bold;
+    box-shadow: 0 4px 12px #0004;
+}
+
+    .satisfied-circle p {
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        color: #191919;
+    }
+
+.stats-right {
+    flex: 2;
+}
+
+.chart-bar {
+    background: #232323;
+    margin: 1rem 0;
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    height: 42px;
+    box-shadow: 0 2px 8px #0002;
+}
+
+    .chart-bar span {
+        position: absolute;
+        left: 1.2rem;
+        font-size: 1rem;
+        top: 12px;
+        color: #fff;
+        z-index: 2;
+        font-weight: 500;
+    }
+
+    .chart-bar div {
+        background: #ffc107;
+        height: 100%;
+        border-radius: 1rem;
+        text-align: right;
+        color: #222;
+        font-weight: bold;
+        font-size: 1.2rem;
+        line-height: 42px;
+        padding-right: 1rem;
+    }
+
+.dashboard-features {
+    display: flex;
+    gap: 1.6rem;
+    justify-content: space-between;
+    background: #232323;
+    padding: 2.2rem 2rem;
+    border-radius: 1.1rem;
+    margin-top: 2.5rem;
+}
+
+    .dashboard-features div {
+        flex: 1;
+        background: transparent;
+        color: #fff;
+        padding: 0 0.5rem;
+    }
+
+    .dashboard-features h3 {
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+@media (max-width: 900px) {
+    .dashboard-hero {
+        flex-direction: column;
+    }
+
+    .dashboard-stats {
+        flex-direction: column;
+    }
+
+    .dashboard-features {
+        flex-direction: column;
+    }
+}

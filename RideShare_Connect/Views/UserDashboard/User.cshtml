@@ -1,0 +1,392 @@
+﻿
+@{
+    ViewData["Title"] = "User Dashboard";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/user.css" asp-append-version="true" />
+    <script src="~/js/user.js" asp-append-version="true"></script>
+</head>
+
+<body>
+
+    <!-- Header & Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="index.html">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../FinancialDashboard/Finance">Payments & Finance</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://avatar.iran.liara.run/public/boy?username=Ash" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>User</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="../UserDashboard/UserProfile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column" id="sidebar-nav" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#dashboard-tab-pane" role="tab" aria-controls="dashboard-tab-pane" aria-selected="true">
+                                <i class="bi bi-speedometer2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-bs-target="#find-ride-tab-pane" role="tab" aria-controls="find-ride-tab-pane" aria-selected="false">
+                                <i class="bi bi-search"></i>Find a Ride
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings-tab-pane" role="tab" aria-controls="bookings-tab-pane" aria-selected="false">
+                                <i class="bi bi-bookmark-check-fill"></i>My Bookings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../UserDashboard/UserProfile">
+                                <i class="bi bi-person-circle"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="UserAccount" asp-action="Logout">
+                                <i class="bi bi-box-arrow-left"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="p-3 mt-4">
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#createRideModal">
+                            <i class="bi bi-plus-circle-fill me-2"></i>Book a New Ride
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
+                <div class="tab-content" id="myTabContent">
+                    <!-- Dashboard Tab -->
+                    <div class="tab-pane fade show active" id="dashboard-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Dashboard</h1>
+                        </div>
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <div class="stat-card d-flex align-items-center">
+                                    <div class="icon bg-primary-subtle text-primary me-3">
+                                        <i class="bi bi-bookmark-check-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">5</h5>
+                                        <p class="text-muted mb-0">Rides Booked</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card d-flex align-items-center">
+                                    <div class="icon bg-success-subtle text-success me-3">
+                                        <i class="bi bi-wallet2"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">₹2,500</h5>
+                                        <p class="text-muted mb-0">Total Saved</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-card d-flex align-items-center">
+                                    <div class="icon bg-warning-subtle text-warning me-3">
+                                        <i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">4.8</h5>
+                                        <p class="text-muted mb-0">Your Rating</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4>Recent Activity</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        You booked a ride to Danapur with Ravi Kumar.
+                                        <span class="text-muted small">1 hour ago</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Your ride offer to Gaya was successfully created.
+                                        <span class="text-muted small">Yesterday</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Priya Sharma accepted your booking request.
+                                        <span class="text-muted small">2 days ago</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Find a Ride Tab -->
+                    <div class="tab-pane fade" id="find-ride-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Find Available Rides</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <form class="row g-3 align-items-end">
+                                    <div class="col-lg-3">
+                                        <label for="fromLocation" class="form-label">From</label>
+                                        <input type="text" class="form-control" id="fromLocation" placeholder="e.g., Patna Junction">
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <label for="toLocation" class="form-label">To</label>
+                                        <input type="text" class="form-control" id="toLocation" placeholder="e.g., Airport">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label for="rideDate" class="form-label">Date</label>
+                                        <input type="date" class="form-control" id="rideDate">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <label for="rideSeats" class="form-label">Seats</label>
+                                        <input type="number" class="form-control" id="rideSeats" placeholder="1" min="1">
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <h5>Search Results</h5>
+                            <div class="ride-card card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt-fill text-success fs-4 me-2"></i>
+                                                <div>
+                                                    <strong>Patna Junction <i class="bi bi-arrow-right mx-1"></i> Danapur</strong>
+                                                    <div class="text-muted small">Today, 08:00 AM</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="driver-info d-flex align-items-center">
+                                                <img src="https://images.pexels.com/photos/775358/pexels-photo-775358.jpeg" class="rounded-circle me-2" alt="Driver">
+                                                <div>
+                                                    <strong>Ravi Kumar</strong>
+                                                    <div><i class="bi bi-star-fill text-warning"></i> 4.9</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 text-center">
+                                            <h4 class="mb-0 text-primary">₹80</h4>
+                                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill">2 Seats Left</span>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <a href="#" class="btn btn-primary">Book Ride</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="ride-card card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-5">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt-fill text-success fs-4 me-2"></i>
+                                                <div>
+                                                    <strong>Boring Road <i class="bi bi-arrow-right mx-1"></i> IIT Patna</strong>
+                                                    <div class="text-muted small">Today, 09:30 AM</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="driver-info d-flex align-items-center">
+                                                <img src="https://images.pexels.com/photos/1043473/pexels-photo-1043473.jpeg" class="rounded-circle me-2" alt="Driver">
+                                                <div>
+                                                    <strong>Priya Sharma</strong>
+                                                    <div><i class="bi bi-star-fill text-warning"></i> 5.0</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 text-center">
+                                            <h4 class="mb-0 text-primary">₹150</h4>
+                                            <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">1 Seat Left</span>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <a href="#" class="btn btn-primary">Book Ride</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Bookings Tab -->
+                    <div class="tab-pane fade" id="bookings-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">My Bookings</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Route</th>
+                                                <th>Driver</th>
+                                                <th>Date & Time</th>
+                                                <th>Price</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><strong>Patna Junction <i class="bi bi-arrow-right"></i> Danapur</strong></td>
+                                                <td>Ravi Kumar</td>
+                                                <td>26 Jul 2025, 08:00 AM</td>
+                                                <td>₹80</td>
+                                                <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Confirmed</span></td>
+                                                <td><button class="btn btn-sm btn-outline-danger">Cancel</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Boring Road <i class="bi bi-arrow-right"></i> Airport</strong></td>
+                                                <td>Sunita Devi</td>
+                                                <td>27 Jul 2025, 11:00 AM</td>
+                                                <td>₹120</td>
+                                                <td><span class="badge bg-warning-subtle text-warning-emphasis rounded-pill">Pending</span></td>
+                                                <td><button class="btn btn-sm btn-outline-danger">Cancel</button></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Kankarbagh <i class="bi bi-arrow-right"></i> Frazer Road</strong></td>
+                                                <td>Amit Singh</td>
+                                                <td>24 Jul 2025, 05:00 PM</td>
+                                                <td>₹60</td>
+                                                <td><span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">Completed</span></td>
+                                                <td><button class="btn btn-sm btn-outline-primary">Rate</button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Create Ride Modal -->
+    <div class="modal fade" id="createRideModal" tabindex="-1" aria-labelledby="createRideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRideModalLabel">Book a New Ride</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="modalFrom" class="form-label">Origin</label>
+                                <input type="text" class="form-control" id="modalFrom" placeholder="Starting point">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalTo" class="form-label">Destination</label>
+                                <input type="text" class="form-control" id="modalTo" placeholder="Ending point">
+                            </div>
+                            <div class="col-12">
+                                <label for="modalWaypoints" class="form-label">Waypoints (Optional)</label>
+                                <input type="text" class="form-control" id="modalWaypoints" placeholder="e.g., Gandhi Maidan, Eco Park">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalDate" class="form-label">Departure Date</label>
+                                <input type="date" class="form-control" id="modalDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalTime" class="form-label">Departure Time</label>
+                                <input type="time" class="form-control" id="modalTime">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="modalSeats" class="form-label">Available Seats</label>
+                                <input type="number" class="form-control" id="modalSeats" min="1" max="6" placeholder="e.g., 3">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="modalPrice" class="form-label">Price per Seat (₹)</label>
+                                <input type="number" class="form-control" id="modalPrice" placeholder="e.g., 100">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="modalVehicle" class="form-label">Vehicle</label>
+                                <select id="modalVehicle" class="form-select">
+                                    <option selected>Choose...</option>
+                                    <option>Maruti Swift (Sedan)</option>
+                                    <option>Hyundai Creta (SUV)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="isRecurring">
+                                    <label class="form-check-label" for="isRecurring">
+                                        This is a recurring ride
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Create Ride</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const navLinks = sidebarNav.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    // Remove active class from all sidebar links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to the clicked link
+                    event.currentTarget.classList.add('active');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
+

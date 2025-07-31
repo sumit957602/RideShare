@@ -1,0 +1,364 @@
+﻿@{
+    ViewData["Title"] = "Driver Login";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Header & Navbar from Main Site -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="index.html">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Admin Panel</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>Admin User</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content: Admin Panel -->
+    <main class="flex-grow-1">
+        <div class="container-fluid h-100">
+            <div class="row h-100">
+                <!-- Sidebar -->
+                <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block">
+                    <div class="position-sticky pt-3">
+                        <ul class="nav flex-column" id="sidebar-nav" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" data-bs-toggle="tab" data-bs-target="#dashboard-tab-pane" role="tab" aria-selected="true">
+                                    <i class="bi bi-speedometer2"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#users-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-people-fill"></i>User Management
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#rides-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-car-front-fill"></i>Ride Management
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#reports-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-flag-fill"></i>Reports & Complaints
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#financials-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-cash-coin"></i>Financials
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#config-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-gear-fill"></i>System Config
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+
+                <!-- Admin Panel Content Area -->
+                <div class="col-md-9 ms-sm-auto col-lg-10 main-content">
+                    <div class="tab-content" id="adminTabContent">
+                        <!-- Dashboard Tab -->
+                        <div class="tab-pane fade show active" id="dashboard-tab-pane" role="tabpanel" tabindex="0">
+                            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                                <h1 class="h2">Dashboard</h1>
+                            </div>
+                            <!-- Stats -->
+                            <div class="row g-4">
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="stat-card d-flex align-items-center">
+                                        <div class="icon bg-primary-subtle text-primary me-3"><i class="bi bi-cash-coin"></i></div>
+                                        <div>
+                                            <h4 class="mb-0">₹1,25,430</h4>
+                                            <p class="text-muted mb-0">Total Revenue</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="stat-card d-flex align-items-center">
+                                        <div class="icon bg-success-subtle text-success me-3"><i class="bi bi-people-fill"></i></div>
+                                        <div>
+                                            <h4 class="mb-0">8,950</h4>
+                                            <p class="text-muted mb-0">Total Users</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="stat-card d-flex align-items-center">
+                                        <div class="icon bg-info-subtle text-info me-3"><i class="bi bi-car-front-fill"></i></div>
+                                        <div>
+                                            <h4 class="mb-0">12,345</h4>
+                                            <p class="text-muted mb-0">Rides Completed</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3">
+                                    <div class="stat-card d-flex align-items-center">
+                                        <div class="icon bg-danger-subtle text-danger me-3"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                                        <div>
+                                            <h4 class="mb-0">12</h4>
+                                            <p class="text-muted mb-0">Open Reports</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts -->
+                            <div class="row g-4 mt-2">
+                                <div class="col-lg-7">
+                                    <div class="card">
+                                        <div class="card-header bg-white">User Growth</div>
+                                        <div class="card-body">
+                                            <canvas id="userGrowthChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="card">
+                                        <div class="card-header bg-white">Revenue by Month</div>
+                                        <div class="card-body">
+                                            <canvas id="revenueChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Management Tab -->
+                        <div class="tab-pane fade" id="users-tab-pane" role="tabpanel" tabindex="0">
+                            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                                <h1 class="h2">User Management</h1>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Name</th>
+                                                    <th>Email</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th>Joined Date</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>USR-001</td>
+                                                    <td>Alex Rodriguez</td>
+                                                    <td>alex.r@example.com</td>
+                                                    <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Rider</span></td>
+                                                    <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Active</span></td>
+                                                    <td>2025-07-20</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit User"><i class="bi bi-pencil-fill"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Suspend User"><i class="bi bi-slash-circle-fill"></i></button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>USR-002</td>
+                                                    <td>Ravi Kumar</td>
+                                                    <td>ravi.k@example.com</td>
+                                                    <td><span class="badge bg-info-subtle text-info-emphasis rounded-pill">Driver</span></td>
+                                                    <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Active</span></td>
+                                                    <td>2025-07-15</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit User"><i class="bi bi-pencil-fill"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Suspend User"><i class="bi bi-slash-circle-fill"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ride Management Tab -->
+                        <div class="tab-pane fade" id="rides-tab-pane" role="tabpanel" tabindex="0">
+                            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                                <h1 class="h2">Ride Management</h1>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row mb-3 g-3">
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" placeholder="Search by Ride ID, User...">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select">
+                                                <option selected>Filter by Status...</option>
+                                                <option value="1">Ongoing</option>
+                                                <option value="2">Completed</option>
+                                                <option value="3">Cancelled</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ride ID</th>
+                                                    <th>Route</th>
+                                                    <th>Driver</th>
+                                                    <th>Rider(s)</th>
+                                                    <th>Date & Time</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>RID-101</td>
+                                                    <td>Patna <i class="bi bi-arrow-right"></i> Gaya</td>
+                                                    <td>Ravi Kumar</td>
+                                                    <td>Alex Rodriguez, Sunita</td>
+                                                    <td>2025-07-28, 09:00</td>
+                                                    <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Ongoing</span></td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-outline-info table-action-btn" title="View Details"><i class="bi bi-eye-fill"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Cancel Ride"><i class="bi bi-x-circle-fill"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Other tabs would go here -->
+
+                    </div>
+                </div>
+    </main>
+    </div>
+    </main>
+
+    <!-- Footer from Main Site -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5>
+                    <p>Your trusted platform for safe, comfortable, and affordable shared rides. Building a community, one ride at a time.</p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">About Us</a></li>
+                        <li class="mb-2"><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4 col-6">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li>
+                        <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+            <div class="text-center">
+                <p>&copy; 2025 RideShare Connect. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sidebar navigation handler
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const navLinks = sidebarNav.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    event.currentTarget.classList.add('active');
+                });
+            });
+
+            // Chart.js instances
+            const userGrowthCtx = document.getElementById('userGrowthChart');
+            if(userGrowthCtx) {
+                new Chart(userGrowthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        datasets: [{
+                            label: 'New Users',
+                            data: [65, 59, 80, 81, 56, 55, 140],
+                            fill: false,
+                            borderColor: 'rgb(255, 102, 0)',
+                            tension: 0.1
+                        }]
+                    }
+                });
+            }
+
+            const revenueCtx = document.getElementById('revenueChart');
+            if(revenueCtx) {
+                new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                        datasets: [{
+                            label: 'Revenue (in ₹1000s)',
+                            data: [12, 19, 13, 15, 22, 23, 30],
+                            backgroundColor: 'rgba(255, 102, 0, 0.5)',
+                            borderColor: 'rgb(255, 102, 0)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true } } }
+                });
+            }
+        });
+    </script>
+</body>
