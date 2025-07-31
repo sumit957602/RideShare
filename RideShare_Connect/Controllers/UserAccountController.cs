@@ -161,11 +161,12 @@ namespace RideShare_Connect.Controllers
 
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             _logger.LogInformation("User logged out.");
-            return RedirectToAction("Login", "Account");
+            return RedirectToAction("Login", "UserAccount");
         }
 
 
