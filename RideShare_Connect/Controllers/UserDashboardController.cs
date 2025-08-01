@@ -2,6 +2,7 @@
 using RideShare_Connect.Models.UserManagement;
 using RideShareConnect.Data;
 using System.Linq;
+using System.Security.Claims;
 
 namespace RideShare_Connect.Controllers
 {
@@ -16,15 +17,26 @@ namespace RideShare_Connect.Controllers
 
         public IActionResult User()
         {
-            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.Id == 2);
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
 
+            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
             return View(userProfile);
         }
 
-        
+
         public IActionResult UserProfile()
         {
-            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.Id == 2);
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+
+            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
             return View(userProfile);
         }
 
