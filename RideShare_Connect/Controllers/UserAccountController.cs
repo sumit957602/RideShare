@@ -8,6 +8,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
+using System.Net.Http.Headers;
 
 namespace RideShare_Connect.Controllers
 {
@@ -156,6 +157,43 @@ namespace RideShare_Connect.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount(DeleteAccountDto model)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"api/Users/{userId}/account")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json")
+            };
+
+            var token = User.FindFirst("Token")?.Value;
+            if (!string.IsNullOrEmpty(token))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+
+            var response = await httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                TempData["SuccessMessage"] = "Account deleted successfully.";
+                return RedirectToAction("Register", "UserAccount");
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            ModelState.AddModelError(string.Empty, $"Account deletion failed: {response.StatusCode} - {error}");
+            return RedirectToAction("PrivacySettings", "UserDashboard");
         }
 
 

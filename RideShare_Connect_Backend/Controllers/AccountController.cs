@@ -259,6 +259,32 @@ namespace RideShare_Connect.Api.Controllers
             return NoContent();
         }
 
+        // DELETE: api/Users/{id}/account
+        // Allows a user to permanently remove their account by confirming their password
+        [HttpDelete("{id}/account")]
+        public async Task<IActionResult> DeleteAccount(int id, [FromBody] DeleteAccountDto deleteDto)
+        {
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, deleteDto.Password);
+            if (verify == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid password.");
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);
