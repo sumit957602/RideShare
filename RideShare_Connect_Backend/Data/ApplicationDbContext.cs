@@ -13,6 +13,7 @@ namespace RideShare_Connect.Api.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; } // Add this!
+        public DbSet<UserVerification> UserVerifications { get; set; }
         // ... other DbSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -27,6 +28,11 @@ namespace RideShare_Connect.Api.Data
 
             // Optional: Ensure email is unique
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+
+            modelBuilder.Entity<UserVerification>()
+                .HasOne(v => v.User)
+                .WithMany(u => u.Verifications)
+                .HasForeignKey(v => v.UserId);
         }
     }
 }
