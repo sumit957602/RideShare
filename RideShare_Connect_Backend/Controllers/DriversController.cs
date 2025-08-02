@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -159,6 +160,162 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = user.UserType
             };
             return Ok(response);
+        }
+
+        // GET: api/Drivers
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers()
+        {
+            var drivers = await _context.Users
+                .Include(u => u.UserProfile)
+                .Where(u => u.UserType == "Driver")
+                .Join(_context.DriverProfiles,
+                      u => u.Id,
+                      dp => dp.DriverId,
+                      (u, dp) => new DriverDto
+                      {
+                          Id = u.Id,
+                          Email = u.Email,
+                          PhoneNumber = u.PhoneNumber,
+                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
+                          UserType = u.UserType,
+                          AccountStatus = u.AccountStatus,
+                          CreatedAt = u.CreatedAt,
+                          LicenseNumber = dp.LicenseNumber,
+                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
+                          DrivingExperienceYears = dp.DrivingExperienceYears,
+                          ReferenceContacts = dp.ReferenceContacts
+                      })
+                .ToListAsync();
+
+            return Ok(drivers);
+        }
+
+        // GET: api/Drivers/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DriverDto>> GetDriver(int id)
+        {
+            var driver = await _context.Users
+                .Include(u => u.UserProfile)
+                .Where(u => u.UserType == "Driver" && u.Id == id)
+                .Join(_context.DriverProfiles,
+                      u => u.Id,
+                      dp => dp.DriverId,
+                      (u, dp) => new DriverDto
+                      {
+                          Id = u.Id,
+                          Email = u.Email,
+                          PhoneNumber = u.PhoneNumber,
+                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
+                          UserType = u.UserType,
+                          AccountStatus = u.AccountStatus,
+                          CreatedAt = u.CreatedAt,
+                          LicenseNumber = dp.LicenseNumber,
+                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
+                          DrivingExperienceYears = dp.DrivingExperienceYears,
+                          ReferenceContacts = dp.ReferenceContacts
+                      })
+                .FirstOrDefaultAsync();
+
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(driver);
+        }
+
+        // PUT: api/Drivers/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateDriver(int id, DriverUpdateDto dto)
+        {
+            var user = await _context.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == id);
+            if (driverProfile == null)
+            {
+                return NotFound();
+            }
+
+            if (dto.Email != null) user.Email = dto.Email;
+            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
+
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile { UserId = user.Id };
+            }
+            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+
+            if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
+            if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
+            if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
+            if (dto.ReferenceContacts != null) driverProfile.ReferenceContacts = dto.ReferenceContacts;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/Drivers/{id}/account
+        [HttpDelete("{id}/account")]
+        public async Task<IActionResult> DeleteDriverAccount(int id, [FromBody] DeleteAccountDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+            if (verify == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid password.");
+            }
+
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == id);
+            if (driverProfile != null)
+            {
+                _context.DriverProfiles.Remove(driverProfile);
+            }
+
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.UserId == id);
+            if (userProfile != null)
+            {
+                _context.UserProfiles.Remove(userProfile);
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool UserExists(int id)
+        {
+            return _context.Users.Any(e => e.Id == id);
         }
     }
 }
