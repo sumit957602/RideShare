@@ -64,3 +64,4 @@ Project Modules:
 
 
 Visual Studio 2022 is used for development purpose.
+Removed deprecated FrontendProxy API endpoints (/api/FrontendProxy/home-about and /api/FrontendProxy/user-dashboard).
