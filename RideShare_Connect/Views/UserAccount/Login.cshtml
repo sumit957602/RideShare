@@ -49,6 +49,10 @@
                                 <p class="mb-0">Log in to continue your journey.</p>
                             </div>
                             <div class="login-card-body">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                                }
                                 <form asp-action="Login" id="loginForm">
                                     <div class="login-step active" id="loginStep1">
                                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -98,6 +102,7 @@
                                     <a href="#" class="btn btn-outline-primary"><i class="bi bi-facebook me-2"></i>Log in with Facebook</a>
                                 </div>
                                 <div class="text-center mt-4">
+                                    <p><a asp-action="ForgotPassword">Forgot Password?</a></p>
                                     <p class="text-muted">Don't have an account? <a asp-action="Register">Sign Up</a></p>
                                 </div>
                             </div>

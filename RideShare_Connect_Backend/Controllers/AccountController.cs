@@ -267,6 +267,7 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(responseDto);
         }
 
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
@@ -290,6 +291,7 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(new { Token = token });
         }
 
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
         {
