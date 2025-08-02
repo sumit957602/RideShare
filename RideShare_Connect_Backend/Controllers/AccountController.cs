@@ -179,35 +179,45 @@ namespace RideShare_Connect.Api.Controllers
             var tokenString = tokenHandler.WriteToken(token);
             // --- End JWT Token Generation ---
 
+            var refreshToken = new RefreshToken
+            {
+                UserId = user.Id,
+                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
             var responseDto = new AuthResponseDto
             {
                 Token = tokenString,
+                RefreshToken = refreshToken.Token,
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
-                ProfilePicture=user.UserProfile?.ProfilePicture,
+                ProfilePicture = user.UserProfile?.ProfilePicture,
                 UserType = user.UserType
             };
 
             return Ok(responseDto);
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<AuthResponseDto>> RefreshToken()
+        public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenRequestDto request)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
+            var existing = await _context.RefreshTokens
+                .Include(r => r.User)
+                .ThenInclude(u => u.UserProfile)
+                .FirstOrDefaultAsync(r => r.Token == request.RefreshToken && r.ExpiresAt > DateTime.UtcNow);
+
+            if (existing == null)
             {
                 return Unauthorized();
             }
 
-            var user = await _context.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Id == int.Parse(userIdClaim));
-            if (user == null)
-            {
-                return Unauthorized();
-            }
-
+            var user = existing.User;
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
 
@@ -231,9 +241,22 @@ namespace RideShare_Connect.Api.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
+            var newRefresh = new RefreshToken
+            {
+                UserId = user.Id,
+                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.RefreshTokens.Remove(existing);
+            _context.RefreshTokens.Add(newRefresh);
+            await _context.SaveChangesAsync();
+
             var responseDto = new AuthResponseDto
             {
                 Token = tokenString,
+                RefreshToken = newRefresh.Token,
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
