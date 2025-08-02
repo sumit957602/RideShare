@@ -166,32 +166,67 @@
                         </div>
                         <div class="card">
                             <div class="card-body">
-                                <form class="row g-3 align-items-end">
-                                    <div class="col-lg-3">
+                                <form id="rideSearchForm" class="row g-3">
+                                    <div class="col-md-3">
                                         <label for="fromLocation" class="form-label">From</label>
                                         <input type="text" class="form-control" id="fromLocation" placeholder="e.g., Patna Junction">
                                     </div>
-                                    <div class="col-lg-3">
+                                    <div class="col-md-3">
                                         <label for="toLocation" class="form-label">To</label>
                                         <input type="text" class="form-control" id="toLocation" placeholder="e.g., Airport">
                                     </div>
-                                    <div class="col-lg-2">
+                                    <div class="col-md-2">
+                                        <label for="radius" class="form-label">Radius (km)</label>
+                                        <input type="number" class="form-control" id="radius" min="1" placeholder="5">
+                                    </div>
+                                    <div class="col-md-2">
                                         <label for="rideDate" class="form-label">Date</label>
                                         <input type="date" class="form-control" id="rideDate">
                                     </div>
-                                    <div class="col-lg-2">
+                                    <div class="col-md-2">
+                                        <label for="rideTime" class="form-label">Time</label>
+                                        <input type="time" class="form-control" id="rideTime">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="priceMin" class="form-label">Min Price (₹)</label>
+                                        <input type="number" class="form-control" id="priceMin" min="0">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="priceMax" class="form-label">Max Price (₹)</label>
+                                        <input type="number" class="form-control" id="priceMax" min="0">
+                                    </div>
+                                    <div class="col-md-2">
                                         <label for="rideSeats" class="form-label">Seats</label>
                                         <input type="number" class="form-control" id="rideSeats" placeholder="1" min="1">
                                     </div>
-                                    <div class="col-lg-2">
+                                    <div class="col-md-2">
+                                        <label for="vehicleType" class="form-label">Vehicle</label>
+                                        <select id="vehicleType" class="form-select">
+                                            <option value="">Any</option>
+                                            <option value="Sedan">Sedan</option>
+                                            <option value="SUV">SUV</option>
+                                            <option value="Hatchback">Hatchback</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="sortOption" class="form-label">Sort By</label>
+                                        <select id="sortOption" class="form-select">
+                                            <option value="price">Price</option>
+                                            <option value="time">Departure Time</option>
+                                            <option value="rating">Rating</option>
+                                            <option value="distance">Distance</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 align-self-end">
                                         <button type="submit" class="btn btn-primary w-100">Search</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4" id="searchResults">
                             <h5>Search Results</h5>
-                            <div class="ride-card card mb-3">
+                            <div id="rideResults">
+                            <div class="ride-card card mb-3" data-price="80" data-time="08:00" data-rating="4.9" data-distance="5" data-seats="2" data-vehicle="Sedan" data-date="2025-07-26">
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-md-5">
@@ -222,7 +257,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="ride-card card mb-3">
+                            <div class="ride-card card mb-3" data-price="150" data-time="09:30" data-rating="5.0" data-distance="12" data-seats="1" data-vehicle="SUV" data-date="2025-07-26">
                                 <div class="card-body">
                                     <div class="row align-items-center">
                                         <div class="col-md-5">
@@ -253,6 +288,7 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
 
@@ -380,17 +416,78 @@
     </div>
 
     <script>
-            document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
             const sidebarNav = document.getElementById('sidebar-nav');
             const navLinks = sidebarNav.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
 
             navLinks.forEach(link => {
                 link.addEventListener('click', function (event) {
-                    // Remove active class from all sidebar links
                     navLinks.forEach(l => l.classList.remove('active'));
-                    // Add active class to the clicked link
                     event.currentTarget.classList.add('active');
                 });
+            });
+
+            const searchForm = document.getElementById('rideSearchForm');
+            const sortSelect = document.getElementById('sortOption');
+            const rideResults = document.getElementById('rideResults');
+
+            function filterRides() {
+                const radius = parseFloat(document.getElementById('radius').value);
+                const date = document.getElementById('rideDate').value;
+                const time = document.getElementById('rideTime').value;
+                const priceMin = parseFloat(document.getElementById('priceMin').value);
+                const priceMax = parseFloat(document.getElementById('priceMax').value);
+                const seats = parseInt(document.getElementById('rideSeats').value);
+                const vehicle = document.getElementById('vehicleType').value;
+
+                rideResults.querySelectorAll('.ride-card').forEach(card => {
+                    let show = true;
+                    const cardPrice = parseFloat(card.dataset.price);
+                    const cardSeats = parseInt(card.dataset.seats);
+                    const cardVehicle = card.dataset.vehicle;
+                    const cardDistance = parseFloat(card.dataset.distance);
+                    const cardDate = card.dataset.date;
+                    const cardTime = card.dataset.time;
+
+                    if (!isNaN(radius) && cardDistance > radius) show = false;
+                    if (date && cardDate !== date) show = false;
+                    if (time && cardTime !== time) show = false;
+                    if (!isNaN(priceMin) && cardPrice < priceMin) show = false;
+                    if (!isNaN(priceMax) && cardPrice > priceMax) show = false;
+                    if (!isNaN(seats) && cardSeats < seats) show = false;
+                    if (vehicle && cardVehicle !== vehicle) show = false;
+
+                    card.style.display = show ? '' : 'none';
+                });
+            }
+
+            function sortRides(criteria) {
+                const cards = Array.from(rideResults.querySelectorAll('.ride-card'));
+                cards.sort((a, b) => {
+                    let valA = a.dataset[criteria];
+                    let valB = b.dataset[criteria];
+                    if (criteria === 'time') {
+                        const toMinutes = t => parseInt(t.split(':')[0]) * 60 + parseInt(t.split(':')[1]);
+                        valA = toMinutes(valA);
+                        valB = toMinutes(valB);
+                    } else {
+                        valA = parseFloat(valA);
+                        valB = parseFloat(valB);
+                    }
+                    return valA - valB;
+                });
+                rideResults.innerHTML = '';
+                cards.forEach(card => rideResults.appendChild(card));
+            }
+
+            searchForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                filterRides();
+                sortRides(sortSelect.value);
+            });
+
+            sortSelect.addEventListener('change', function () {
+                sortRides(this.value);
             });
         });
     </script>
