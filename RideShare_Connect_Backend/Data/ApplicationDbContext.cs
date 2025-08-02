@@ -16,6 +16,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<UserProfile> UserProfiles { get; set; } // Add this!
         public DbSet<UserVerification> UserVerifications { get; set; }
         public DbSet<DriverProfile> DriverProfiles { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         // ... other DbSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

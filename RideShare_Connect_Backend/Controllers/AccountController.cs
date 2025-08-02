@@ -1,5 +1,6 @@
 // Controllers/UsersController.cs
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using RideShare_Connect.Models.UserManagement;
 using System.IdentityModel.Tokens.Jwt; // Required for JwtSecurityTokenHandler
 using System.Security.Claims; // Required for Claims
 using System.Text; // Required for Encoding
+using System.IO;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -22,12 +24,14 @@ namespace RideShare_Connect.Api.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _configuration; // Inject IConfiguration
+        private readonly IWebHostEnvironment _environment;
 
-        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration)
+        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration; // Initialize IConfiguration
+            _environment = environment;
         }
 
         // GET: api/Users
@@ -188,6 +192,120 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(responseDto);
         }
 
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<UserDto>> GetProfile()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userId = int.Parse(userIdClaim);
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userDto = new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                FullName = user.UserProfile?.FullName,
+                UserType = user.UserType,
+                AccountStatus = user.AccountStatus,
+                CreatedAt = user.CreatedAt
+            };
+            return Ok(userDto);
+        }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile(UserUpdateDto dto)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Id == int.Parse(userIdClaim));
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (dto.Email != null) user.Email = dto.Email;
+            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+            if (dto.UserType != null) user.UserType = dto.UserType;
+            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
+
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile { UserId = user.Id };
+            }
+            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("upload-document")]
+        public async Task<IActionResult> UploadDocument([FromForm] DocumentUploadDto dto)
+        {
+            if (dto.File == null || dto.File.Length == 0)
+            {
+                return BadRequest("No file provided.");
+            }
+
+            var type = dto.DocumentType?.ToLower();
+            if (type != "id-proof" && type != "driving-license")
+            {
+                return BadRequest("Unsupported document type.");
+            }
+
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userId = int.Parse(userIdClaim);
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var uploadsRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var folder = Path.Combine(uploadsRoot, "documents");
+            Directory.CreateDirectory(folder);
+
+            var fileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
+            var filePath = Path.Combine(folder, fileName);
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                await dto.File.CopyToAsync(stream);
+            }
+
+            var record = new UserVerification
+            {
+                UserId = userId,
+                DocUrl = $"/documents/{fileName}",
+                VerificationType = type,
+                Status = "Uploaded",
+                IssuedOn = DateTime.UtcNow,
+                ExpiresOn = DateTime.UtcNow
+            };
+            _context.UserVerifications.Add(record);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { record.Id, record.DocUrl, record.VerificationType });
+        }
 
         // PUT: api/Users/5
         // This endpoint should typically require authorization for a user to update their own profile
