@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
+using RideShare_Connect.Models.RideManagement;
 
 namespace RideShare_Connect.Api.Data
 {
@@ -19,6 +20,12 @@ namespace RideShare_Connect.Api.Data
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         // ... other DbSets
+
+        public DbSet<Ride> Rides { get; set; }
+        public DbSet<RoutePoint> RoutePoints { get; set; }
+        public DbSet<RideRecurrence> RideRecurrences { get; set; }
+        public DbSet<RideBooking> RideBookings { get; set; }
+        public DbSet<RideRequest> RideRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,6 +54,26 @@ namespace RideShare_Connect.Api.Data
                 .HasOne(rt => rt.User)
                 .WithMany(u => u.RefreshTokens)
                 .HasForeignKey(rt => rt.UserId);
+
+            modelBuilder.Entity<Ride>()
+                .HasMany(r => r.RoutePoints)
+                .WithOne(rp => rp.Ride)
+                .HasForeignKey(rp => rp.RideId);
+
+            modelBuilder.Entity<Ride>()
+                .HasMany(r => r.Recurrences)
+                .WithOne(rr => rr.Ride)
+                .HasForeignKey(rr => rr.RideId);
+
+            modelBuilder.Entity<Ride>()
+                .HasMany(r => r.Bookings)
+                .WithOne(rb => rb.Ride)
+                .HasForeignKey(rb => rb.RideId);
+
+            modelBuilder.Entity<Ride>()
+                .HasMany(r => r.Requests)
+                .WithOne(rr => rr.Ride)
+                .HasForeignKey(rr => rr.RideId);
         }
     }
 }
