@@ -29,5 +29,6 @@ namespace RideShare_Connect.Models.UserManagement
         public virtual ICollection<UserVerification> Verifications { get; set; } = new HashSet<UserVerification>();
         public virtual ICollection<LoginHistory> LoginHistories { get; set; } = new HashSet<LoginHistory>();
         public virtual ICollection<PasswordResetToken> PasswordResetTokens { get; set; } = new HashSet<PasswordResetToken>();
+        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
     }
 }

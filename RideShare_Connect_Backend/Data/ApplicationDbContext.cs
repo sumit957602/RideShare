@@ -17,6 +17,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<UserVerification> UserVerifications { get; set; }
         public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         // ... other DbSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -41,6 +42,11 @@ namespace RideShare_Connect.Api.Data
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(dp => dp.DriverId);
+
+            modelBuilder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId);
         }
     }
 }
