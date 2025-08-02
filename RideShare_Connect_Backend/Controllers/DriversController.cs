@@ -52,16 +52,19 @@ namespace RideShare_Connect.Api.Controllers
                 CreatedAt = DateTime.UtcNow
             };
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
-            user.UserProfile = new UserProfile
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var userProfile = new UserProfile
             {
+                UserId = user.Id,
                 FullName = dto.FullName,
                 Bio = "Default bio message for new drivers.",
                 ProfilePicture = "https://avatar.iran.liara.run/public/boy?username=Driver",
                 EmergencyContact = "Nan",
             };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            _context.UserProfiles.Add(userProfile);
 
             var driverProfile = new DriverProfile
             {
@@ -72,6 +75,7 @@ namespace RideShare_Connect.Api.Controllers
                 ReferenceContacts = dto.ReferenceContacts
             };
             _context.DriverProfiles.Add(driverProfile);
+
             await _context.SaveChangesAsync();
 
             if (dto.LicenseDocument != null && dto.LicenseDocument.Length > 0)
@@ -104,7 +108,7 @@ namespace RideShare_Connect.Api.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                FullName = user.UserProfile.FullName,
+                FullName = dto.FullName,
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
                 CreatedAt = user.CreatedAt
