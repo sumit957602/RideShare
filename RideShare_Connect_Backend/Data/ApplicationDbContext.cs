@@ -1,6 +1,7 @@
 // Data/ApplicationDbContext.cs
 using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Models.UserManagement;
+using RideShare_Connect.Models.VehicleManagement;
 
 namespace RideShare_Connect.Api.Data
 {
@@ -14,6 +15,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<User> Users { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; } // Add this!
         public DbSet<UserVerification> UserVerifications { get; set; }
+        public DbSet<DriverProfile> DriverProfiles { get; set; }
         // ... other DbSets
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +35,11 @@ namespace RideShare_Connect.Api.Data
                 .HasOne(v => v.User)
                 .WithMany(u => u.Verifications)
                 .HasForeignKey(v => v.UserId);
+
+            modelBuilder.Entity<DriverProfile>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(dp => dp.DriverId);
         }
     }
 }

@@ -1,7 +1,7 @@
-﻿@{
+@model RideShare_Connect.DTOs.DriverRegisterDto
+@{
     ViewData["Title"] = "Driver Sign-Up";
 }
-
 
 <head>
     <link rel="stylesheet" href="~/css/driverRegister.css" asp-append-version="true" />
@@ -45,47 +45,62 @@
                                 <p class="mb-0">Start earning on your own schedule.</p>
                             </div>
                             <div class="signup-card-body">
-                                <form>
+                                <form asp-action="Register" enctype="multipart/form-data">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <!-- Full Name -->
                                     <div class="mb-3">
-                                        <label for="fullName" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" id="fullName" placeholder="John Doe" required>
+                                        <label asp-for="FullName" class="form-label">Full Name</label>
+                                        <input asp-for="FullName" class="form-control" placeholder="John Doe" />
+                                        <span asp-validation-for="FullName" class="text-danger"></span>
                                     </div>
 
                                     <!-- Email Address -->
                                     <div class="mb-3">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" placeholder="you@example.com" required>
+                                        <label asp-for="Email" class="form-label">Email Address</label>
+                                        <input asp-for="Email" class="form-control" placeholder="you@example.com" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+
+                                    <!-- Phone Number -->
+                                    <div class="mb-3">
+                                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                        <input asp-for="PhoneNumber" class="form-control" placeholder="1234567890" />
+                                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                                     </div>
 
                                     <!-- Password -->
                                     <div class="mb-3">
-                                        <label for="password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                                        <label asp-for="Password" class="form-label">Password</label>
+                                        <input asp-for="Password" class="form-control" type="password" placeholder="••••••••" />
+                                        <span asp-validation-for="Password" class="text-danger"></span>
                                     </div>
 
                                     <!-- License Number -->
                                     <div class="mb-3">
-                                        <label for="licenseNumber" class="form-label">Driving License Number</label>
-                                        <input type="text" class="form-control" id="licenseNumber" placeholder="e.g., DL1420210012345" required>
+                                        <label asp-for="LicenseNumber" class="form-label">Driving License Number</label>
+                                        <input asp-for="LicenseNumber" class="form-control" placeholder="e.g., DL1420210012345" />
+                                        <span asp-validation-for="LicenseNumber" class="text-danger"></span>
                                     </div>
 
                                     <!-- Driving Experience -->
                                     <div class="mb-3">
-                                        <label for="drivingExperience" class="form-label">Driving Experience (in years)</label>
-                                        <input type="number" class="form-control" id="drivingExperience" placeholder="e.g., 5" min="1" required>
+                                        <label asp-for="DrivingExperienceYears" class="form-label">Driving Experience (in years)</label>
+                                        <input asp-for="DrivingExperienceYears" class="form-control" type="number" min="0" />
+                                        <span asp-validation-for="DrivingExperienceYears" class="text-danger"></span>
                                     </div>
 
                                     <!-- Reference Contact -->
                                     <div class="mb-3">
-                                        <label for="referenceContact" class="form-label">Reference Contact (Optional)</label>
-                                        <input type="text" class="form-control" id="referenceContact" placeholder="Name and Phone Number">
+                                        <label asp-for="ReferenceContacts" class="form-label">Reference Contact (Optional)</label>
+                                        <input asp-for="ReferenceContacts" class="form-control" placeholder="Name and Phone Number" />
+                                        <span asp-validation-for="ReferenceContacts" class="text-danger"></span>
                                     </div>
 
                                     <!-- Document Upload -->
                                     <div class="mb-3">
-                                        <label for="documentUpload" class="form-label">Upload Driving License</label>
-                                        <input class="form-control" type="file" id="documentUpload" required>
+                                        <label asp-for="LicenseDocument" class="form-label">Upload Driving License</label>
+                                        <input asp-for="LicenseDocument" type="file" class="form-control" />
+                                        <span asp-validation-for="LicenseDocument" class="text-danger"></span>
                                     </div>
 
                                     <!-- Background Check Consent -->
