@@ -120,9 +120,13 @@ namespace RideShare_Connect.Controllers
 
                     var authProperties = new AuthenticationProperties
                     {
-                        IsPersistent = true, // Keep the user logged in across browser sessions
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60) // Match JWT expiration or set longer for cookie persistence
+                        IsPersistent = model.RememberMe
                     };
+
+                    if (model.RememberMe)
+                    {
+                        authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7);
+                    }
 
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
