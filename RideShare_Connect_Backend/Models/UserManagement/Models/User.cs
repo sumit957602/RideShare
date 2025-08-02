@@ -18,7 +18,7 @@ namespace RideShare_Connect.Models.UserManagement
 
         public string UserType { get; set; } 
 
-        public string AccountStatus { get; set; } 
+        public string AccountStatus { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
