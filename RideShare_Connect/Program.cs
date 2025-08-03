@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RideShareConnect.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using RideShare_Connect.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +43,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         }
     )
 );
+
+builder.Services.AddHostedService<VerificationReminderService>();
 
 var app = builder.Build();
 

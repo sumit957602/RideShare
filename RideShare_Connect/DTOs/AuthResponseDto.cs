@@ -9,7 +9,8 @@
 
         public string ProfilePicture { get; set; }
         public string UserType { get; set; }
+        public bool IsVerified { get; set; }
+        public string VerificationBadge { get; set; }
         // other user details to return with the token
-
     }
 }

@@ -96,9 +96,9 @@ namespace RideShare_Connect.Api.Controllers
                     UserId = user.Id,
                     DocUrl = $"/documents/{fileName}",
                     VerificationType = "driving-license",
-                    Status = "Uploaded",
+                    Status = "Pending",
                     IssuedOn = DateTime.UtcNow,
-                    ExpiresOn = DateTime.UtcNow
+                    ExpiresOn = DateTime.UtcNow.AddYears(1)
                 };
                 _context.UserVerifications.Add(verification);
                 await _context.SaveChangesAsync();
@@ -112,7 +112,9 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = dto.FullName,
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
             return CreatedAtAction(nameof(RegisterDriver), new { id = userDto.Id }, userDto);
         }
@@ -154,10 +156,13 @@ namespace RideShare_Connect.Api.Controllers
             var response = new AuthResponseDto
             {
                 Token = tokenString,
+                RefreshToken = string.Empty,
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
-                UserType = user.UserType
+                UserType = user.UserType,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
             return Ok(response);
         }
@@ -181,6 +186,8 @@ namespace RideShare_Connect.Api.Controllers
                           UserType = u.UserType,
                           AccountStatus = u.AccountStatus,
                           CreatedAt = u.CreatedAt,
+                          IsVerified = u.IsVerified,
+                          VerificationBadge = u.VerificationBadge,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -210,6 +217,8 @@ namespace RideShare_Connect.Api.Controllers
                           UserType = u.UserType,
                           AccountStatus = u.AccountStatus,
                           CreatedAt = u.CreatedAt,
+                          IsVerified = u.IsVerified,
+                          VerificationBadge = u.VerificationBadge,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,

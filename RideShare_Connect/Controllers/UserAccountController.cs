@@ -111,7 +111,9 @@ namespace RideShare_Connect.Controllers
                         new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
                         new Claim(ClaimTypes.Email, authResponse.Email),
                         new Claim("Token", authResponse.Token), // Store the JWT token itself
-                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Rider")
+                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Rider"),
+                        new Claim("IsVerified", authResponse.IsVerified.ToString()),
+                        new Claim("VerificationBadge", authResponse.VerificationBadge ?? string.Empty)
                         //other claim needed from AuthResponseDto
                     };
 
