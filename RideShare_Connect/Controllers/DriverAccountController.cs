@@ -96,8 +96,7 @@ namespace RideShare_Connect.Controllers
                         new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
                         new Claim(ClaimTypes.Email, authResponse.Email),
                         new Claim("Token", authResponse.Token),
-                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver"),
-                        new Claim("VerificationBadge", authResponse.VerificationBadge ?? string.Empty)
+                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver")
                     };
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var authProperties = new AuthenticationProperties

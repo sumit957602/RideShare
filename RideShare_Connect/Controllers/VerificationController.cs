@@ -43,15 +43,6 @@ namespace RideShare_Connect.Controllers
 
             verification.Status = dto.Status;
 
-            if (dto.Status?.ToLower() == "approved")
-            {
-                var user = await _context.Users.FindAsync(verification.UserId);
-                if (user != null)
-                {
-                    user.VerificationBadge = "Verified";
-                }
-            }
-
             await _context.SaveChangesAsync();
             return NoContent();
         }
