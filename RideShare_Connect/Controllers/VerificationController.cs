@@ -48,7 +48,6 @@ namespace RideShare_Connect.Controllers
                 var user = await _context.Users.FindAsync(verification.UserId);
                 if (user != null)
                 {
-                    user.IsVerified = true;
                     user.VerificationBadge = "Verified";
                 }
             }

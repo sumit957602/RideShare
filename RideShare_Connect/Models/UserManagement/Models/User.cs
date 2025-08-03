@@ -21,9 +21,6 @@ namespace RideShare_Connect.Models.UserManagement
         public string AccountStatus { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
-        public bool IsVerified { get; set; } = false;
-
         public string VerificationBadge { get; set; } = string.Empty;
 
         public virtual UserProfile UserProfile { get; set; }
