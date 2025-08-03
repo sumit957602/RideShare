@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Models.RideManagement;
+using RideShare_Connect.Models.PaymentManagement;
 
 namespace RideShare_Connect.Api.Data
 {
@@ -31,6 +32,13 @@ namespace RideShare_Connect.Api.Data
         public DbSet<RideRecurrence> RideRecurrences { get; set; }
         public DbSet<RideBooking> RideBookings { get; set; }
         public DbSet<RideRequest> RideRequests { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<Wallet> Wallets { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<Refund> Refunds { get; set; }
+        public DbSet<Commission> Commissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +87,46 @@ namespace RideShare_Connect.Api.Data
                 .HasMany(r => r.Requests)
                 .WithOne(rr => rr.Ride)
                 .HasForeignKey(rr => rr.RideId);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Booking)
+                .WithMany()
+                .HasForeignKey(p => p.BookingId);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany()
+                .HasForeignKey(p => p.PaymentMethodId);
+
+            modelBuilder.Entity<PaymentMethod>()
+                .HasOne(pm => pm.User)
+                .WithMany()
+                .HasForeignKey(pm => pm.UserId);
+
+            modelBuilder.Entity<Refund>()
+                .HasOne(r => r.Payment)
+                .WithMany()
+                .HasForeignKey(r => r.PaymentId);
+
+            modelBuilder.Entity<Wallet>()
+                .HasOne(w => w.User)
+                .WithMany()
+                .HasForeignKey(w => w.UserId);
+
+            modelBuilder.Entity<WalletTransaction>()
+                .HasOne(wt => wt.Wallet)
+                .WithMany()
+                .HasForeignKey(wt => wt.WalletId);
+
+            modelBuilder.Entity<Commission>()
+                .HasOne(c => c.Booking)
+                .WithMany()
+                .HasForeignKey(c => c.BookingId);
         }
     }
 }
