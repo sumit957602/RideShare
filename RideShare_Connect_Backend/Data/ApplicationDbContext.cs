@@ -21,6 +21,11 @@ namespace RideShare_Connect.Api.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         // ... other DbSets
 
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<VehicleDocument> VehicleDocuments { get; set; }
+        public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
+        public DbSet<DriverRating> DriverRatings { get; set; }
+
         public DbSet<Ride> Rides { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<RideRecurrence> RideRecurrences { get; set; }
