@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt; // Required for JwtSecurityTokenHandler
 using System.Security.Claims; // Required for Claims
 using System.Text; // Required for Encoding
 using System.IO;
+using System.Linq;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -501,6 +502,8 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
+            await RemoveUserRelatedData(id);
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
@@ -512,9 +515,7 @@ namespace RideShare_Connect.Api.Controllers
         [HttpDelete("{id}/account")]
         public async Task<IActionResult> DeleteAccount(int id, [FromBody] DeleteAccountDto deleteDto)
         {
-            var user = await _context.Users
-                                     .Include(u => u.UserProfile)
-                                     .FirstOrDefaultAsync(u => u.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
@@ -527,6 +528,8 @@ namespace RideShare_Connect.Api.Controllers
                 return Unauthorized("Invalid password.");
             }
 
+            await RemoveUserRelatedData(id);
+
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
 
@@ -536,6 +539,109 @@ namespace RideShare_Connect.Api.Controllers
         private bool UserExists(int id)
         {
             return _context.Users.Any(e => e.Id == id);
+        }
+
+        private async Task RemoveUserRelatedData(int userId)
+        {
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == userId);
+            if (driverProfile != null)
+            {
+                _context.DriverProfiles.Remove(driverProfile);
+            }
+
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.UserId == userId);
+            if (userProfile != null)
+            {
+                _context.UserProfiles.Remove(userProfile);
+            }
+
+            var verifications = await _context.UserVerifications.Where(v => v.UserId == userId).ToListAsync();
+            if (verifications.Any())
+            {
+                _context.UserVerifications.RemoveRange(verifications);
+            }
+
+            var resetTokens = await _context.PasswordResetTokens.Where(t => t.UserId == userId).ToListAsync();
+            if (resetTokens.Any())
+            {
+                _context.PasswordResetTokens.RemoveRange(resetTokens);
+            }
+
+            var refreshTokens = await _context.RefreshTokens.Where(t => t.UserId == userId).ToListAsync();
+            if (refreshTokens.Any())
+            {
+                _context.RefreshTokens.RemoveRange(refreshTokens);
+            }
+
+            var notifications = await _context.Notifications.Where(n => n.UserId == userId).ToListAsync();
+            if (notifications.Any())
+            {
+                _context.Notifications.RemoveRange(notifications);
+            }
+
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (wallet != null)
+            {
+                var transactions = await _context.WalletTransactions.Where(wt => wt.WalletId == wallet.Id).ToListAsync();
+                if (transactions.Any())
+                {
+                    _context.WalletTransactions.RemoveRange(transactions);
+                }
+                _context.Wallets.Remove(wallet);
+            }
+
+            var paymentMethods = await _context.PaymentMethods.Where(pm => pm.UserId == userId).ToListAsync();
+            if (paymentMethods.Any())
+            {
+                _context.PaymentMethods.RemoveRange(paymentMethods);
+            }
+
+            var payments = await _context.Payments.Where(p => p.UserId == userId).ToListAsync();
+            if (payments.Any())
+            {
+                _context.Payments.RemoveRange(payments);
+            }
+
+            var bookings = await _context.RideBookings.Where(rb => rb.PassengerId == userId).ToListAsync();
+            if (bookings.Any())
+            {
+                _context.RideBookings.RemoveRange(bookings);
+            }
+
+            var requests = await _context.RideRequests.Where(rr => rr.PassengerId == userId).ToListAsync();
+            if (requests.Any())
+            {
+                _context.RideRequests.RemoveRange(requests);
+            }
+
+            var reports = await _context.UserReports.Where(ur => ur.ReportedUserId == userId || ur.ReportingUserId == userId).ToListAsync();
+            if (reports.Any())
+            {
+                _context.UserReports.RemoveRange(reports);
+            }
+
+            var ratings = await _context.DriverRatings.Where(dr => dr.DriverId == userId || dr.PassengerId == userId).ToListAsync();
+            if (ratings.Any())
+            {
+                _context.DriverRatings.RemoveRange(ratings);
+            }
+
+            var vehicles = await _context.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+            if (vehicles.Any())
+            {
+                var vehicleIds = vehicles.Select(v => v.Id).ToList();
+                var vehicleDocs = await _context.VehicleDocuments.Where(vd => vehicleIds.Contains(vd.VehicleId)).ToListAsync();
+                if (vehicleDocs.Any())
+                {
+                    _context.VehicleDocuments.RemoveRange(vehicleDocs);
+                }
+                var maintenance = await _context.MaintenanceRecords.Where(m => vehicleIds.Contains(m.VehicleId)).ToListAsync();
+                if (maintenance.Any())
+                {
+                    _context.MaintenanceRecords.RemoveRange(maintenance);
+                }
+                _context.Vehicles.RemoveRange(vehicles);
+            }
         }
     }
 }
