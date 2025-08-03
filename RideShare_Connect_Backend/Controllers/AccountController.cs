@@ -42,6 +42,7 @@ namespace RideShare_Connect.Api.Controllers
         {
             var users = await _context.Users
                                     .Include(u => u.UserProfile)
+                                    .Where(u => !_context.DriverProfiles.Any(dp => dp.DriverId == u.Id))
                                     .Select(u => new UserDto
                                     {
                                         Id = u.Id,
@@ -64,6 +65,7 @@ namespace RideShare_Connect.Api.Controllers
         {
             var user = await _context.Users
                                     .Include(u => u.UserProfile)
+                                    .Where(u => !_context.DriverProfiles.Any(dp => dp.DriverId == u.Id))
                                     .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
@@ -91,6 +93,11 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> RegisterUser(UserRegisterDto userRegisterDto)
         {
+            if (string.Equals(userRegisterDto.UserType, "Driver", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest("Use driver registration endpoint for drivers.");
+            }
+
             if (await _context.Users.AnyAsync(u => u.Email == userRegisterDto.Email))
             {
                 return Conflict("User with this email already exists.");
@@ -142,7 +149,7 @@ namespace RideShare_Connect.Api.Controllers
                                      .Include(u => u.UserProfile) // Include UserProfile for FullName
                                      .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-            if (user == null)
+            if (user == null || await _context.DriverProfiles.AnyAsync(dp => dp.DriverId == user.Id))
             {
                 return Unauthorized("Invalid credentials.");
             }

@@ -122,11 +122,14 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> LoginDriver(LoginDto dto)
         {
-            var user = await _context.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Email == dto.Email && u.UserType == "Driver");
-            if (user == null)
+            var user = await _context.Users.Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+            if (user == null || !await _context.DriverProfiles.AnyAsync(dp => dp.DriverId == user.Id))
             {
                 return Unauthorized("Invalid credentials.");
             }
+
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
@@ -175,13 +178,12 @@ namespace RideShare_Connect.Api.Controllers
             }
             var userId = int.Parse(userIdClaim);
 
-            var driver = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver" && u.Id == userId)
-                .Join(_context.DriverProfiles,
-                      u => u.Id,
+            var driver = await _context.DriverProfiles
+                .Where(dp => dp.DriverId == userId)
+                .Join(_context.Users.Include(u => u.UserProfile),
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      u => u.Id,
+                      (dp, u) => new DriverDto
                       {
                           Id = u.Id,
                           Email = u.Email,
@@ -218,7 +220,7 @@ namespace RideShare_Connect.Api.Controllers
 
             var user = await _context.Users
                 .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
@@ -283,13 +285,11 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers()
         {
-            var drivers = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver")
-                .Join(_context.DriverProfiles,
-                      u => u.Id,
+            var drivers = await _context.DriverProfiles
+                .Join(_context.Users.Include(u => u.UserProfile),
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      u => u.Id,
+                      (dp, u) => new DriverDto
                       {
                           Id = u.Id,
                           Email = u.Email,
@@ -312,13 +312,12 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DriverDto>> GetDriver(int id)
         {
-            var driver = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver" && u.Id == id)
-                .Join(_context.DriverProfiles,
-                      u => u.Id,
+            var driver = await _context.DriverProfiles
+                .Where(dp => dp.DriverId == id)
+                .Join(_context.Users.Include(u => u.UserProfile),
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      u => u.Id,
+                      (dp, u) => new DriverDto
                       {
                           Id = u.Id,
                           Email = u.Email,
@@ -348,7 +347,7 @@ namespace RideShare_Connect.Api.Controllers
         {
             var user = await _context.Users
                 .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
@@ -382,7 +381,7 @@ namespace RideShare_Connect.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!DriverExists(id))
                 {
                     return NotFound();
                 }
@@ -399,9 +398,9 @@ namespace RideShare_Connect.Api.Controllers
         [HttpDelete("{id}/account")]
         public async Task<IActionResult> DeleteDriverAccount(int id, [FromBody] DeleteAccountDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
 
-            if (user == null)
+            if (user == null || !await _context.DriverProfiles.AnyAsync(dp => dp.DriverId == id))
             {
                 return NotFound();
             }
@@ -430,9 +429,9 @@ namespace RideShare_Connect.Api.Controllers
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private bool DriverExists(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.DriverProfiles.Any(e => e.DriverId == id);
         }
     }
 }
