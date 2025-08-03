@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<RideService>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 
 builder.Services.AddControllers();
