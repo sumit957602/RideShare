@@ -48,7 +48,6 @@ namespace RideShare_Connect_Backend.Controllers
                 if (user != null)
                 {
                     user.IsVerified = true;
-                    user.VerificationBadge = "Verified";
                 }
             }
 

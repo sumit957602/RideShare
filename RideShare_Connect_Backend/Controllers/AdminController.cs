@@ -130,7 +130,6 @@ namespace RideShare_Connect.Api.Controllers
                           AccountStatus = u.AccountStatus,
                           CreatedAt = u.CreatedAt,
                           IsVerified = u.IsVerified,
-                          VerificationBadge = u.VerificationBadge,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
