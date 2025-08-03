@@ -67,9 +67,9 @@ namespace RideShare_Connect.Controllers
                 UserId = userId,
                 DocUrl = $"/documents/{fileName}",
                 VerificationType = type,
-                Status = "Uploaded",
+                Status = "Pending",
                 IssuedOn = DateTime.UtcNow,
-                ExpiresOn = DateTime.UtcNow
+                ExpiresOn = DateTime.UtcNow.AddYears(1)
             };
             _context.UserVerifications.Add(record);
             await _context.SaveChangesAsync();

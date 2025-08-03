@@ -50,7 +50,9 @@ namespace RideShare_Connect.Api.Controllers
                                         FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
                                         UserType = u.UserType,
                                         AccountStatus = u.AccountStatus,
-                                        CreatedAt = u.CreatedAt
+                                        CreatedAt = u.CreatedAt,
+                                        IsVerified = u.IsVerified,
+                                        VerificationBadge = u.VerificationBadge
                                     })
                                     .ToListAsync();
             return Ok(users);
@@ -79,7 +81,9 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = user.UserProfile != null ? user.UserProfile.FullName : null,
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
 
             return Ok(userDto);
@@ -126,7 +130,9 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = newUser.UserProfile.FullName,
                 UserType = newUser.UserType,
                 AccountStatus = newUser.AccountStatus,
-                CreatedAt = newUser.CreatedAt
+                CreatedAt = newUser.CreatedAt,
+                IsVerified = newUser.IsVerified,
+                VerificationBadge = newUser.VerificationBadge
             };
 
             return CreatedAtAction(nameof(GetUser), new { id = userDto.Id }, userDto);
@@ -197,7 +203,9 @@ namespace RideShare_Connect.Api.Controllers
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
                 ProfilePicture = user.UserProfile?.ProfilePicture,
-                UserType = user.UserType
+                UserType = user.UserType,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
 
             return Ok(responseDto);
@@ -261,7 +269,9 @@ namespace RideShare_Connect.Api.Controllers
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
                 ProfilePicture = user.UserProfile?.ProfilePicture,
-                UserType = user.UserType
+                UserType = user.UserType,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
 
             return Ok(responseDto);
@@ -335,7 +345,9 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = user.UserProfile?.FullName,
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                IsVerified = user.IsVerified,
+                VerificationBadge = user.VerificationBadge
             };
             return Ok(userDto);
         }
