@@ -113,8 +113,7 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = dto.FullName,
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt,
-                VerificationBadge = user.VerificationBadge
+                CreatedAt = user.CreatedAt
             };
             return CreatedAtAction(nameof(RegisterDriver), new { id = userDto.Id }, userDto);
         }
@@ -160,8 +159,7 @@ namespace RideShare_Connect.Api.Controllers
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
-                UserType = user.UserType,
-                VerificationBadge = user.VerificationBadge
+                UserType = user.UserType
             };
             return Ok(response);
         }
@@ -301,7 +299,6 @@ namespace RideShare_Connect.Api.Controllers
                           AccountStatus = u.AccountStatus,
                           CreatedAt = u.CreatedAt,
                           IsVerified = u.IsVerified,
-                          VerificationBadge = u.VerificationBadge,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -332,7 +329,6 @@ namespace RideShare_Connect.Api.Controllers
                           AccountStatus = u.AccountStatus,
                           CreatedAt = u.CreatedAt,
                           IsVerified = u.IsVerified,
-                          VerificationBadge = u.VerificationBadge,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
