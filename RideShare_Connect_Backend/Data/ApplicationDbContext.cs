@@ -1,5 +1,4 @@
-// Data/ApplicationDbContext.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Models.RideManagement;
@@ -15,25 +14,29 @@ namespace RideShare_Connect.Api.Data
         {
         }
 
+        // User Management
         public DbSet<User> Users { get; set; }
-        public DbSet<UserProfile> UserProfiles { get; set; } // Add this!
+        public DbSet<UserProfile> UserProfiles { get; set; }
         public DbSet<UserVerification> UserVerifications { get; set; }
-        public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        // ... other DbSets
 
+        // Vehicle & Driver Management
+        public DbSet<Driver> Drivers { get; set; } // ✅ Added
+        public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleDocument> VehicleDocuments { get; set; }
         public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
         public DbSet<DriverRating> DriverRatings { get; set; }
 
+        // Ride Management
         public DbSet<Ride> Rides { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<RideRecurrence> RideRecurrences { get; set; }
         public DbSet<RideBooking> RideBookings { get; set; }
         public DbSet<RideRequest> RideRequests { get; set; }
 
+        // Payment System
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
@@ -41,6 +44,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
 
+        // Admin Panel
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Analytics> Analytics { get; set; }
         public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
@@ -51,24 +55,25 @@ namespace RideShare_Connect.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure the one-to-one relationship between User and UserProfile
+            // One-to-one: User <-> UserProfile
             modelBuilder.Entity<User>()
                 .HasOne(u => u.UserProfile)
                 .WithOne(up => up.User)
-                .HasForeignKey<UserProfile>(up => up.UserId); // This specifies the foreign key
+                .HasForeignKey<UserProfile>(up => up.UserId);
 
-            // Optional: Ensure email is unique
             modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
 
+            // One-to-many: User <-> Verifications
             modelBuilder.Entity<UserVerification>()
                 .HasOne(v => v.User)
                 .WithMany(u => u.Verifications)
                 .HasForeignKey(v => v.UserId);
 
-            modelBuilder.Entity<DriverProfile>()
-                .HasOne<User>()
-                .WithMany()
-                .HasForeignKey(dp => dp.DriverId);
+            // ✅ One-to-one: Driver <-> DriverProfile (Shared PK & FK)
+            modelBuilder.Entity<Driver>()
+                .HasOne(d => d.DriverProfile)
+                .WithOne(dp => dp.Driver)
+                .HasForeignKey<DriverProfile>(dp => dp.DriverId);
 
             modelBuilder.Entity<RefreshToken>()
                 .HasOne(rt => rt.User)

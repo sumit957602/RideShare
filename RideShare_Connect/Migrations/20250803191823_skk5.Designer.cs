@@ -12,8 +12,8 @@ using RideShareConnect.Data;
 namespace RideShare_Connect.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250728171729_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250803191823_skk5")]
+    partial class skk5
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -840,21 +840,53 @@ namespace RideShare_Connect.Migrations
                     b.ToTable("DocumentReminders");
                 });
 
-            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.Driver", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("DriverId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DriverId"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("LicenseUploadPath")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.HasKey("DriverId");
+
+                    b.ToTable("Drivers");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>
+                {
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
 
                     b.Property<string>("BackgroundCheckStatus")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
-
-                    b.Property<int>("DriverId")
-                        .HasColumnType("int");
 
                     b.Property<int>("DrivingExperienceYears")
                         .HasColumnType("int");
@@ -869,7 +901,7 @@ namespace RideShare_Connect.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.HasKey("Id");
+                    b.HasKey("DriverId");
 
                     b.ToTable("DriverProfiles");
                 });
@@ -1307,6 +1339,17 @@ namespace RideShare_Connect.Migrations
                     b.Navigation("VehicleDocument");
                 });
 
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>
+                {
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
+                        .WithOne("DriverProfile")
+                        .HasForeignKey("RideShare_Connect.Models.VehicleManagement.DriverProfile", "DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+                });
+
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverRating", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.UserManagement.User", "Driver")
@@ -1396,6 +1439,12 @@ namespace RideShare_Connect.Migrations
                         .IsRequired();
 
                     b.Navigation("Verifications");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.Driver", b =>
+                {
+                    b.Navigation("DriverProfile")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.Vehicle", b =>
