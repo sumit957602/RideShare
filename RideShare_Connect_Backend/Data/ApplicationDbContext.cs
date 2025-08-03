@@ -4,6 +4,7 @@ using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.PaymentManagement;
+using RideShare_Connect.Models.AdminManagement;
 
 namespace RideShare_Connect.Api.Data
 {
@@ -39,6 +40,12 @@ namespace RideShare_Connect.Api.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
+
+        public DbSet<Admin> Admins { get; set; }
+        public DbSet<Analytics> Analytics { get; set; }
+        public DbSet<SystemConfiguration> SystemConfigurations { get; set; }
+        public DbSet<UserReport> UserReports { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -127,6 +134,32 @@ namespace RideShare_Connect.Api.Data
                 .HasOne(c => c.Booking)
                 .WithMany()
                 .HasForeignKey(c => c.BookingId);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.ReportedUser)
+                .WithMany()
+                .HasForeignKey(ur => ur.ReportedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.ReportingUser)
+                .WithMany()
+                .HasForeignKey(ur => ur.ReportingUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.HandledByAdmin)
+                .WithMany()
+                .HasForeignKey(ur => ur.HandledByAdminId);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId);
+
+            modelBuilder.Entity<SystemConfiguration>()
+                .HasIndex(c => c.Key)
+                .IsUnique();
         }
     }
 }
