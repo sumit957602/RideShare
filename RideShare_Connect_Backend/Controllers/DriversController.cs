@@ -15,6 +15,7 @@ using System.Text;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -160,6 +161,121 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = user.UserType
             };
             return Ok(response);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpGet("profile")]
+        public async Task<ActionResult<DriverDto>> GetProfile()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var userId = int.Parse(userIdClaim);
+
+            var driver = await _context.Users
+                .Include(u => u.UserProfile)
+                .Where(u => u.UserType == "Driver" && u.Id == userId)
+                .Join(_context.DriverProfiles,
+                      u => u.Id,
+                      dp => dp.DriverId,
+                      (u, dp) => new DriverDto
+                      {
+                          Id = u.Id,
+                          Email = u.Email,
+                          PhoneNumber = u.PhoneNumber,
+                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
+                          UserType = u.UserType,
+                          AccountStatus = u.AccountStatus,
+                          CreatedAt = u.CreatedAt,
+                          LicenseNumber = dp.LicenseNumber,
+                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
+                          DrivingExperienceYears = dp.DrivingExperienceYears,
+                          ReferenceContacts = dp.ReferenceContacts
+                      })
+                .FirstOrDefaultAsync();
+
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(driver);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile(DriverUpdateDto dto)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var id = int.Parse(userIdClaim);
+
+            var user = await _context.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == id);
+            if (driverProfile == null)
+            {
+                return NotFound();
+            }
+
+            if (dto.Email != null) user.Email = dto.Email;
+            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
+
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile { UserId = user.Id };
+            }
+            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+
+            if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
+            if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
+            if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
+            if (dto.ReferenceContacts != null) driverProfile.ReferenceContacts = dto.ReferenceContacts;
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpGet("ratings")]
+        public async Task<IActionResult> GetRatings()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized();
+            }
+            var id = int.Parse(userIdClaim);
+
+            var ratings = await _context.DriverRatings
+                .Where(r => r.DriverId == id)
+                .Select(r => new DriverRatingDto
+                {
+                    Id = r.Id,
+                    PassengerId = r.PassengerId,
+                    RideId = r.RideId,
+                    Rating = r.Rating,
+                    Review = r.Review,
+                    Timestamp = r.Timestamp
+                }).ToListAsync();
+
+            var average = ratings.Any() ? ratings.Average(r => r.Rating) : 0;
+
+            return Ok(new { averageRating = average, ratings });
         }
 
         // GET: api/Drivers
