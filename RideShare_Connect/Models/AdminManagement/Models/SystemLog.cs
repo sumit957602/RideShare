@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using RideShare_Connect.Models.UserManagement;
 
 namespace RideShare_Connect.Models.AdminManagement
 {
@@ -10,6 +11,7 @@ namespace RideShare_Connect.Models.AdminManagement
         public int Id { get; set; }
 
         [Required]
+        [ForeignKey("Admin")]
         public int AdminId { get; set; }
 
         [Required]
@@ -19,6 +21,10 @@ namespace RideShare_Connect.Models.AdminManagement
         [StringLength(1000)]
         public string LogDescription { get; set; }  // Detailed description of the action
 
-        public int? UserId { get; set; }  // Optional: affected user, if any (e.
+        [ForeignKey("User")]
+        public int? UserId { get; set; }  // Optional: affected user, if any (e.g., banned user)
+
+        public virtual Admin Admin { get; set; }
+        public virtual User User { get; set; }
     }
 }

@@ -64,6 +64,18 @@ namespace RideShareConnect.Data
                 .HasOne(d => d.DriverProfile)
                 .WithOne(dp => dp.Driver)
                 .HasForeignKey<DriverProfile>(dp => dp.DriverId);
+
+            // SystemLog relationships
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.Admin)
+                .WithMany()
+                .HasForeignKey(sl => sl.AdminId);
+
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.User)
+                .WithMany()
+                .HasForeignKey(sl => sl.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -165,6 +165,17 @@ namespace RideShare_Connect.Api.Data
             modelBuilder.Entity<SystemConfiguration>()
                 .HasIndex(c => c.Key)
                 .IsUnique();
+
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.Admin)
+                .WithMany()
+                .HasForeignKey(sl => sl.AdminId);
+
+            modelBuilder.Entity<SystemLog>()
+                .HasOne(sl => sl.User)
+                .WithMany()
+                .HasForeignKey(sl => sl.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
