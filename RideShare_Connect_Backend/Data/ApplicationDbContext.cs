@@ -27,6 +27,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<VehicleDocument> VehicleDocuments { get; set; }
         public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
         public DbSet<DriverRating> DriverRatings { get; set; }
+        public DbSet<DriverCredential> DriverCredentials { get; set; }
 
         public DbSet<Ride> Rides { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
@@ -69,6 +70,11 @@ namespace RideShare_Connect.Api.Data
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(dp => dp.DriverId);
+
+            modelBuilder.Entity<DriverCredential>()
+                .HasOne(dc => dc.User)
+                .WithMany()
+                .HasForeignKey(dc => dc.UserId);
 
             modelBuilder.Entity<RefreshToken>()
                 .HasOne(rt => rt.User)
