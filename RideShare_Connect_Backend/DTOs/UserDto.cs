@@ -10,7 +10,6 @@ namespace RideShare_Connect.Api.DTOs
         public string UserType { get; set; }
         public string AccountStatus { get; set; }
         public DateTime CreatedAt { get; set; }
-        public bool IsVerified { get; set; }
         public string VerificationBadge { get; set; }
     }
 }

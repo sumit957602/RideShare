@@ -114,7 +114,6 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
                 CreatedAt = user.CreatedAt,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
             return CreatedAtAction(nameof(RegisterDriver), new { id = userDto.Id }, userDto);
@@ -162,7 +161,6 @@ namespace RideShare_Connect.Api.Controllers
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
                 UserType = user.UserType,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
             return Ok(response);

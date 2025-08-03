@@ -51,7 +51,6 @@ namespace RideShare_Connect.Api.Controllers
                                         UserType = u.UserType,
                                         AccountStatus = u.AccountStatus,
                                         CreatedAt = u.CreatedAt,
-                                        IsVerified = u.IsVerified,
                                         VerificationBadge = u.VerificationBadge
                                     })
                                     .ToListAsync();
@@ -82,7 +81,6 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
                 CreatedAt = user.CreatedAt,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
 
@@ -131,7 +129,6 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = newUser.UserType,
                 AccountStatus = newUser.AccountStatus,
                 CreatedAt = newUser.CreatedAt,
-                IsVerified = newUser.IsVerified,
                 VerificationBadge = newUser.VerificationBadge
             };
 
@@ -204,7 +201,6 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = user.UserProfile?.FullName,
                 ProfilePicture = user.UserProfile?.ProfilePicture,
                 UserType = user.UserType,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
 
@@ -270,7 +266,6 @@ namespace RideShare_Connect.Api.Controllers
                 FullName = user.UserProfile?.FullName,
                 ProfilePicture = user.UserProfile?.ProfilePicture,
                 UserType = user.UserType,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
 
@@ -346,7 +341,6 @@ namespace RideShare_Connect.Api.Controllers
                 UserType = user.UserType,
                 AccountStatus = user.AccountStatus,
                 CreatedAt = user.CreatedAt,
-                IsVerified = user.IsVerified,
                 VerificationBadge = user.VerificationBadge
             };
             return Ok(userDto);
