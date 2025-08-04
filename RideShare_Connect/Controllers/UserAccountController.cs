@@ -197,8 +197,8 @@ namespace RideShare_Connect.Controllers
             }
 
             var error = await response.Content.ReadAsStringAsync();
-            ModelState.AddModelError(string.Empty, $"Account deletion failed: {response.StatusCode} - {error}");
-            return RedirectToAction("PrivacySettings", "UserDashboard");
+            TempData["ErrorMessage"] = $"Account deletion failed: {response.StatusCode} - {error}";
+            return RedirectToAction("DeleteAccount", "UserDashboard");
         }
 
 

@@ -5,6 +5,7 @@ using RideShareConnect.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
+using RideShare_Connect.DTOs;
 
 namespace RideShare_Connect.Controllers
 {
@@ -108,6 +109,16 @@ namespace RideShare_Connect.Controllers
         public IActionResult PrivacySettings()
         {
             return View();
+        }
+
+        public IActionResult DeleteAccount()
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+            return View(new DeleteAccountDto());
         }
     }
 }
