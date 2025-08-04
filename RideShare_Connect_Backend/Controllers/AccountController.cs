@@ -138,11 +138,13 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
+            var normalizedEmail = loginDto.Email?.Trim().ToLower();
+
             var user = await _context.Users
                                      .Include(u => u.UserProfile) // Include UserProfile for FullName
-                                     .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+                                     .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
 
-            if (user == null)
+            if (user == null || string.IsNullOrEmpty(user.PasswordHash))
             {
                 return Unauthorized("Invalid credentials.");
             }
