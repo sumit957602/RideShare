@@ -206,70 +206,6 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("refresh-token")]
-        public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenRequestDto request)
-        {
-            var existing = await _context.RefreshTokens
-                .Include(r => r.User)
-                .ThenInclude(u => u.UserProfile)
-                .FirstOrDefaultAsync(r => r.Token == request.RefreshToken && r.ExpiresAt > DateTime.UtcNow);
-
-            if (existing == null)
-            {
-                return Unauthorized();
-            }
-
-            var user = existing.User;
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.UserType ?? "Rider")
-            };
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Issuer = jwtSettings["Issuer"],
-                Audience = jwtSettings["Audience"]
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            var newRefresh = new RefreshToken
-            {
-                UserId = user.Id,
-                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
-                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.RefreshTokens.Remove(existing);
-            _context.RefreshTokens.Add(newRefresh);
-            await _context.SaveChangesAsync();
-
-            var responseDto = new AuthResponseDto
-            {
-                Token = tokenString,
-                RefreshToken = newRefresh.Token,
-                UserId = user.Id,
-                Email = user.Email,
-                FullName = user.UserProfile?.FullName,
-                ProfilePicture = user.UserProfile?.ProfilePicture,
-                UserType = user.UserType
-            };
-
-            return Ok(responseDto);
-        }
-
-        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
@@ -410,24 +346,6 @@ namespace RideShare_Connect.Api.Controllers
                     throw;
                 }
             }
-
-            return NoContent();
-        }
-
-        // DELETE: api/Users/5
-        // This endpoint should typically require authorization, often with specific roles (e.g., Admin)
-        // [Authorize(Roles = "Admin")] // Example: Only Admin can delete users
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
