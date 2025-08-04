@@ -71,7 +71,7 @@ namespace RideShare_Connect.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginDto model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginDto model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
@@ -86,29 +86,39 @@ namespace RideShare_Connect.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                    var claims = new List<Claim>
+                    if (authResponse == null)
                     {
-                        new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
-                        new Claim(ClaimTypes.Email, authResponse.Email),
-                        new Claim("Token", authResponse.Token),
-                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver")
-                    };
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
-                    };
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-                    if (Url.IsLocalUrl(returnUrl))
-                    {
-                        return Redirect(returnUrl);
+                        ModelState.AddModelError(string.Empty, "Invalid response from server.");
                     }
-                    return RedirectToAction("Driver", "DriverDashboard");
+                    else
+                    {
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
+                            new Claim(ClaimTypes.Email, authResponse.Email),
+                            new Claim("Token", authResponse.Token),
+                            new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver")
+                        };
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
+                        };
+                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                        if (returnUrl != null && Url.IsLocalUrl(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        return RedirectToAction("Driver", "DriverDashboard");
+                    }
                 }
-                var errorContent = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Login failed: {response.StatusCode} - {errorContent}");
-                _logger.LogError("Driver login failed for {Email}: {Status} - {Error}", model.Email, response.StatusCode, errorContent);
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    ModelState.AddModelError(string.Empty, $"Login failed: {response.StatusCode} - {errorContent}");
+                    _logger.LogError("Driver login failed for {Email}: {Status} - {Error}", model.Email, response.StatusCode, errorContent);
+                }
             }
             catch (HttpRequestException ex)
             {

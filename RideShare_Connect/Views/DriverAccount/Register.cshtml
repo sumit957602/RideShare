@@ -26,7 +26,7 @@
                         <a class="nav-link" href="../../#how-it-works">How It Works</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="Login">Login</a>
+                        <a class="nav-link" asp-action="Login" asp-controller="DriverAccount">Login</a>
                     </li>
                 </ul>
             </div>
@@ -45,7 +45,7 @@
                                 <p class="mb-0">Start earning on your own schedule.</p>
                             </div>
                             <div class="signup-card-body">
-                                <form asp-action="Register">
+                                <form asp-action="Register" asp-controller="DriverAccount">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <!-- Full Name -->
                                     <div class="mb-3">
@@ -118,7 +118,7 @@
                                     </div>
                                 </form>
                                 <div class="text-center mt-4">
-                                    <p class="text-muted">Already have an account? <a href="Login">Log In</a></p>
+                                    <p class="text-muted">Already have an account? <a asp-action="Login" asp-controller="DriverAccount">Log In</a></p>
                                 </div>
                             </div>
                         </div>
