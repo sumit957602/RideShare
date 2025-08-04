@@ -88,6 +88,10 @@
                                         <li class="list-group-item"><strong>Phone:</strong> @Model.Profile?.User?.PhoneNumber</li>
                                         <li class="list-group-item"><strong>Emergency Contact:</strong> @Model.Profile?.EmergencyContact</li>
                                         <li class="list-group-item"><strong>Bio:</strong> @Model.Profile?.Bio</li>
+                                        <li class="list-group-item"><strong>License Number:</strong> @Model.DriverProfile?.LicenseNumber</li>
+                                        <li class="list-group-item"><strong>Background Check:</strong> @Model.DriverProfile?.BackgroundCheckStatus</li>
+                                        <li class="list-group-item"><strong>Experience:</strong> @Model.DriverProfile?.DrivingExperienceYears years</li>
+                                        <li class="list-group-item"><strong>References:</strong> @Model.DriverProfile?.ReferenceContacts</li>
                                     </ul>
                                     <div class="mt-3 text-end">
                                         <a asp-controller="UserDashboard" asp-action="UserProfile" class="btn btn-primary">Update Profile</a>
