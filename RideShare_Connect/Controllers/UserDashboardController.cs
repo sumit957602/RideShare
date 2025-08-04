@@ -75,6 +75,36 @@ namespace RideShare_Connect.Controllers
             return View(userProfile);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UserProfile(UserProfile profile)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+
+            var existingProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
+            if (existingProfile == null)
+            {
+                profile.UserId = userId;
+                _db.UserProfiles.Add(profile);
+            }
+            else
+            {
+                existingProfile.FullName = profile.FullName;
+                existingProfile.ProfilePicture = profile.ProfilePicture;
+                existingProfile.EmergencyContact = profile.EmergencyContact;
+                existingProfile.Bio = profile.Bio;
+                _db.UserProfiles.Update(existingProfile);
+            }
+
+            _db.SaveChanges();
+
+            return RedirectToAction(nameof(UserProfile));
+        }
+
         public IActionResult PrivacySettings()
         {
             return View();
