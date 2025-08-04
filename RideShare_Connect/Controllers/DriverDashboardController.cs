@@ -28,6 +28,8 @@ namespace RideShare_Connect.Controllers
             var profile = await _db.UserProfiles
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.UserId == userId);
+            var driverProfile = await _db.DriverProfiles
+                .FirstOrDefaultAsync(dp => dp.DriverId == userId);
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
             var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                 .OrderByDescending(r => r.Timestamp)
@@ -37,6 +39,7 @@ namespace RideShare_Connect.Controllers
             var viewModel = new DriverDashboardViewModel
             {
                 Profile = profile,
+                DriverProfile = driverProfile,
                 Vehicles = vehicles,
                 AverageRating = average,
                 RecentRatings = ratings.Take(5)
