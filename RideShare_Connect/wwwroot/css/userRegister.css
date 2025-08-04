@@ -124,15 +124,6 @@ main {
         z-index: 1;
     }
 
-/* --- Multi-step form --- */
-.register-step {
-    display: none;
-}
-
-.register-step.active {
-    display: block;
-}
-
 /* --- Footer Styles --- */
 .footer {
     background-color: var(--dark-color);

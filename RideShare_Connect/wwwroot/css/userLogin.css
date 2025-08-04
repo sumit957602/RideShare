@@ -124,14 +124,6 @@ main {
         z-index: 1;
     }
 
-.login-step {
-    display: none;
-}
-
-.login-step.active {
-    display: block;
-}
-
 .footer {
     background-color: var(--dark-color);
     color: rgba(255, 255, 255, 0.7);
