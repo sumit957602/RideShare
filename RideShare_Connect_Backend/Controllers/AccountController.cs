@@ -312,7 +312,7 @@ namespace RideShare_Connect.Api.Controllers
             return Ok("Password reset successful.");
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("profile")]
         public async Task<ActionResult<UserDto>> GetProfile([FromQuery] int userId)
         {
@@ -338,7 +338,7 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(userDto);
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromQuery] int userId, UserUpdateDto dto)
         {
@@ -366,70 +366,13 @@ namespace RideShare_Connect.Api.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("upload-document")]
-        public async Task<IActionResult> UploadDocument([FromForm] DocumentUploadDto dto)
-        {
-            if (dto.File == null || dto.File.Length == 0)
-            {
-                return BadRequest("No file provided.");
-            }
-
-            var type = dto.DocumentType?.ToLower();
-            if (type != "id-proof" && type != "driving-license")
-            {
-                return BadRequest("Unsupported document type.");
-            }
-
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var userId = int.Parse(userIdClaim);
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var uploadsRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            var folder = Path.Combine(uploadsRoot, "documents");
-            Directory.CreateDirectory(folder);
-
-            var fileName = $"{Guid.NewGuid()}_{dto.File.FileName}";
-            var filePath = Path.Combine(folder, fileName);
-            using (var stream = System.IO.File.Create(filePath))
-            {
-                await dto.File.CopyToAsync(stream);
-            }
-
-            var record = new UserVerification
-            {
-                UserId = userId,
-                DocUrl = $"/documents/{fileName}",
-                VerificationType = type,
-                Status = "Uploaded",
-                IssuedOn = DateTime.UtcNow,
-                ExpiresOn = DateTime.UtcNow
-            };
-            _context.UserVerifications.Add(record);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { record.Id, record.DocUrl, record.VerificationType });
-        }
-
+        
         // PUT: api/Users/5
         // This endpoint should typically require authorization for a user to update their own profile
         // [Authorize] // Uncomment this to protect this endpoint
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserUpdateDto userUpdateDto)
         {
-            // Optional: Add logic to ensure the logged-in user can only update their own profile
-            // if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value != id.ToString())
-            // {
-            //     return Forbid(); // Or Unauthorized if no token, Forbidden if token exists but user isn't allowed
-            // }
 
             var userToUpdate = await _context.Users
                                             .Include(u => u.UserProfile)
