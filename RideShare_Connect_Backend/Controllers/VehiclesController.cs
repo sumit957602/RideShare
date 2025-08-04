@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
@@ -22,17 +20,9 @@ namespace RideShare_Connect.Api.Controllers
             _context = context;
         }
 
-        [Authorize(Roles = "Driver")]
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterVehicle(VehicleRegisterDto dto)
+        public async Task<IActionResult> RegisterVehicle([FromQuery] int driverId, [FromBody] VehicleRegisterDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var driverId = int.Parse(userIdClaim);
-
             var vehicle = new Vehicle
             {
                 DriverId = driverId,
@@ -59,17 +49,9 @@ namespace RideShare_Connect.Api.Controllers
             return CreatedAtAction(nameof(RegisterVehicle), new { id = result.Id }, result);
         }
 
-        [Authorize(Roles = "Driver")]
         [HttpPost("upload-document")]
-        public async Task<IActionResult> UploadDocument([FromForm] VehicleDocumentUploadDto dto)
+        public async Task<IActionResult> UploadDocument([FromQuery] int driverId, [FromForm] VehicleDocumentUploadDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var driverId = int.Parse(userIdClaim);
-
             var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == dto.VehicleId && v.DriverId == driverId);
             if (vehicle == null)
             {
@@ -97,17 +79,9 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(new { document.Id, document.DocumentType });
         }
 
-        [Authorize(Roles = "Driver")]
         [HttpGet("my-vehicles")]
-        public async Task<IActionResult> GetMyVehicles()
+        public async Task<IActionResult> GetMyVehicles([FromQuery] int driverId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var driverId = int.Parse(userIdClaim);
-
             var vehicles = await _context.Vehicles
                 .Where(v => v.DriverId == driverId)
                 .Select(v => new VehicleDto
@@ -122,6 +96,38 @@ namespace RideShare_Connect.Api.Controllers
                 }).ToListAsync();
 
             return Ok(vehicles);
+        }
+
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateVehicle([FromQuery] int driverId, [FromQuery] int vehicleId, [FromBody] VehicleUpdateDto dto)
+        {
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.DriverId == driverId);
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            if (!string.IsNullOrEmpty(dto.CarMaker)) vehicle.CarMaker = dto.CarMaker;
+            if (!string.IsNullOrEmpty(dto.Model)) vehicle.Model = dto.Model;
+            if (!string.IsNullOrEmpty(dto.VehicleType)) vehicle.VehicleType = dto.VehicleType;
+            if (!string.IsNullOrEmpty(dto.LicensePlate)) vehicle.LicensePlate = dto.LicensePlate;
+            if (dto.Year.HasValue) vehicle.Year = dto.Year.Value;
+            if (!string.IsNullOrEmpty(dto.Status)) vehicle.Status = dto.Status;
+
+            await _context.SaveChangesAsync();
+
+            var result = new VehicleDto
+            {
+                Id = vehicle.Id,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                Status = vehicle.Status
+            };
+
+            return Ok(result);
         }
     }
 }
