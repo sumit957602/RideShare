@@ -314,14 +314,8 @@ namespace RideShare_Connect.Api.Controllers
 
         [Authorize]
         [HttpGet("profile")]
-        public async Task<ActionResult<UserDto>> GetProfile()
+        public async Task<ActionResult<UserDto>> GetProfile([FromQuery] int userId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var userId = int.Parse(userIdClaim);
             var user = await _context.Users
                                      .Include(u => u.UserProfile)
                                      .FirstOrDefaultAsync(u => u.Id == userId);
@@ -329,6 +323,7 @@ namespace RideShare_Connect.Api.Controllers
             {
                 return NotFound();
             }
+
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -339,21 +334,17 @@ namespace RideShare_Connect.Api.Controllers
                 AccountStatus = user.AccountStatus,
                 CreatedAt = user.CreatedAt
             };
+
             return Ok(userDto);
         }
 
         [Authorize]
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile(UserUpdateDto dto)
+        public async Task<IActionResult> UpdateProfile([FromQuery] int userId, UserUpdateDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
             var user = await _context.Users
                                      .Include(u => u.UserProfile)
-                                     .FirstOrDefaultAsync(u => u.Id == int.Parse(userIdClaim));
+                                     .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return NotFound();
@@ -368,6 +359,7 @@ namespace RideShare_Connect.Api.Controllers
             {
                 user.UserProfile = new UserProfile { UserId = user.Id };
             }
+
             if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
 
             await _context.SaveChangesAsync();
