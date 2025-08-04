@@ -114,5 +114,45 @@ namespace RideShare_Connect.Services
             await _context.SaveChangesAsync();
             return method;
         }
+
+        public async Task<PaymentMethod?> UpdatePaymentMethodAsync(PaymentMethodUpdateDto dto)
+        {
+            var method = await _context.PaymentMethods.FindAsync(dto.Id);
+            if (method == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(dto.MethodType))
+            {
+                method.MethodType = dto.MethodType;
+            }
+
+            if (!string.IsNullOrEmpty(dto.CardNumber))
+            {
+                method.CardNumber = dto.CardNumber;
+            }
+
+            if (dto.ExpiryDate.HasValue)
+            {
+                method.ExpiryDate = dto.ExpiryDate;
+            }
+
+            await _context.SaveChangesAsync();
+            return method;
+        }
+
+        public async Task<bool> DeletePaymentMethodAsync(int id)
+        {
+            var method = await _context.PaymentMethods.FindAsync(id);
+            if (method == null)
+            {
+                return false;
+            }
+
+            _context.PaymentMethods.Remove(method);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

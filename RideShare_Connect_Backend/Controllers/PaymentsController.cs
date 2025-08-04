@@ -42,5 +42,27 @@ namespace RideShare_Connect.Controllers
             var method = await _paymentService.SavePaymentMethodAsync(dto);
             return Ok(method);
         }
+
+        [HttpPut("methods")]
+        public async Task<IActionResult> UpdateMethod(PaymentMethodUpdateDto dto)
+        {
+            var method = await _paymentService.UpdatePaymentMethodAsync(dto);
+            if (method == null)
+            {
+                return NotFound();
+            }
+            return Ok(method);
+        }
+
+        [HttpDelete("methods")]
+        public async Task<IActionResult> DeleteMethod([FromQuery] int methodId)
+        {
+            var result = await _paymentService.DeletePaymentMethodAsync(methodId);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
     }
 }
