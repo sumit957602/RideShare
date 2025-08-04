@@ -146,15 +146,9 @@
                                     </div>
                                 </form>
 
-                                <hr class="my-4">
+                                <hr class="my-4" />
                                 <h5 class="mb-3 text-danger">Delete Account</h5>
-                                <form asp-controller="UserAccount" asp-action="DeleteAccount" method="post">
-                                    <div class="mb-3 form-group-label-left">
-                                        <label class="form-label">Confirm Password</label>
-                                        <input type="password" name="Password" class="form-control" required />
-                                    </div>
-                                    <button type="submit" class="btn btn-danger">Delete My Account</button>
-                                </form>
+                                <a class="btn btn-danger" asp-action="DeleteAccount" asp-controller="UserDashboard">Delete My Account</a>
                             </div>
                         </div>
                     </div>
