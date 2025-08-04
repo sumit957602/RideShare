@@ -126,26 +126,26 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
         {
-            var driver = await _context.Driver
-                .Include(d => d.DriverProfile)
+            var driverProfile = await _context.DriverProfiles
+                .Include(dp => dp.Driver)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(d => d.DriverId == driverId);
+                .FirstOrDefaultAsync(dp => dp.DriverId == driverId);
 
-            if (driver?.DriverProfile == null)
+            if (driverProfile?.Driver == null)
             {
                 return NotFound();
             }
 
             var driverDto = new DriverDto
             {
-                Id = driver.DriverId,
-                Email = driver.Email,
-                PhoneNumber = driver.PhoneNumber,
-                FullName = driver.FullName,
-                LicenseNumber = driver.DriverProfile.LicenseNumber,
-                BackgroundCheckStatus = driver.DriverProfile.BackgroundCheckStatus,
-                DrivingExperienceYears = driver.DriverProfile.DrivingExperienceYears,
-                ReferenceContacts = driver.DriverProfile.ReferenceContacts
+                Id = driverProfile.DriverId,
+                Email = driverProfile.Driver.Email,
+                PhoneNumber = driverProfile.Driver.PhoneNumber,
+                FullName = driverProfile.Driver.FullName,
+                LicenseNumber = driverProfile.LicenseNumber,
+                BackgroundCheckStatus = driverProfile.BackgroundCheckStatus,
+                DrivingExperienceYears = driverProfile.DrivingExperienceYears,
+                ReferenceContacts = driverProfile.ReferenceContacts
             };
 
             return Ok(driverDto);
@@ -154,21 +154,18 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromQuery] int driverId, DriverUpdateDto dto)
         {
-            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
-            if (driver == null)
-            {
-                return NotFound();
-            }
+            var driverProfile = await _context.DriverProfiles
+                .Include(dp => dp.Driver)
+                .FirstOrDefaultAsync(dp => dp.DriverId == driverId);
 
-            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == driverId);
             if (driverProfile == null)
             {
                 return NotFound();
             }
 
-            if (dto.Email != null) driver.Email = dto.Email;
-            if (dto.PhoneNumber != null) driver.PhoneNumber = dto.PhoneNumber;
-            if (dto.FullName != null) driver.FullName = dto.FullName;
+            if (dto.Email != null) driverProfile.Driver.Email = dto.Email;
+            if (dto.PhoneNumber != null) driverProfile.Driver.PhoneNumber = dto.PhoneNumber;
+            if (dto.FullName != null) driverProfile.Driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
