@@ -36,8 +36,6 @@ namespace RideShare_Connect.Models.VehicleManagement
         public int Year { get; set; }
 
         // Navigation Properties
-        public virtual User Driver { get; set; }
-        public virtual ICollection<VehicleDocument> Documents { get; set; } = new List<VehicleDocument>();
-        public virtual ICollection<MaintenanceRecord> MaintenanceRecords { get; set; } = new List<MaintenanceRecord>();
+        public virtual Driver Driver { get; set; }
     }
 }

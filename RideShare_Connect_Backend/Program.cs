@@ -13,7 +13,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<RideService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 

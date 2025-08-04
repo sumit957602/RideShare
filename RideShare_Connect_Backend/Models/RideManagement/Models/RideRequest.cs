@@ -9,7 +9,7 @@ namespace RideShare_Connect.Models.RideManagement
         public int Id { get; set; }
 
         [Required]
-        public int PassengerId { get; set; } // FK to User (Passenger)
+        public int PassengerId { get; set; } 
 
         [Required]
         [ForeignKey("Ride")]
@@ -23,8 +23,5 @@ namespace RideShare_Connect.Models.RideManagement
         public DateTime RequestTime { get; set; }
 
         public virtual Ride Ride { get; set; }
-
-        // Optionally add this navigation if User is modeled:
-        // public virtual User Passenger { get; set; }
     }
 }

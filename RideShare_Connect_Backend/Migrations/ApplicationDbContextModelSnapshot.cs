@@ -130,9 +130,6 @@ namespace RideShare_Connect_Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Key")
-                        .IsUnique();
-
                     b.ToTable("SystemConfigurations");
                 });
 
@@ -444,14 +441,9 @@ namespace RideShare_Connect_Backend.Migrations
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int");
 
-                    b.Property<int>("VehicleId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("VehicleId");
 
                     b.ToTable("Rides");
                 });
@@ -674,7 +666,7 @@ namespace RideShare_Connect_Backend.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -689,9 +681,6 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -824,11 +813,6 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("LicenseUploadPath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -841,18 +825,24 @@ namespace RideShare_Connect_Backend.Migrations
 
                     b.HasKey("DriverId");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Driver");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>
                 {
-                    b.Property<int>("DriverId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BackgroundCheckStatus")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DrivingExperienceYears")
                         .HasColumnType("int");
@@ -867,7 +857,10 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.HasKey("DriverId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverId")
+                        .IsUnique();
 
                     b.ToTable("DriverProfiles");
                 });
@@ -900,16 +893,9 @@ namespace RideShare_Connect_Backend.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("RideId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("DriverRatings");
                 });
@@ -1054,7 +1040,8 @@ namespace RideShare_Connect_Backend.Migrations
                 {
                     b.HasOne("RideShare_Connect.Models.AdminManagement.Admin", "HandledByAdmin")
                         .WithMany()
-                        .HasForeignKey("HandledByAdminId");
+                        .HasForeignKey("HandledByAdminId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("RideShare_Connect.Models.UserManagement.User", "ReportedUser")
                         .WithMany()
@@ -1091,19 +1078,19 @@ namespace RideShare_Connect_Backend.Migrations
                     b.HasOne("RideShare_Connect.Models.RideManagement.RideBooking", "Booking")
                         .WithMany()
                         .HasForeignKey("BookingId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("RideShare_Connect.Models.PaymentManagement.PaymentMethod", "PaymentMethod")
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("RideShare_Connect.Models.UserManagement.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Booking");
@@ -1170,21 +1157,13 @@ namespace RideShare_Connect_Backend.Migrations
 
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.Ride", b =>
                 {
-                    b.HasOne("RideShare_Connect.Models.UserManagement.User", "Driver")
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
                         .WithMany()
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Vehicle", "Vehicle")
-                        .WithMany()
-                        .HasForeignKey("VehicleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Driver");
-
-                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideBooking", b =>
@@ -1196,7 +1175,7 @@ namespace RideShare_Connect_Backend.Migrations
                         .IsRequired();
 
                     b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
-                        .WithMany("Bookings")
+                        .WithMany()
                         .HasForeignKey("RideId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1209,7 +1188,7 @@ namespace RideShare_Connect_Backend.Migrations
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideRecurrence", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
-                        .WithMany("Recurrences")
+                        .WithMany()
                         .HasForeignKey("RideId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1220,7 +1199,7 @@ namespace RideShare_Connect_Backend.Migrations
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideRequest", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
-                        .WithMany("Requests")
+                        .WithMany()
                         .HasForeignKey("RideId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1231,7 +1210,7 @@ namespace RideShare_Connect_Backend.Migrations
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RoutePoint", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
-                        .WithMany("RoutePoints")
+                        .WithMany()
                         .HasForeignKey("RideId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1318,35 +1297,19 @@ namespace RideShare_Connect_Backend.Migrations
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverRating", b =>
                 {
-                    b.HasOne("RideShare_Connect.Models.UserManagement.User", "Driver")
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
                         .WithMany()
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
-                        .WithMany()
-                        .HasForeignKey("RideId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("RideShare_Connect.Models.UserManagement.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Driver");
-
-                    b.Navigation("Ride");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.MaintenanceRecord", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.VehicleManagement.Vehicle", "Vehicle")
-                        .WithMany("MaintenanceRecords")
+                        .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1356,10 +1319,10 @@ namespace RideShare_Connect_Backend.Migrations
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.Vehicle", b =>
                 {
-                    b.HasOne("RideShare_Connect.Models.UserManagement.User", "Driver")
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
                         .WithMany()
                         .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Driver");
@@ -1368,23 +1331,12 @@ namespace RideShare_Connect_Backend.Migrations
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.VehicleDocument", b =>
                 {
                     b.HasOne("RideShare_Connect.Models.VehicleManagement.Vehicle", "Vehicle")
-                        .WithMany("Documents")
+                        .WithMany()
                         .HasForeignKey("VehicleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("RideShare_Connect.Models.RideManagement.Ride", b =>
-                {
-                    b.Navigation("Bookings");
-
-                    b.Navigation("Recurrences");
-
-                    b.Navigation("Requests");
-
-                    b.Navigation("RoutePoints");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideBooking", b =>
@@ -1413,13 +1365,6 @@ namespace RideShare_Connect_Backend.Migrations
                 {
                     b.Navigation("DriverProfile")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.Vehicle", b =>
-                {
-                    b.Navigation("Documents");
-
-                    b.Navigation("MaintenanceRecords");
                 });
 #pragma warning restore 612, 618
         }

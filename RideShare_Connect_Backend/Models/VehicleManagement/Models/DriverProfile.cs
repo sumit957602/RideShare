@@ -5,7 +5,10 @@ namespace RideShare_Connect.Models.VehicleManagement
 {
     public class DriverProfile
     {
-        [Key, ForeignKey("Driver")] // shared PK and FK
+        public int Id { get; set; }
+
+        [Required]
+        [ForeignKey("Driver")]
         public int DriverId { get; set; }
 
         [Required]
@@ -14,7 +17,7 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [Required]
         [StringLength(30)]
-        public string BackgroundCheckStatus { get; set; }
+        public string BackgroundCheckStatus { get; set; } 
 
         [Range(0, 50)]
         public int DrivingExperienceYears { get; set; }
@@ -22,7 +25,6 @@ namespace RideShare_Connect.Models.VehicleManagement
         [StringLength(500)]
         public string ReferenceContacts { get; set; }
 
-        // Navigation
         public virtual Driver Driver { get; set; }
     }
 }

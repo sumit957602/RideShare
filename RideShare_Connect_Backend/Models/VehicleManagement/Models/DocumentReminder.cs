@@ -24,6 +24,6 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         // Navigation Properties
         public virtual VehicleDocument VehicleDocument { get; set; }
-        //public virtual DriverProfile Driver { get; set; }
+        public virtual Driver Driver { get; set; }
     }
 }

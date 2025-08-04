@@ -1,5 +1,4 @@
-﻿using RideShare_Connect.Models.UserManagement;
-using RideShare_Connect.Models.VehicleManagement;
+﻿using RideShare_Connect.Models.VehicleManagement;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,10 +32,6 @@ namespace RideShare_Connect.Models.RideManagement
         public int AvailableSeats { get; set; }
 
         [Required]
-        [ForeignKey("Vehicle")]
-        public int VehicleId { get; set; }
-
-        [Required]
         [Range(0, 10000)]
         public decimal PricePerSeat { get; set; }
 
@@ -47,12 +42,7 @@ namespace RideShare_Connect.Models.RideManagement
         public bool IsRecurring { get; set; }
 
         // Navigation Properties
-        public virtual User Driver { get; set; }
-        public virtual Vehicle Vehicle { get; set; }
+        public virtual Driver Driver { get; set; }
 
-        public virtual ICollection<RideRecurrence> Recurrences { get; set; }
-        public virtual ICollection<RideBooking> Bookings { get; set; }
-        public virtual ICollection<RideRequest> Requests { get; set; }
-        public virtual ICollection<RoutePoint> RoutePoints { get; set; }
     }
 }

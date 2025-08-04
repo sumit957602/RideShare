@@ -6,7 +6,6 @@ namespace RideShare_Connect.Models.VehicleManagement
     public class Driver
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int DriverId { get; set; }
 
         [Required]
@@ -25,12 +24,9 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [Required]
         [StringLength(255)]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } 
 
-        [StringLength(255)]
-        public string LicenseUploadPath { get; set; }
-
-        // One-to-one navigation
+        // Navigation property to DriverProfile
         public virtual DriverProfile DriverProfile { get; set; }
     }
 }

@@ -31,10 +31,9 @@ namespace RideShareConnect.Data
         public DbSet<BookingHistory> BookingHistories { get; set; }
 
         // Vehicle Management
-        public DbSet<Driver> Drivers { get; set; } // ✅ Added
-        public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
         public DbSet<VehicleDocument> VehicleDocuments { get; set; }
+        public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<DriverRating> DriverRatings { get; set; }
         public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
         public DbSet<DocumentReminder> DocumentReminders { get; set; }
@@ -59,23 +58,7 @@ namespace RideShareConnect.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // ✅ One-to-One: Driver <-> DriverProfile (shared primary key and foreign key)
-            modelBuilder.Entity<Driver>()
-                .HasOne(d => d.DriverProfile)
-                .WithOne(dp => dp.Driver)
-                .HasForeignKey<DriverProfile>(dp => dp.DriverId);
-
-            // SystemLog relationships
-            modelBuilder.Entity<SystemLog>()
-                .HasOne(sl => sl.Admin)
-                .WithMany()
-                .HasForeignKey(sl => sl.AdminId);
-
-            modelBuilder.Entity<SystemLog>()
-                .HasOne(sl => sl.User)
-                .WithMany()
-                .HasForeignKey(sl => sl.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Apply any custom model configurations here.
         }
     }
 }
