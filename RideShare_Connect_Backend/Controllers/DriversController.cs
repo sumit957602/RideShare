@@ -135,29 +135,28 @@ namespace RideShare_Connect.Api.Controllers
             var driverId = int.Parse(userIdClaim);
 
             var driver = await _context.Driver
-                .Where(d => d.DriverId == driverId)
-                .Join(_context.DriverProfiles,
-                      d => d.DriverId,
-                      dp => dp.DriverId,
-                      (d, dp) => new DriverDto
-                      {
-                          Id = d.DriverId,
-                          Email = d.Email,
-                          PhoneNumber = d.PhoneNumber,
-                          FullName = d.FullName,
-                          LicenseNumber = dp.LicenseNumber,
-                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
-                          DrivingExperienceYears = dp.DrivingExperienceYears,
-                          ReferenceContacts = dp.ReferenceContacts
-                      })
-                .FirstOrDefaultAsync();
+                .Include(d => d.DriverProfile)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.DriverId == driverId);
 
-            if (driver == null)
+            if (driver?.DriverProfile == null)
             {
                 return NotFound();
             }
 
-            return Ok(driver);
+            var driverDto = new DriverDto
+            {
+                Id = driver.DriverId,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                FullName = driver.FullName,
+                LicenseNumber = driver.DriverProfile.LicenseNumber,
+                BackgroundCheckStatus = driver.DriverProfile.BackgroundCheckStatus,
+                DrivingExperienceYears = driver.DriverProfile.DrivingExperienceYears,
+                ReferenceContacts = driver.DriverProfile.ReferenceContacts
+            };
+
+            return Ok(driverDto);
         }
 
         [Authorize(Roles = "Driver")]
@@ -169,15 +168,15 @@ namespace RideShare_Connect.Api.Controllers
             {
                 return Unauthorized();
             }
-            var id = int.Parse(userIdClaim);
+            var driverId = int.Parse(userIdClaim);
 
-            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
             if (driver == null)
             {
                 return NotFound();
             }
 
-            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == id);
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == driverId);
             if (driverProfile == null)
             {
                 return NotFound();
@@ -206,10 +205,10 @@ namespace RideShare_Connect.Api.Controllers
             {
                 return Unauthorized();
             }
-            var id = int.Parse(userIdClaim);
+            var driverId = int.Parse(userIdClaim);
 
             var ratings = await _context.DriverRatings
-                .Where(r => r.DriverId == id)
+                .Where(r => r.DriverId == driverId)
                 .Select(r => new DriverRatingDto
                 {
                     Id = r.Id,
