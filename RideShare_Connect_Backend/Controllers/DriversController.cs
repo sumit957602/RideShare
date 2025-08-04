@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
-using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,11 +23,11 @@ namespace RideShare_Connect.Api.Controllers
     public class DriversController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPasswordHasher<Driver> _passwordHasher;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _environment;
 
-        public DriversController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment)
+        public DriversController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment)
         {
             _context = context;
             _passwordHasher = passwordHasher;
@@ -38,39 +37,27 @@ namespace RideShare_Connect.Api.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> RegisterDriver([FromForm] DriverRegisterDto dto)
+        public async Task<ActionResult<DriverDto>> RegisterDriver([FromForm] DriverRegisterDto dto)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            if (await _context.Driver.AnyAsync(d => d.Email == dto.Email))
             {
-                return Conflict("User with this email already exists.");
+                return Conflict("Driver with this email already exists.");
             }
 
-            var user = new User
+            var driver = new Driver
             {
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                UserType = "Driver",
-                AccountStatus = "Active",
-                CreatedAt = DateTime.UtcNow
+                FullName = dto.FullName
             };
-            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+            driver.PasswordHash = _passwordHasher.HashPassword(driver, dto.Password);
 
-            _context.Users.Add(user);
+            _context.Driver.Add(driver);
             await _context.SaveChangesAsync();
-
-            var userProfile = new UserProfile
-            {
-                UserId = user.Id,
-                FullName = dto.FullName,
-                Bio = "Default bio message for new drivers.",
-                ProfilePicture = "https://avatar.iran.liara.run/public/boy?username=Driver",
-                EmergencyContact = "Nan",
-            };
-            _context.UserProfiles.Add(userProfile);
 
             var driverProfile = new DriverProfile
             {
-                DriverId = user.Id,
+                DriverId = driver.DriverId,
                 LicenseNumber = dto.LicenseNumber,
                 BackgroundCheckStatus = "Pending",
                 DrivingExperienceYears = dto.DrivingExperienceYears,
@@ -91,43 +78,32 @@ namespace RideShare_Connect.Api.Controllers
                 {
                     await dto.LicenseDocument.CopyToAsync(stream);
                 }
-
-                var verification = new UserVerification
-                {
-                    UserId = user.Id,
-                    DocUrl = $"/documents/{fileName}",
-                    VerificationType = "driving-license",
-                    Status = "Pending",
-                    IssuedOn = DateTime.UtcNow,
-                    ExpiresOn = DateTime.UtcNow.AddYears(1)
-                };
-                _context.UserVerifications.Add(verification);
-                await _context.SaveChangesAsync();
             }
 
-            var userDto = new UserDto
+            var driverDto = new DriverDto
             {
-                Id = user.Id,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FullName = dto.FullName,
-                UserType = user.UserType,
-                AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt
+                Id = driver.DriverId,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                FullName = driver.FullName,
+                LicenseNumber = driverProfile.LicenseNumber,
+                BackgroundCheckStatus = driverProfile.BackgroundCheckStatus,
+                DrivingExperienceYears = driverProfile.DrivingExperienceYears,
+                ReferenceContacts = driverProfile.ReferenceContacts
             };
-            return CreatedAtAction(nameof(RegisterDriver), new { id = userDto.Id }, userDto);
+            return CreatedAtAction(nameof(GetDriver), new { id = driverDto.Id }, driverDto);
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> LoginDriver(LoginDto dto)
         {
-            var user = await _context.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Email == dto.Email && u.UserType == "Driver");
-            if (user == null)
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.Email == dto.Email);
+            if (driver == null)
             {
                 return Unauthorized("Invalid credentials.");
             }
-            var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+            var result = _passwordHasher.VerifyHashedPassword(driver, driver.PasswordHash, dto.Password);
             if (result == PasswordVerificationResult.Failed)
             {
                 return Unauthorized("Invalid credentials.");
@@ -137,9 +113,9 @@ namespace RideShare_Connect.Api.Controllers
             var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.UserType)
+                new Claim(ClaimTypes.NameIdentifier, driver.DriverId.ToString()),
+                new Claim(ClaimTypes.Email, driver.Email),
+                new Claim(ClaimTypes.Role, "Driver")
             };
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -156,10 +132,10 @@ namespace RideShare_Connect.Api.Controllers
             {
                 Token = tokenString,
                 RefreshToken = string.Empty,
-                UserId = user.Id,
-                Email = user.Email,
-                FullName = user.UserProfile?.FullName,
-                UserType = user.UserType
+                UserId = driver.DriverId,
+                Email = driver.Email,
+                FullName = driver.FullName,
+                UserType = "Driver"
             };
             return Ok(response);
         }
@@ -173,23 +149,19 @@ namespace RideShare_Connect.Api.Controllers
             {
                 return Unauthorized();
             }
-            var userId = int.Parse(userIdClaim);
+            var driverId = int.Parse(userIdClaim);
 
-            var driver = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver" && u.Id == userId)
+            var driver = await _context.Driver
+                .Where(d => d.DriverId == driverId)
                 .Join(_context.DriverProfiles,
-                      u => u.Id,
+                      d => d.DriverId,
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      (d, dp) => new DriverDto
                       {
-                          Id = u.Id,
-                          Email = u.Email,
-                          PhoneNumber = u.PhoneNumber,
-                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
-                          UserType = u.UserType,
-                          AccountStatus = u.AccountStatus,
-                          CreatedAt = u.CreatedAt,
+                          Id = d.DriverId,
+                          Email = d.Email,
+                          PhoneNumber = d.PhoneNumber,
+                          FullName = d.FullName,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -216,11 +188,8 @@ namespace RideShare_Connect.Api.Controllers
             }
             var id = int.Parse(userIdClaim);
 
-            var user = await _context.Users
-                .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
-
-            if (user == null)
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
             {
                 return NotFound();
             }
@@ -231,15 +200,9 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
-            if (dto.Email != null) user.Email = dto.Email;
-            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
-            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
-
-            if (user.UserProfile == null)
-            {
-                user.UserProfile = new UserProfile { UserId = user.Id };
-            }
-            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+            if (dto.Email != null) driver.Email = dto.Email;
+            if (dto.PhoneNumber != null) driver.PhoneNumber = dto.PhoneNumber;
+            if (dto.FullName != null) driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
@@ -283,21 +246,16 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers()
         {
-            var drivers = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver")
+            var drivers = await _context.Driver
                 .Join(_context.DriverProfiles,
-                      u => u.Id,
+                      d => d.DriverId,
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      (d, dp) => new DriverDto
                       {
-                          Id = u.Id,
-                          Email = u.Email,
-                          PhoneNumber = u.PhoneNumber,
-                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
-                          UserType = u.UserType,
-                          AccountStatus = u.AccountStatus,
-                          CreatedAt = u.CreatedAt,
+                          Id = d.DriverId,
+                          Email = d.Email,
+                          PhoneNumber = d.PhoneNumber,
+                          FullName = d.FullName,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -312,21 +270,17 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DriverDto>> GetDriver(int id)
         {
-            var driver = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver" && u.Id == id)
+            var driver = await _context.Driver
+                .Where(d => d.DriverId == id)
                 .Join(_context.DriverProfiles,
-                      u => u.Id,
+                      d => d.DriverId,
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      (d, dp) => new DriverDto
                       {
-                          Id = u.Id,
-                          Email = u.Email,
-                          PhoneNumber = u.PhoneNumber,
-                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
-                          UserType = u.UserType,
-                          AccountStatus = u.AccountStatus,
-                          CreatedAt = u.CreatedAt,
+                          Id = d.DriverId,
+                          Email = d.Email,
+                          PhoneNumber = d.PhoneNumber,
+                          FullName = d.FullName,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -346,11 +300,8 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDriver(int id, DriverUpdateDto dto)
         {
-            var user = await _context.Users
-                .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
-
-            if (user == null)
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
             {
                 return NotFound();
             }
@@ -361,15 +312,9 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
-            if (dto.Email != null) user.Email = dto.Email;
-            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
-            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
-
-            if (user.UserProfile == null)
-            {
-                user.UserProfile = new UserProfile { UserId = user.Id };
-            }
-            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+            if (dto.Email != null) driver.Email = dto.Email;
+            if (dto.PhoneNumber != null) driver.PhoneNumber = dto.PhoneNumber;
+            if (dto.FullName != null) driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
@@ -382,7 +327,7 @@ namespace RideShare_Connect.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
+                if (!DriverExists(id))
                 {
                     return NotFound();
                 }
@@ -399,14 +344,14 @@ namespace RideShare_Connect.Api.Controllers
         [HttpDelete("{id}/account")]
         public async Task<IActionResult> DeleteDriverAccount(int id, [FromBody] DeleteAccountDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
 
-            if (user == null)
+            if (driver == null)
             {
                 return NotFound();
             }
 
-            var verify = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.Password);
+            var verify = _passwordHasher.VerifyHashedPassword(driver, driver.PasswordHash, dto.Password);
             if (verify == PasswordVerificationResult.Failed)
             {
                 return Unauthorized("Invalid password.");
@@ -418,21 +363,15 @@ namespace RideShare_Connect.Api.Controllers
                 _context.DriverProfiles.Remove(driverProfile);
             }
 
-            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.UserId == id);
-            if (userProfile != null)
-            {
-                _context.UserProfiles.Remove(userProfile);
-            }
-
-            _context.Users.Remove(user);
+            _context.Driver.Remove(driver);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool UserExists(int id)
+        private bool DriverExists(int id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.Driver.Any(e => e.DriverId == id);
         }
     }
 }

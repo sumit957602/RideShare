@@ -28,7 +28,7 @@ namespace RideShare_Connect.Api.Controllers
         {
             var totalUsers = await _context.Users.CountAsync();
             var totalRides = await _context.Rides.CountAsync();
-            var totalDrivers = await _context.Users.CountAsync(u => u.UserType == "Driver");
+            var totalDrivers = await _context.Driver.CountAsync();
             var totalVehicles = await _context.Vehicles.CountAsync();
             return Ok(new { totalUsers, totalRides, totalDrivers, totalVehicles });
         }
@@ -114,21 +114,16 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet("drivers")]
         public async Task<IActionResult> GetDrivers()
         {
-            var drivers = await _context.Users
-                .Include(u => u.UserProfile)
-                .Where(u => u.UserType == "Driver")
+            var drivers = await _context.Driver
                 .Join(_context.DriverProfiles,
-                      u => u.Id,
+                      d => d.DriverId,
                       dp => dp.DriverId,
-                      (u, dp) => new DriverDto
+                      (d, dp) => new DriverDto
                       {
-                          Id = u.Id,
-                          Email = u.Email,
-                          PhoneNumber = u.PhoneNumber,
-                          FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
-                          UserType = u.UserType,
-                          AccountStatus = u.AccountStatus,
-                          CreatedAt = u.CreatedAt,
+                          Id = d.DriverId,
+                          Email = d.Email,
+                          PhoneNumber = d.PhoneNumber,
+                          FullName = d.FullName,
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
@@ -141,10 +136,8 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPut("drivers/{id}")]
         public async Task<IActionResult> UpdateDriver(int id, DriverUpdateDto dto)
         {
-            var user = await _context.Users
-                .Include(u => u.UserProfile)
-                .FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
-            if (user == null)
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
             {
                 return NotFound();
             }
@@ -155,15 +148,9 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
-            if (dto.Email != null) user.Email = dto.Email;
-            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
-            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
-
-            if (user.UserProfile == null)
-            {
-                user.UserProfile = new UserProfile { UserId = user.Id };
-            }
-            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+            if (dto.Email != null) driver.Email = dto.Email;
+            if (dto.PhoneNumber != null) driver.PhoneNumber = dto.PhoneNumber;
+            if (dto.FullName != null) driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
@@ -177,8 +164,8 @@ namespace RideShare_Connect.Api.Controllers
         [HttpDelete("drivers/{id}")]
         public async Task<IActionResult> DeleteDriver(int id)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id && u.UserType == "Driver");
-            if (user == null)
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
             {
                 return NotFound();
             }
@@ -189,19 +176,13 @@ namespace RideShare_Connect.Api.Controllers
                 _context.DriverProfiles.Remove(driverProfile);
             }
 
-            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.UserId == id);
-            if (userProfile != null)
-            {
-                _context.UserProfiles.Remove(userProfile);
-            }
-
             var vehicles = await _context.Vehicles.Where(v => v.DriverId == id).ToListAsync();
             if (vehicles.Any())
             {
                 _context.Vehicles.RemoveRange(vehicles);
             }
 
-            _context.Users.Remove(user);
+            _context.Driver.Remove(driver);
             await _context.SaveChangesAsync();
             return NoContent();
         }
