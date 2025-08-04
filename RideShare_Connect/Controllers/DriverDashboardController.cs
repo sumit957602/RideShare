@@ -25,7 +25,9 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "DriverAccount");
             }
 
-            var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+            var profile = await _db.UserProfiles
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.UserId == userId);
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
             var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                 .OrderByDescending(r => r.Timestamp)
