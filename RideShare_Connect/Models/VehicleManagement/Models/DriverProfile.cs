@@ -7,6 +7,8 @@ namespace RideShare_Connect.Models.VehicleManagement
     {
         public int Id { get; set; }
 
+        [Required]
+        [ForeignKey("Driver")]
         public int DriverId { get; set; }
 
         [Required]
@@ -22,5 +24,7 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [StringLength(500)]
         public string ReferenceContacts { get; set; }
+
+        public virtual Driver Driver { get; set; }
     }
 }

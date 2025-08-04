@@ -15,12 +15,7 @@ namespace RideShare_Connect.Models.VehicleManagement
         [ForeignKey("DriverId")]
         public int DriverId { get; set; }
 
-        [Required]
-        [ForeignKey("UserId")]
         public int PassengerId { get; set; }
-
-        [Required]
-        [ForeignKey("Ride")]
         public int RideId { get; set; }
 
         [Range(1, 5)]
@@ -32,8 +27,6 @@ namespace RideShare_Connect.Models.VehicleManagement
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        public virtual User Driver { get; set; }
-        public virtual User User { get; set; }
-        public virtual Ride Ride { get; set; }
+        public virtual Driver Driver { get; set; }
     }
 }

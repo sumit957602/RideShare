@@ -24,7 +24,7 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [Required]
         [StringLength(255)]
-        public string PasswordHash { get; set; } 
+        public string PasswordHash { get; set; }
 
         // Navigation property to DriverProfile
         public virtual DriverProfile DriverProfile { get; set; }

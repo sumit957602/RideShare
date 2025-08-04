@@ -23,8 +23,6 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [StringLength(1000)]
         public string Details { get; set; } 
-
-        // Navigation Property
         public virtual Vehicle Vehicle { get; set; }
     }
 }
