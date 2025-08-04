@@ -125,14 +125,18 @@ namespace RideShare_Connect.Api.Controllers
 
         [Authorize(Roles = "Driver")]
         [HttpGet("profile")]
-        public async Task<ActionResult<DriverDto>> GetProfile()
+        public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
                 return Unauthorized();
             }
-            var driverId = int.Parse(userIdClaim);
+
+            if (int.Parse(userIdClaim) != driverId)
+            {
+                return Forbid();
+            }
 
             var driver = await _context.Driver
                 .Include(d => d.DriverProfile)
@@ -161,14 +165,18 @@ namespace RideShare_Connect.Api.Controllers
 
         [Authorize(Roles = "Driver")]
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile(DriverUpdateDto dto)
+        public async Task<IActionResult> UpdateProfile([FromQuery] int driverId, DriverUpdateDto dto)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
                 return Unauthorized();
             }
-            var driverId = int.Parse(userIdClaim);
+
+            if (int.Parse(userIdClaim) != driverId)
+            {
+                return Forbid();
+            }
 
             var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
             if (driver == null)
@@ -198,14 +206,18 @@ namespace RideShare_Connect.Api.Controllers
 
         [Authorize(Roles = "Driver")]
         [HttpGet("ratings")]
-        public async Task<IActionResult> GetRatings()
+        public async Task<IActionResult> GetRatings([FromQuery] int driverId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
                 return Unauthorized();
             }
-            var driverId = int.Parse(userIdClaim);
+
+            if (int.Parse(userIdClaim) != driverId)
+            {
+                return Forbid();
+            }
 
             var ratings = await _context.DriverRatings
                 .Where(r => r.DriverId == driverId)
