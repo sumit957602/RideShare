@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
@@ -14,10 +15,12 @@ namespace RideShare_Connect.Api.Controllers
     public class VehiclesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordHasher<Driver> _passwordHasher;
 
-        public VehiclesController(ApplicationDbContext context)
+        public VehiclesController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost("register")]
@@ -128,6 +131,33 @@ namespace RideShare_Connect.Api.Controllers
             };
 
             return Ok(result);
+        }
+
+        [HttpDelete("delete")]
+        public async Task<IActionResult> DeleteVehicle([FromQuery] int driverId, [FromQuery] int vehicleId, [FromBody] DeleteAccountDto dto)
+        {
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
+            if (driver == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            var verify = _passwordHasher.VerifyHashedPassword(driver, driver.PasswordHash, dto.Password);
+            if (verify == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid password.");
+            }
+
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.DriverId == driverId);
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            _context.Vehicles.Remove(vehicle);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
