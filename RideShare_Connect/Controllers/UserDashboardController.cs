@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using RideShare_Connect.Models.UserManagement;
+using RideShare_Connect.ViewModels;
 using RideShareConnect.Data;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 
@@ -23,10 +25,43 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "UserAccount");
             }
 
-            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
-            return View(userProfile);
-        }
+            var profile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
 
+            var bookingsQuery = _db.RideBookings
+                .Include(rb => rb.Ride)
+                    .ThenInclude(r => r.Driver)
+                .Where(rb => rb.PassengerId == userId);
+
+            var bookings = bookingsQuery
+                .OrderByDescending(rb => rb.BookingTime)
+                .ToList();
+
+            var totalSpent = bookings.Sum(rb => rb.BookedSeats * rb.Ride.PricePerSeat);
+
+            var rating = _db.DriverRatings
+                .Where(r => r.DriverId == userId)
+                .Average(r => (double?)r.Rating) ?? 0;
+
+            var availableRides = _db.Rides
+                .Include(r => r.Driver)
+                .Where(r => r.AvailableSeats > 0 && r.DepartureTime >= DateTime.Now)
+                .OrderBy(r => r.DepartureTime)
+                .Take(10)
+                .ToList();
+
+            var model = new UserDashboardViewModel
+            {
+                Profile = profile,
+                RidesBooked = bookings.Count,
+                TotalSpent = totalSpent,
+                Rating = rating,
+                Bookings = bookings,
+                RecentBookings = bookings.Take(5).ToList(),
+                AvailableRides = availableRides
+            };
+
+            return View(model);
+        }
 
         public IActionResult UserProfile()
         {
