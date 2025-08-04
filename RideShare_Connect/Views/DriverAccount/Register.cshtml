@@ -45,7 +45,7 @@
                                 <p class="mb-0">Start earning on your own schedule.</p>
                             </div>
                             <div class="signup-card-body">
-                                <form asp-action="Register" enctype="multipart/form-data">
+                                <form asp-action="Register">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <!-- Full Name -->
                                     <div class="mb-3">
@@ -94,13 +94,6 @@
                                         <label asp-for="ReferenceContacts" class="form-label">Reference Contact (Optional)</label>
                                         <input asp-for="ReferenceContacts" class="form-control" placeholder="Name and Phone Number" />
                                         <span asp-validation-for="ReferenceContacts" class="text-danger"></span>
-                                    </div>
-
-                                    <!-- Document Upload -->
-                                    <div class="mb-3">
-                                        <label asp-for="LicenseDocument" class="form-label">Upload Driving License</label>
-                                        <input asp-for="LicenseDocument" type="file" class="form-control" />
-                                        <span asp-validation-for="LicenseDocument" class="text-danger"></span>
                                     </div>
 
                                     <!-- Background Check Consent -->

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +10,6 @@ using RideShare_Connect.Models.VehicleManagement;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,14 +23,12 @@ namespace RideShare_Connect.Api.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<Driver> _passwordHasher;
         private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _environment;
 
-        public DriversController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment)
+        public DriversController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher, IConfiguration configuration)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration;
-            _environment = environment;
         }
 
         [AllowAnonymous]
@@ -66,19 +62,6 @@ namespace RideShare_Connect.Api.Controllers
             _context.DriverProfiles.Add(driverProfile);
 
             await _context.SaveChangesAsync();
-
-            if (dto.LicenseDocument != null && dto.LicenseDocument.Length > 0)
-            {
-                var uploadsRoot = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                var folder = Path.Combine(uploadsRoot, "documents");
-                Directory.CreateDirectory(folder);
-                var fileName = $"{Guid.NewGuid()}_{dto.LicenseDocument.FileName}";
-                var filePath = Path.Combine(folder, fileName);
-                using (var stream = System.IO.File.Create(filePath))
-                {
-                    await dto.LicenseDocument.CopyToAsync(stream);
-                }
-            }
 
             var driverDto = new DriverDto
             {

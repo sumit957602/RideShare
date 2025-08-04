@@ -45,11 +45,6 @@ namespace RideShare_Connect.Controllers
             formData.Add(new StringContent(model.DrivingExperienceYears.ToString()), "DrivingExperienceYears");
             if (!string.IsNullOrEmpty(model.ReferenceContacts))
                 formData.Add(new StringContent(model.ReferenceContacts), "ReferenceContacts");
-            if (model.LicenseDocument != null)
-            {
-                var fileContent = new StreamContent(model.LicenseDocument.OpenReadStream());
-                formData.Add(fileContent, "LicenseDocument", model.LicenseDocument.FileName);
-            }
             try
             {
                 var response = await httpClient.PostAsync("api/drivers/register", formData);
