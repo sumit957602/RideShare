@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace RideShare_Connect.DTOs
@@ -28,7 +27,5 @@ namespace RideShare_Connect.DTOs
 
         [StringLength(500)]
         public string ReferenceContacts { get; set; }
-
-        public IFormFile LicenseDocument { get; set; }
     }
 }
