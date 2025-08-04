@@ -250,53 +250,45 @@ namespace RideShare_Connect.Api.Controllers
 
         [AllowAnonymous]
         [HttpGet("profile")]
-        public async Task<ActionResult<UserDto>> GetProfile([FromQuery] int userId)
+        public async Task<ActionResult<UserProfileDto>> GetProfile([FromQuery] int userId)
         {
-            var user = await _context.Users
-                                     .Include(u => u.UserProfile)
-                                     .FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
+            var profile = await _context.UserProfiles
+                                         .FirstOrDefaultAsync(p => p.UserId == userId);
+            if (profile == null)
             {
                 return NotFound();
             }
 
-            var userDto = new UserDto
+            var profileDto = new UserProfileDto
             {
-                Id = user.Id,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                FullName = user.UserProfile?.FullName,
-                UserType = user.UserType,
-                AccountStatus = user.AccountStatus,
-                CreatedAt = user.CreatedAt
+                Id = profile.Id,
+                UserId = profile.UserId,
+                FullName = profile.FullName,
+                ProfilePicture = profile.ProfilePicture,
+                EmergencyContact = profile.EmergencyContact,
+                Bio = profile.Bio
             };
 
-            return Ok(userDto);
+            return Ok(profileDto);
         }
 
         [AllowAnonymous]
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromQuery] int userId, UserUpdateDto dto)
+        public async Task<IActionResult> UpdateProfile([FromQuery] int userId, UserProfileUpdateDto dto)
         {
-            var user = await _context.Users
-                                     .Include(u => u.UserProfile)
-                                     .FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
+            var profile = await _context.UserProfiles
+                                         .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (profile == null)
             {
-                return NotFound();
+                profile = new UserProfile { UserId = userId };
+                _context.UserProfiles.Add(profile);
             }
 
-            if (dto.Email != null) user.Email = dto.Email;
-            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
-            if (dto.UserType != null) user.UserType = dto.UserType;
-            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
-
-            if (user.UserProfile == null)
-            {
-                user.UserProfile = new UserProfile { UserId = user.Id };
-            }
-
-            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+            if (dto.FullName != null) profile.FullName = dto.FullName;
+            if (dto.ProfilePicture != null) profile.ProfilePicture = dto.ProfilePicture;
+            if (dto.EmergencyContact != null) profile.EmergencyContact = dto.EmergencyContact;
+            if (dto.Bio != null) profile.Bio = dto.Bio;
 
             await _context.SaveChangesAsync();
             return NoContent();
