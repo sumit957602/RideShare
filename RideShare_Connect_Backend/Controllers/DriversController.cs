@@ -124,60 +124,45 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [Authorize(Roles = "Driver")]
-        [HttpGet("profile")]
-        public async Task<ActionResult<DriverDto>> GetProfile()
+        [HttpGet("profile/{driverId}")]
+        public async Task<ActionResult<DriverDto>> GetProfile(int driverId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var driverId = int.Parse(userIdClaim);
-
             var driver = await _context.Driver
-                .Where(d => d.DriverId == driverId)
-                .Join(_context.DriverProfiles,
-                      d => d.DriverId,
-                      dp => dp.DriverId,
-                      (d, dp) => new DriverDto
-                      {
-                          Id = d.DriverId,
-                          Email = d.Email,
-                          PhoneNumber = d.PhoneNumber,
-                          FullName = d.FullName,
-                          LicenseNumber = dp.LicenseNumber,
-                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
-                          DrivingExperienceYears = dp.DrivingExperienceYears,
-                          ReferenceContacts = dp.ReferenceContacts
-                      })
-                .FirstOrDefaultAsync();
+                .Include(d => d.DriverProfile)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.DriverId == driverId);
 
-            if (driver == null)
+            if (driver?.DriverProfile == null)
             {
                 return NotFound();
             }
 
-            return Ok(driver);
+            var driverDto = new DriverDto
+            {
+                Id = driver.DriverId,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                FullName = driver.FullName,
+                LicenseNumber = driver.DriverProfile.LicenseNumber,
+                BackgroundCheckStatus = driver.DriverProfile.BackgroundCheckStatus,
+                DrivingExperienceYears = driver.DriverProfile.DrivingExperienceYears,
+                ReferenceContacts = driver.DriverProfile.ReferenceContacts
+            };
+
+            return Ok(driverDto);
         }
 
         [Authorize(Roles = "Driver")]
-        [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile(DriverUpdateDto dto)
+        [HttpPut("profile/{driverId}")]
+        public async Task<IActionResult> UpdateProfile(int driverId, DriverUpdateDto dto)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var id = int.Parse(userIdClaim);
-
-            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == id);
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
             if (driver == null)
             {
                 return NotFound();
             }
 
-            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == id);
+            var driverProfile = await _context.DriverProfiles.FirstOrDefaultAsync(dp => dp.DriverId == driverId);
             if (driverProfile == null)
             {
                 return NotFound();
@@ -198,18 +183,11 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [Authorize(Roles = "Driver")]
-        [HttpGet("ratings")]
-        public async Task<IActionResult> GetRatings()
+        [HttpGet("ratings/{driverId}")]
+        public async Task<IActionResult> GetRatings(int driverId)
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Unauthorized();
-            }
-            var id = int.Parse(userIdClaim);
-
             var ratings = await _context.DriverRatings
-                .Where(r => r.DriverId == id)
+                .Where(r => r.DriverId == driverId)
                 .Select(r => new DriverRatingDto
                 {
                     Id = r.Id,
