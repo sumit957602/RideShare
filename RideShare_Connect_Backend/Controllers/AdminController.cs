@@ -34,6 +34,57 @@ namespace RideShare_Connect.Api.Controllers
             _configuration = configuration;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAdmins()
+        {
+            var admins = await _context.Admins
+                .Select(a => new AdminDto
+                {
+                    Id = a.Id,
+                    Username = a.Username,
+                    Role = a.Role,
+                    Status = a.Status
+                })
+                .ToListAsync();
+
+            return Ok(admins);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAdmin(int id, AdminUpdateDto dto)
+        {
+            var admin = await _context.Admins.FindAsync(id);
+            if (admin == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(dto.Username)) admin.Username = dto.Username;
+            if (!string.IsNullOrEmpty(dto.Role)) admin.Role = dto.Role;
+            if (!string.IsNullOrEmpty(dto.Status)) admin.Status = dto.Status;
+            if (!string.IsNullOrEmpty(dto.Password))
+            {
+                admin.PasswordHash = _passwordHasher.HashPassword(admin, dto.Password);
+            }
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAdmin(int id)
+        {
+            var admin = await _context.Admins.FindAsync(id);
+            if (admin == null)
+            {
+                return NotFound();
+            }
+
+            _context.Admins.Remove(admin);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAdmin(AdminRegisterDto dto)
