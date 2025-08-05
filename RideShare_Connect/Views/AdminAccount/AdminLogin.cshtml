@@ -1,3 +1,4 @@
+@model RideShare_Connect.DTOs.AdminLoginDto
 ﻿@{
     ViewData["Title"] = "Admin Login";
 }
@@ -138,15 +139,19 @@
                                 <p class="mb-0">Please enter your credentials to continue.</p>
                             </div>
                             <div class="form-card-body">
-                                <form>
+                                <form asp-action="AdminLogin" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <div class="mb-3">
-                                        <label for="email" class="form-label">Email Address</label>
-                                        <input type="email" class="form-control" id="email" placeholder="admin@example.com" required>
+                                        <label asp-for="Username" class="form-label">Username</label>
+                                        <input asp-for="Username" class="form-control" placeholder="admin" />
+                                        <span asp-validation-for="Username" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                                        <label asp-for="Password" class="form-label">Password</label>
+                                        <input asp-for="Password" class="form-control" type="password" placeholder="••••••••" />
+                                        <span asp-validation-for="Password" class="text-danger"></span>
                                     </div>
 
                                     <div class="d-grid">
