@@ -1,4 +1,5 @@
-﻿@{
+﻿@model RideShare_Connect.ViewModels.AdminDashboardViewModel
+@{
     ViewData["Title"] = "Driver Login";
 }
 
@@ -64,6 +65,16 @@
                                 </a>
                             </li>
                             <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#drivers-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-person-badge-fill"></i>Driver Management
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" data-bs-toggle="tab" data-bs-target="#vehicles-tab-pane" role="tab" aria-selected="false">
+                                    <i class="bi bi-truck"></i>Vehicle Management
+                                </a>
+                            </li>
+                            <li class="nav-item" role="presentation">
                                 <a class="nav-link" data-bs-toggle="tab" data-bs-target="#rides-tab-pane" role="tab" aria-selected="false">
                                     <i class="bi bi-car-front-fill"></i>Ride Management
                                 </a>
@@ -101,7 +112,7 @@
                                     <div class="stat-card d-flex align-items-center">
                                         <div class="icon bg-primary-subtle text-primary me-3"><i class="bi bi-cash-coin"></i></div>
                                         <div>
-                                            <h4 class="mb-0">₹1,25,430</h4>
+                                            <h4 class="mb-0">₹@Model.TotalRevenue</h4>
                                             <p class="text-muted mb-0">Total Revenue</p>
                                         </div>
                                     </div>
@@ -110,7 +121,7 @@
                                     <div class="stat-card d-flex align-items-center">
                                         <div class="icon bg-success-subtle text-success me-3"><i class="bi bi-people-fill"></i></div>
                                         <div>
-                                            <h4 class="mb-0">8,950</h4>
+                                              <h4 class="mb-0">@Model.TotalUsers</h4>
                                             <p class="text-muted mb-0">Total Users</p>
                                         </div>
                                     </div>
@@ -119,7 +130,7 @@
                                     <div class="stat-card d-flex align-items-center">
                                         <div class="icon bg-info-subtle text-info me-3"><i class="bi bi-car-front-fill"></i></div>
                                         <div>
-                                            <h4 class="mb-0">12,345</h4>
+                                              <h4 class="mb-0">@Model.RidesCompleted</h4>
                                             <p class="text-muted mb-0">Rides Completed</p>
                                         </div>
                                     </div>
@@ -128,7 +139,7 @@
                                     <div class="stat-card d-flex align-items-center">
                                         <div class="icon bg-danger-subtle text-danger me-3"><i class="bi bi-exclamation-triangle-fill"></i></div>
                                         <div>
-                                            <h4 class="mb-0">12</h4>
+                                              <h4 class="mb-0">@Model.OpenReports</h4>
                                             <p class="text-muted mb-0">Open Reports</p>
                                         </div>
                                     </div>
@@ -176,40 +187,107 @@
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>USR-001</td>
-                                                    <td>Alex Rodriguez</td>
-                                                    <td>alex.r@example.com</td>
-                                                    <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Rider</span></td>
-                                                    <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Active</span></td>
-                                                    <td>2025-07-20</td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit User"><i class="bi bi-pencil-fill"></i></button>
-                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Suspend User"><i class="bi bi-slash-circle-fill"></i></button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>USR-002</td>
-                                                    <td>Ravi Kumar</td>
-                                                    <td>ravi.k@example.com</td>
-                                                    <td><span class="badge bg-info-subtle text-info-emphasis rounded-pill">Driver</span></td>
-                                                    <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">Active</span></td>
-                                                    <td>2025-07-15</td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit User"><i class="bi bi-pencil-fill"></i></button>
-                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Suspend User"><i class="bi bi-slash-circle-fill"></i></button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
+                                              <tbody>
+                                                  @foreach (var user in Model.Users)
+                                                  {
+                                                      <tr>
+                                                          <td>@user.Id</td>
+                                                          <td>@user.UserProfile?.FullName</td>
+                                                          <td>@user.Email</td>
+                                                          <td><span class="badge @(user.UserType == "Driver" ? "bg-info-subtle text-info-emphasis" : "bg-primary-subtle text-primary-emphasis") rounded-pill">@user.UserType</span></td>
+                                                          <td><span class="badge @(user.AccountStatus == "Active" ? "bg-success-subtle text-success-emphasis" : "bg-danger-subtle text-danger-emphasis") rounded-pill">@user.AccountStatus</span></td>
+                                                          <td>@user.CreatedAt.ToString("yyyy-MM-dd")</td>
+                                                          <td>
+                                                              <button class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit User"><i class="bi bi-pencil-fill"></i></button>
+                                                              <button class="btn btn-sm btn-outline-danger table-action-btn" title="Suspend User"><i class="bi bi-slash-circle-fill"></i></button>
+                                                          </td>
+                                                      </tr>
+                                                  }
+                                              </tbody>
                                         </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-                        <!-- Ride Management Tab -->
-                        <div class="tab-pane fade" id="rides-tab-pane" role="tabpanel" tabindex="0">
+              <!-- Driver Management Tab -->
+              <div class="tab-pane fade" id="drivers-tab-pane" role="tabpanel" tabindex="0">
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Driver Management</h1>
+                  </div>
+                  <div class="card">
+                      <div class="card-body">
+                          <div class="table-responsive">
+                              <table class="table table-hover">
+                                  <thead>
+                                      <tr>
+                                          <th>Driver ID</th>
+                                          <th>Name</th>
+                                          <th>Email</th>
+                                          <th>Phone</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @foreach (var driver in Model.Drivers)
+                                      {
+                                          <tr>
+                                              <td>@driver.DriverId</td>
+                                              <td>@driver.FullName</td>
+                                              <td>@driver.Email</td>
+                                              <td>@driver.PhoneNumber</td>
+                                          </tr>
+                                      }
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Vehicle Management Tab -->
+              <div class="tab-pane fade" id="vehicles-tab-pane" role="tabpanel" tabindex="0">
+                  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                      <h1 class="h2">Vehicle Management</h1>
+                  </div>
+                  <div class="card">
+                      <div class="card-body">
+                          <div class="table-responsive">
+                              <table class="table table-hover">
+                                  <thead>
+                                      <tr>
+                                          <th>Vehicle ID</th>
+                                          <th>Driver</th>
+                                          <th>Maker</th>
+                                          <th>Model</th>
+                                          <th>Type</th>
+                                          <th>License Plate</th>
+                                          <th>Status</th>
+                                          <th>Year</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @foreach (var vehicle in Model.Vehicles)
+                                      {
+                                          <tr>
+                                              <td>@vehicle.Id</td>
+                                              <td>@vehicle.Driver?.FullName</td>
+                                              <td>@vehicle.CarMaker</td>
+                                              <td>@vehicle.Model</td>
+                                              <td>@vehicle.VehicleType</td>
+                                              <td>@vehicle.LicensePlate</td>
+                                              <td>@vehicle.Status</td>
+                                              <td>@vehicle.Year</td>
+                                          </tr>
+                                      }
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Ride Management Tab -->
+              <div class="tab-pane fade" id="rides-tab-pane" role="tabpanel" tabindex="0">
                             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                                 <h1 class="h2">Ride Management</h1>
                             </div>
