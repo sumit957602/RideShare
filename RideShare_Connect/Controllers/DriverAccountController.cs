@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Collections.Generic;
 
 namespace RideShare_Connect.Controllers
@@ -131,6 +132,74 @@ namespace RideShare_Connect.Controllers
                 _logger.LogError(ex, "JSON parsing error during driver login for {Email}", model.Email);
             }
             return View(model);
+        }
+
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/Drivers/forgot-password", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var tokenResponse = await response.Content.ReadFromJsonAsync<PasswordResetTokenDto>();
+                    return RedirectToAction("ResetPassword", new { token = tokenResponse?.Token });
+                }
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Error: {error}");
+            }
+            catch (HttpRequestException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+            }
+
+            return View(dto);
+        }
+
+        public IActionResult ResetPassword(string token)
+        {
+            return View(new ResetPasswordDto { Token = token });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(dto);
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/Drivers/reset-password", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Password reset successful. Please log in.";
+                    return RedirectToAction("Login");
+                }
+                var error = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"Error: {error}");
+            }
+            catch (HttpRequestException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+            }
+
+            return View(dto);
         }
     }
 }
