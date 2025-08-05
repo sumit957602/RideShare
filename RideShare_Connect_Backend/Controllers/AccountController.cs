@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt; // Required for JwtSecurityTokenHandler
 using System.Security.Claims; // Required for Claims
 using System.Text; // Required for Encoding
 using System.IO;
+using RideShare_Connect_Backend.Services;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -25,13 +26,15 @@ namespace RideShare_Connect.Api.Controllers
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IConfiguration _configuration; // Inject IConfiguration
         private readonly IWebHostEnvironment _environment;
+        private readonly IEmailService _emailService;
 
-        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment)
+        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment, IEmailService emailService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration; // Initialize IConfiguration
             _environment = environment;
+            _emailService = emailService;
         }
 
         // GET: api/Users
@@ -117,6 +120,7 @@ namespace RideShare_Connect.Api.Controllers
 
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
+            await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.UserProfile.FullName);
 
             var userDto = new UserDto
             {

@@ -12,8 +12,8 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250804100554_skk1")]
-    partial class skk1
+    [Migration("20250805045144_Initial Migration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
