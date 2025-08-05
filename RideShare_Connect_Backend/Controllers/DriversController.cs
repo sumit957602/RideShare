@@ -13,6 +13,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -122,6 +123,51 @@ namespace RideShare_Connect.Api.Controllers
             };
             return Ok(response);
         }
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.Email == dto.Email);
+            if (driver == null)
+            {
+                return NotFound("Driver not found.");
+            }
+
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            var record = new DriverPasswordResetToken
+            {
+                DriverId = driver.DriverId,
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddHours(1)
+            };
+
+            _context.DriverPasswordResetTokens.Add(record);
+            await _context.SaveChangesAsync();
+
+            // In production, send the token via email. Returning for testing.
+            return Ok(new { Token = token });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            var record = await _context.DriverPasswordResetTokens.Include(r => r.Driver)
+                .FirstOrDefaultAsync(r => r.Token == dto.Token && r.ExpiresAt > DateTime.UtcNow);
+            if (record == null)
+            {
+                return BadRequest("Invalid or expired token.");
+            }
+
+            var driver = record.Driver;
+            driver.PasswordHash = _passwordHasher.HashPassword(driver, dto.NewPassword);
+            _context.DriverPasswordResetTokens.Remove(record);
+            await _context.SaveChangesAsync();
+
+            return Ok("Password reset successful.");
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
