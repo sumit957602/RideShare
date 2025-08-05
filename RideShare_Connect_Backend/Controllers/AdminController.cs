@@ -1,11 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.AdminManagement;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,10 +24,84 @@ namespace RideShare_Connect.Api.Controllers
     public class AdminController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordHasher<Admin> _passwordHasher;
+        private readonly IConfiguration _configuration;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IPasswordHasher<Admin> passwordHasher, IConfiguration configuration)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
+            _configuration = configuration;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> RegisterAdmin(AdminRegisterDto dto)
+        {
+            if (await _context.Admins.AnyAsync(a => a.Username == dto.Username))
+            {
+                return Conflict("Username already exists.");
+            }
+
+            var admin = new Admin
+            {
+                Username = dto.Username,
+                Role = dto.Role ?? "Admin",
+                Status = "Active"
+            };
+
+            admin.PasswordHash = _passwordHasher.HashPassword(admin, dto.Password);
+            _context.Admins.Add(admin);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { admin.Id, admin.Username, admin.Role });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult<AdminAuthResponseDto>> Login(AdminLoginDto dto)
+        {
+            var admin = await _context.Admins.FirstOrDefaultAsync(a => a.Username == dto.Username && a.Status == "Active");
+            if (admin == null)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+
+            var result = _passwordHasher.VerifyHashedPassword(admin, admin.PasswordHash, dto.Password);
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, admin.Id.ToString()),
+                new Claim(ClaimTypes.Name, admin.Username),
+                new Claim(ClaimTypes.Role, admin.Role)
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return Ok(new AdminAuthResponseDto
+            {
+                Token = tokenString,
+                AdminId = admin.Id,
+                Username = admin.Username,
+                Role = admin.Role
+            });
         }
 
         [HttpGet("dashboard")]

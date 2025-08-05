@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
+using RideShare_Connect.Models.AdminManagement;
 using RideShare_Connect.Services;
 using RideShare_Connect_Backend.Services;
 using System.Text;
@@ -16,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
+builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
