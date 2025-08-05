@@ -12,8 +12,8 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250805045144_Initial Migration")]
-    partial class InitialMigration
+    [Migration("20250805181804_skk1")]
+    partial class skk1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -831,6 +831,32 @@ namespace RideShare_Connect_Backend.Migrations
                     b.ToTable("Driver");
                 });
 
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverPasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverId");
+
+                    b.ToTable("DriverPasswordResetTokens");
+                });
+
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -1285,6 +1311,17 @@ namespace RideShare_Connect_Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverPasswordResetToken", b =>
+                {
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.VehicleManagement.DriverProfile", b =>

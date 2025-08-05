@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RideShare_Connect_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class skk1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -89,6 +89,27 @@ namespace RideShare_Connect_Backend.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DriverPasswordResetTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriverPasswordResetTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DriverPasswordResetTokens_Driver_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Driver",
+                        principalColumn: "DriverId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -704,6 +725,11 @@ namespace RideShare_Connect_Backend.Migrations
                 column: "BookingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DriverPasswordResetTokens_DriverId",
+                table: "DriverPasswordResetTokens",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DriverProfiles_DriverId",
                 table: "DriverProfiles",
                 column: "DriverId",
@@ -858,6 +884,9 @@ namespace RideShare_Connect_Backend.Migrations
 
             migrationBuilder.DropTable(
                 name: "Commissions");
+
+            migrationBuilder.DropTable(
+                name: "DriverPasswordResetTokens");
 
             migrationBuilder.DropTable(
                 name: "DriverProfiles");
