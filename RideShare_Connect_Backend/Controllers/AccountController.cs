@@ -17,7 +17,6 @@ using RideShare_Connect_Backend.Services;
 using Google.Apis.Auth;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -126,16 +125,6 @@ namespace RideShare_Connect.Api.Controllers
             await _context.SaveChangesAsync();
             await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.UserProfile.FullName);
 
-            var verificationToken = new EmailVerificationToken
-            {
-                UserId = newUser.Id,
-                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
-                ExpiresAt = DateTime.UtcNow.AddDays(1)
-            };
-            _context.EmailVerificationTokens.Add(verificationToken);
-            await _context.SaveChangesAsync();
-            await _emailService.SendVerificationEmailAsync(newUser.Email, verificationToken.Token);
-
             var userDto = new UserDto
             {
                 Id = newUser.Id,
@@ -172,11 +161,6 @@ namespace RideShare_Connect.Api.Controllers
             if (passwordVerificationResult == PasswordVerificationResult.Failed)
             {
                 return Unauthorized("Invalid credentials.");
-            }
-
-            if (!user.IsEmailVerified)
-            {
-                return Unauthorized("Email not verified.");
             }
 
             // --- Generate JWT Token ---
@@ -397,25 +381,6 @@ namespace RideShare_Connect.Api.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Password reset successful.");
-        }
-
-        [AllowAnonymous]
-        [HttpPost("verify-email")]
-        public async Task<IActionResult> VerifyEmail(VerifyEmailDto dto)
-        {
-            var record = await _context.EmailVerificationTokens
-                .Include(v => v.User)
-                .FirstOrDefaultAsync(v => v.Token == dto.Token && v.ExpiresAt > DateTime.UtcNow);
-            if (record == null)
-            {
-                return BadRequest("Invalid or expired token.");
-            }
-
-            record.User.IsEmailVerified = true;
-            _context.EmailVerificationTokens.Remove(record);
-            await _context.SaveChangesAsync();
-
-            return Ok("Email verified successfully.");
         }
 
         [AllowAnonymous]
