@@ -149,6 +149,97 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> EditVehicle(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id && v.DriverId == userId);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditVehicleViewModel
+            {
+                Id = vehicle.Id,
+                DriverId = vehicle.DriverId,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Status = vehicle.Status,
+                Year = vehicle.Year
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVehicle(EditVehicleViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (userId != model.DriverId)
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == model.Id && v.DriverId == userId);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            vehicle.CarMaker = model.CarMaker;
+            vehicle.Model = model.Model;
+            vehicle.VehicleType = model.VehicleType;
+            vehicle.LicensePlate = model.LicensePlate;
+            vehicle.Year = model.Year;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVehicle(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id && v.DriverId == userId);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            _db.Vehicles.Remove(vehicle);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
         public async Task<IActionResult> EditProfile()
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);

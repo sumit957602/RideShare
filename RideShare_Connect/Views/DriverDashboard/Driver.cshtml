@@ -113,7 +113,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Vehicle</th><th>Type</th><th>Status</th></tr></thead>
+                                            <thead><tr><th>Vehicle</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
                                             <tbody>
                                                 @if (Model.Vehicles.Any())
                                                 {
@@ -123,12 +123,18 @@
                                                             <td>@v.LicensePlate (@v.Model)</td>
                                                             <td>@v.VehicleType</td>
                                                             <td><span class="badge bg-secondary">@v.Status</span></td>
+                                                            <td>
+                                                                <a asp-action="EditVehicle" asp-route-id="@v.Id" class="btn btn-sm btn-primary me-2">Edit</a>
+                                                                <form asp-action="DeleteVehicle" asp-route-id="@v.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <tr><td colspan="3">No vehicles registered.</td></tr>
+                                                    <tr><td colspan="4">No vehicles registered.</td></tr>
                                                 }
                                             </tbody>
                                         </table>
