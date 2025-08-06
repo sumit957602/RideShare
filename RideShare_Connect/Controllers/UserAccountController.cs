@@ -103,7 +103,8 @@ namespace RideShare_Connect.Controllers
             var claimsIdentity = new ClaimsIdentity(result.Principal.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-            return RedirectToAction("Index", "Home");
+            // After successful Google authentication, redirect the user to their dashboard
+            return RedirectToAction("User", "UserDashboard");
         }
 
         [HttpPost]
