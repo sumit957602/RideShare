@@ -27,8 +27,8 @@
                 </ul>
                 <div class="dropdown ms-lg-3">
                     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="@(Model.Profile?.ProfilePicture ?? "/images/default-profile.png")" alt="" width="32" height="32" class="rounded-circle me-2" />
-                        <strong>@Model.Profile?.FullName</strong>
+                        <img src="/images/default-profile.png" alt="" width="32" height="32" class="rounded-circle me-2" />
+                        <strong>@Model.Driver?.FullName</strong>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
                         <li><a class="dropdown-item" href="#">Profile</a></li>
@@ -90,18 +90,16 @@
                             <div class="card">
                                 <div class="card-body">
                                     <ul class="list-group list-group-flush">
-                                        <li class="list-group-item"><strong>Name:</strong> @Model.Profile?.FullName</li>
-                                        <li class="list-group-item"><strong>Email:</strong> @Model.Profile?.User?.Email</li>
-                                        <li class="list-group-item"><strong>Phone:</strong> @Model.Profile?.User?.PhoneNumber</li>
-                                        <li class="list-group-item"><strong>Emergency Contact:</strong> @Model.Profile?.EmergencyContact</li>
-                                        <li class="list-group-item"><strong>Bio:</strong> @Model.Profile?.Bio</li>
+                                        <li class="list-group-item"><strong>Name:</strong> @Model.Driver?.FullName</li>
+                                        <li class="list-group-item"><strong>Email:</strong> @Model.Driver?.Email</li>
+                                        <li class="list-group-item"><strong>Phone:</strong> @Model.Driver?.PhoneNumber</li>
                                         <li class="list-group-item"><strong>License Number:</strong> @Model.DriverProfile?.LicenseNumber</li>
                                         <li class="list-group-item"><strong>Background Check:</strong> @Model.DriverProfile?.BackgroundCheckStatus</li>
                                         <li class="list-group-item"><strong>Experience:</strong> @Model.DriverProfile?.DrivingExperienceYears years</li>
                                         <li class="list-group-item"><strong>References:</strong> @Model.DriverProfile?.ReferenceContacts</li>
                                     </ul>
                                     <div class="mt-3 text-end">
-                                        <a asp-controller="UserDashboard" asp-action="UserProfile" class="btn btn-primary">Update Profile</a>
+                                        <a asp-action="EditProfile" class="btn btn-primary">Update Profile</a>
                                     </div>
                                 </div>
                             </div>
