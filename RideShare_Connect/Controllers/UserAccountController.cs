@@ -100,10 +100,38 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login");
             }
 
-            var claimsIdentity = new ClaimsIdentity(result.Principal.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+            var idToken = result.Properties.GetTokenValue("id_token");
+            if (string.IsNullOrEmpty(idToken))
+            {
+                return RedirectToAction("Login");
+            }
 
-            // After successful Google authentication, redirect the user to their dashboard
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            var apiResponse = await httpClient.PostAsJsonAsync("api/Users/google-login", new GoogleLoginDto { IdToken = idToken });
+            if (!apiResponse.IsSuccessStatusCode)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var authResponse = await apiResponse.Content.ReadFromJsonAsync<AuthResponseDto>();
+            if (authResponse == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
+                new Claim(ClaimTypes.Email, authResponse.Email ?? string.Empty),
+                new Claim("Token", authResponse.Token),
+                new Claim(ClaimTypes.Role, authResponse.UserType ?? "Rider")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
             return RedirectToAction("User", "UserDashboard");
         }
 
