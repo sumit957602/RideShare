@@ -15,6 +15,8 @@ using System.Text; // Required for Encoding
 using System.IO;
 using RideShare_Connect_Backend.Services;
 using Google.Apis.Auth;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -208,6 +210,41 @@ namespace RideShare_Connect.Api.Controllers
             };
 
             return Ok(responseDto);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("google-token")]
+        public async Task<ActionResult<GoogleTokenResponseDto>> GetGoogleToken(GoogleTokenRequestDto dto)
+        {
+            var clientId = _configuration["GoogleAuth:ClientId"];
+            var clientSecret = _configuration["GoogleAuth:ClientSecret"];
+
+            var values = new Dictionary<string, string>
+            {
+                {"code", dto.Code},
+                {"client_id", clientId},
+                {"client_secret", clientSecret},
+                {"redirect_uri", dto.RedirectUri},
+                {"grant_type", "authorization_code"}
+            };
+
+            using var content = new FormUrlEncodedContent(values);
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return StatusCode((int)response.StatusCode, error);
+            }
+
+            var tokenResponse = await response.Content.ReadFromJsonAsync<GoogleTokenResponseDto>();
+            if (tokenResponse == null)
+            {
+                return StatusCode(500, "Failed to parse Google token response.");
+            }
+
+            return Ok(tokenResponse);
         }
 
         [AllowAnonymous]
