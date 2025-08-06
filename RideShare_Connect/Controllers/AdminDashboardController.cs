@@ -4,6 +4,7 @@ using RideShareConnect.Data;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace RideShare_Connect.Controllers
 {
@@ -35,6 +36,103 @@ namespace RideShare_Connect.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var user = await _db.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditUserViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FullName = user.UserProfile?.FullName,
+                UserType = user.UserType,
+                AccountStatus = user.AccountStatus
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(EditUserViewModel model)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _db.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Id == model.Id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = model.Email;
+            user.UserType = model.UserType;
+            user.AccountStatus = model.AccountStatus;
+
+            if (user.UserProfile != null)
+            {
+                user.UserProfile.FullName = model.FullName;
+            }
+            else if (!string.IsNullOrWhiteSpace(model.FullName))
+            {
+                user.UserProfile = new RideShare_Connect.Models.UserManagement.UserProfile
+                {
+                    FullName = model.FullName,
+                    UserId = user.Id
+                };
+            }
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var user = await _db.Users.Include(u => u.UserProfile).FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.UserProfile != null)
+            {
+                _db.UserProfiles.Remove(user.UserProfile);
+            }
+
+            _db.Users.Remove(user);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
         }
     }
 }
