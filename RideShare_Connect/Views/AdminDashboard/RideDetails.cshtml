@@ -1,0 +1,39 @@
+@model RideShare_Connect.ViewModels.RideDetailsViewModel
+@{
+    ViewData["Title"] = "Ride Details";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Ride Details</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Ride ID:</strong> @Model.Ride.Id</p>
+            <p><strong>Route:</strong> @Model.Ride.Origin <i class="bi bi-arrow-right"></i> @Model.Ride.Destination</p>
+            <p><strong>Driver:</strong> @Model.Ride.Driver?.FullName</p>
+            <p><strong>Vehicle:</strong> @Model.Ride.Vehicle?.Model (@Model.Ride.Vehicle?.LicensePlate)</p>
+            <p><strong>Departure Time:</strong> @Model.Ride.DepartureTime.ToString("yyyy-MM-dd, HH:mm")</p>
+            <p><strong>Status:</strong> @Model.Ride.Status</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            Riders
+        </div>
+        <ul class="list-group list-group-flush">
+            @if (Model.Riders.Any())
+            {
+                foreach (var rider in Model.Riders)
+                {
+                    <li class="list-group-item">@rider</li>
+                }
+            }
+            else
+            {
+                <li class="list-group-item">No riders for this ride.</li>
+            }
+        </ul>
+    </div>
+
+    <a asp-action="Admin" class="btn btn-secondary">Back to Dashboard</a>
+</div>
