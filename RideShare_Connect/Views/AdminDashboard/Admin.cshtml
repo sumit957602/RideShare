@@ -1,4 +1,5 @@
 ﻿@model RideShare_Connect.ViewModels.AdminDashboardViewModel
+@using System.Linq
 @{
     ViewData["Title"] = "Driver Login";
 }
@@ -336,18 +337,25 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
-                                                    <td>RID-101</td>
-                                                    <td>Patna <i class="bi bi-arrow-right"></i> Gaya</td>
-                                                    <td>Ravi Kumar</td>
-                                                    <td>Alex Rodriguez, Sunita</td>
-                                                    <td>2025-07-28, 09:00</td>
-                                                    <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">Ongoing</span></td>
-                                                    <td>
-                                                        <button class="btn btn-sm btn-outline-info table-action-btn" title="View Details"><i class="bi bi-eye-fill"></i></button>
-                                                        <button class="btn btn-sm btn-outline-danger table-action-btn" title="Cancel Ride"><i class="bi bi-x-circle-fill"></i></button>
-                                                    </td>
-                                                </tr>
+                                                @foreach (var ride in Model.Rides)
+                                                {
+                                                    var riders = Model.RideBookings
+                                                        .Where(rb => rb.RideId == ride.Id)
+                                                        .Select(rb => rb.User.UserProfile != null ? rb.User.UserProfile.FullName : rb.User.Email)
+                                                        .ToList();
+                                                    <tr>
+                                                        <td>@ride.Id</td>
+                                                        <td>@ride.Origin <i class="bi bi-arrow-right"></i> @ride.Destination</td>
+                                                        <td>@ride.Driver?.FullName</td>
+                                                        <td>@(riders.Any() ? string.Join(", ", riders) : "N/A")</td>
+                                                        <td>@ride.DepartureTime.ToString("yyyy-MM-dd, HH:mm")</td>
+                                                        <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">@ride.Status</span></td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-info table-action-btn" title="View Details"><i class="bi bi-eye-fill"></i></button>
+                                                            <button class="btn btn-sm btn-outline-danger table-action-btn" title="Cancel Ride"><i class="bi bi-x-circle-fill"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             </tbody>
                                         </table>
                                     </div>

@@ -17,5 +17,8 @@ namespace RideShare_Connect.ViewModels
         public List<User> Users { get; set; } = new();
         public List<Driver> Drivers { get; set; } = new();
         public List<Vehicle> Vehicles { get; set; } = new();
+
+        public List<Ride> Rides { get; set; } = new();
+        public List<RideBooking> RideBookings { get; set; } = new();
     }
 }

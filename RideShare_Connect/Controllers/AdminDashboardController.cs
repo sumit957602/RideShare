@@ -32,7 +32,12 @@ namespace RideShare_Connect.Controllers
                 OpenReports = _db.UserReports.Count(r => r.Status == "Pending"),
                 Users = _db.Users.Include(u => u.UserProfile).ToList(),
                 Drivers = _db.Set<Driver>().ToList(),
-                Vehicles = _db.Vehicles.Include(v => v.Driver).ToList()
+                Vehicles = _db.Vehicles.Include(v => v.Driver).ToList(),
+                Rides = _db.Rides.Include(r => r.Driver).ToList(),
+                RideBookings = _db.RideBookings
+                    .Include(rb => rb.User)
+                    .ThenInclude(u => u.UserProfile)
+                    .ToList()
             };
 
             return View(viewModel);
