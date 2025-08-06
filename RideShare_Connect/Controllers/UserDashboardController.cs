@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 using RideShare_Connect.DTOs;
-using System.Threading.Tasks;
 
 namespace RideShare_Connect.Controllers
 {
@@ -19,7 +18,7 @@ namespace RideShare_Connect.Controllers
             _db = db;
         }
 
-        public async Task<IActionResult> User()
+        public IActionResult User()
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -27,29 +26,28 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "UserAccount");
             }
 
-            var profile = await _db.UserProfiles.FirstOrDefaultAsync(u => u.UserId == userId);
+            var profile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
 
             var bookingsQuery = _db.RideBookings
                 .Include(rb => rb.Ride)
                     .ThenInclude(r => r.Driver)
                 .Where(rb => rb.PassengerId == userId);
 
-            var bookings = await bookingsQuery
+            var bookings = bookingsQuery
                 .OrderByDescending(rb => rb.BookingTime)
-                .ToListAsync();
+                .ToList();
 
             var totalSpent = bookings.Sum(rb => rb.BookedSeats * rb.Ride.PricePerSeat);
 
-            var rating = await _db.DriverRatings
+            var rating = _db.DriverRatings
                 .Where(r => r.DriverId == userId)
-                .AverageAsync(r => (double?)r.Rating) ?? 0;
+                .Average(r => (double?)r.Rating) ?? 0;
 
-            var availableRides = await _db.Rides
-                .AsNoTracking()
+            var availableRides = _db.Rides
                 .Include(r => r.Driver)
-                .Where(r => r.Status == "Scheduled" && r.AvailableSeats > 0 && r.DepartureTime >= DateTime.UtcNow)
+                .Where(r => r.AvailableSeats > 0 && r.DepartureTime >= DateTime.Now)
                 .OrderBy(r => r.DepartureTime)
-                .ToListAsync();
+                .ToList();
 
             var model = new UserDashboardViewModel
             {
