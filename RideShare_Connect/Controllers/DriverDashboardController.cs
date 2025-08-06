@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RideShareConnect.Data;
 using RideShare_Connect.Models.RideManagement;
+using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
 using System.Security.Claims;
 
@@ -43,7 +44,8 @@ namespace RideShare_Connect.Controllers
                 DriverProfile = driverProfile,
                 Vehicles = vehicles,
                 AverageRating = average,
-                RecentRatings = ratings.Take(5)
+                RecentRatings = ratings.Take(5),
+                NewVehicle = new AddVehicleViewModel()
             };
 
             return View(viewModel);
@@ -103,6 +105,60 @@ namespace RideShare_Connect.Controllers
             };
 
             _db.Rides.Add(ride);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVehicle(AddVehicleViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var profile = await _db.UserProfiles
+                    .Include(p => p.User)
+                    .FirstOrDefaultAsync(p => p.UserId == userId);
+                var driverProfile = await _db.DriverProfiles
+                    .FirstOrDefaultAsync(dp => dp.DriverId == userId);
+                var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+                var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
+                    .OrderByDescending(r => r.Timestamp)
+                    .ToListAsync();
+                var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
+
+                var viewModel = new DriverDashboardViewModel
+                {
+                    Profile = profile,
+                    DriverProfile = driverProfile,
+                    Vehicles = vehicles,
+                    AverageRating = average,
+                    RecentRatings = ratings.Take(5),
+                    NewVehicle = model
+                };
+
+                return View("Driver", viewModel);
+            }
+
+            var vehicle = new Vehicle
+            {
+                DriverId = userId,
+                CarMaker = model.CarMaker,
+                Model = model.Model,
+                VehicleType = model.VehicleType,
+                LicensePlate = model.LicensePlate,
+                Status = "Pending",
+                Year = model.Year
+            };
+
+            _db.Vehicles.Add(vehicle);
             await _db.SaveChangesAsync();
 
             return RedirectToAction(nameof(Driver));
