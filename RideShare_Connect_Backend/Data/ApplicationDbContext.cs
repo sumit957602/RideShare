@@ -21,7 +21,6 @@ namespace RideShare_Connect.Api.Data
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<DriverPasswordResetToken> DriverPasswordResetTokens { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
         // ... other DbSets
 
         public DbSet<Vehicle> Vehicles { get; set; }
