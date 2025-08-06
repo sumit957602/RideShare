@@ -52,11 +52,10 @@ namespace RideShare_Connect.Controllers
                 var response = await httpClient.PostAsync("api/Users/register", jsonContent);
                 if (response.IsSuccessStatusCode)
                 {
-                    // Optionally read the response content if your API returns the created user
-                    var createdUser = await response.Content.ReadFromJsonAsync<UserDto>();
-                    ViewBag.Message = "User registered successfully! ID: " + createdUser?.Id + ", Email: " + createdUser?.Email;
+                    // registration successful - instruct user to verify email
+                    TempData["SuccessMessage"] = "Registration successful! Please check your email to verify your account.";
                     _logger.LogInformation("User {Email} registered successfully.", model.Email);
-                    return View("Login"); // Or redirect to a login page
+                    return RedirectToAction("Login");
                 }
                 else
                 {
@@ -131,6 +130,39 @@ namespace RideShare_Connect.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
             return RedirectToAction("User", "UserDashboard");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> VerifyEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                ViewBag.Message = "Invalid verification token.";
+                return View();
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var dto = new VerifyEmailDto { Token = token };
+                var response = await httpClient.PostAsJsonAsync("api/users/verify-email", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    ViewBag.Message = "Email verified successfully. You can now log in.";
+                }
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    ViewBag.Message = $"Verification failed: {error}";
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = $"Verification error: {ex.Message}";
+            }
+
+            return View();
         }
 
         [HttpPost]
