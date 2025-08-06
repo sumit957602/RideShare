@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RideShare_Connect.Api.Data;
+using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.RideManagement;
 using System.Linq;
@@ -126,6 +127,74 @@ namespace RideShare_Connect.Api.Controllers
             }
 
             return Ok(ride);
+        }
+
+        [HttpGet("{id}/driver")]
+        public async Task<IActionResult> GetRideDriver(int id)
+        {
+            var ride = await _context.Rides.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var driver = await _context.Driver
+                .Include(d => d.DriverProfile)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.DriverId == ride.DriverId);
+
+            if (driver == null || driver.DriverProfile == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            var profile = driver.DriverProfile;
+
+            var driverDto = new DriverDto
+            {
+                Id = driver.DriverId,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                FullName = driver.FullName,
+                LicenseNumber = profile.LicenseNumber,
+                BackgroundCheckStatus = profile.BackgroundCheckStatus,
+                DrivingExperienceYears = profile.DrivingExperienceYears,
+                ReferenceContacts = profile.ReferenceContacts
+            };
+
+            return Ok(driverDto);
+        }
+
+        [HttpGet("{id}/vehicle")]
+        public async Task<IActionResult> GetRideVehicle(int id)
+        {
+            var ride = await _context.Rides.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var vehicle = await _context.Vehicles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == ride.VehicleId);
+
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            var vehicleDto = new VehicleDto
+            {
+                Id = vehicle.Id,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                Status = vehicle.Status
+            };
+
+            return Ok(vehicleDto);
         }
 
         [HttpPut("{id}")]
