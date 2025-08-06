@@ -43,8 +43,7 @@ namespace RideShare_Connect.Controllers
                 DriverProfile = driverProfile,
                 Vehicles = vehicles,
                 AverageRating = average,
-                RecentRatings = ratings.Take(5),
-                NewVehicle = new AddVehicleViewModel()
+                RecentRatings = ratings.Take(5)
             };
 
             return View(viewModel);
@@ -110,6 +109,13 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        [HttpGet]
+        public IActionResult AddVehicle()
+        {
+            return View(new AddVehicleViewModel());
+        }
+
+        [Authorize(Roles = "Driver")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddVehicle(AddVehicleViewModel model)
@@ -122,27 +128,7 @@ namespace RideShare_Connect.Controllers
 
             if (!ModelState.IsValid)
             {
-                var driver = await _db.Set<Driver>()
-                    .Include(d => d.DriverProfile)
-                    .FirstOrDefaultAsync(d => d.DriverId == userId);
-                var driverProfile = driver?.DriverProfile;
-                var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-                var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
-                    .OrderByDescending(r => r.Timestamp)
-                    .ToListAsync();
-                var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
-
-                var viewModel = new DriverDashboardViewModel
-                {
-                    Driver = driver,
-                    DriverProfile = driverProfile,
-                    Vehicles = vehicles,
-                    AverageRating = average,
-                    RecentRatings = ratings.Take(5),
-                    NewVehicle = model
-                };
-
-                return View("Driver", viewModel);
+                return View(model);
             }
 
             var vehicle = new Vehicle
@@ -152,7 +138,7 @@ namespace RideShare_Connect.Controllers
                 Model = model.Model,
                 VehicleType = model.VehicleType,
                 LicensePlate = model.LicensePlate,
-                Status = "Pending",
+                Status = "Active",
                 Year = model.Year
             };
 

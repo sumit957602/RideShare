@@ -1,0 +1,41 @@
+@model RideShare_Connect.ViewModels.AddVehicleViewModel
+
+@{
+    ViewData["Title"] = "Register New Vehicle";
+}
+
+<h2>Register New Vehicle</h2>
+
+<form asp-action="AddVehicle" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="CarMaker" class="form-label"></label>
+        <input asp-for="CarMaker" class="form-control" />
+        <span asp-validation-for="CarMaker" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Model" class="form-label"></label>
+        <input asp-for="Model" class="form-control" />
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="VehicleType" class="form-label"></label>
+        <input asp-for="VehicleType" class="form-control" />
+        <span asp-validation-for="VehicleType" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="LicensePlate" class="form-label"></label>
+        <input asp-for="LicensePlate" class="form-control" />
+        <span asp-validation-for="LicensePlate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label"></label>
+        <input asp-for="Year" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+    <div class="text-end">
+        <a asp-action="Driver" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Vehicle</button>
+    </div>
+</form>
+
