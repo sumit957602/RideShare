@@ -14,6 +14,7 @@ using System.Security.Claims; // Required for Claims
 using System.Text; // Required for Encoding
 using System.IO;
 using RideShare_Connect_Backend.Services;
+using Google.Apis.Auth;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -184,6 +185,99 @@ namespace RideShare_Connect.Api.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
             // --- End JWT Token Generation ---
+
+            var refreshToken = new RefreshToken
+            {
+                UserId = user.Id,
+                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
+            var responseDto = new AuthResponseDto
+            {
+                Token = tokenString,
+                RefreshToken = refreshToken.Token,
+                UserId = user.Id,
+                Email = user.Email,
+                FullName = user.UserProfile?.FullName,
+                ProfilePicture = user.UserProfile?.ProfilePicture,
+                UserType = user.UserType
+            };
+
+            return Ok(responseDto);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("google-login")]
+        public async Task<ActionResult<AuthResponseDto>> GoogleLogin(GoogleLoginDto googleDto)
+        {
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(googleDto.IdToken, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _configuration["GoogleAuth:ClientId"] }
+                });
+            }
+            catch (InvalidJwtException)
+            {
+                return Unauthorized("Invalid Google token.");
+            }
+
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Email.ToLower() == payload.Email.ToLower());
+
+            if (user == null)
+            {
+                var newUser = new User
+                {
+                    Email = payload.Email,
+                    PhoneNumber = string.Empty,
+                    UserType = "Rider",
+                    AccountStatus = "Active",
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                newUser.PasswordHash = _passwordHasher.HashPassword(newUser, Guid.NewGuid().ToString());
+                newUser.UserProfile = new UserProfile
+                {
+                    FullName = payload.Name,
+                    ProfilePicture = payload.Picture,
+                    Bio = "Default bio message for new users.",
+                    EmergencyContact = "Nan",
+                };
+
+                _context.Users.Add(newUser);
+                await _context.SaveChangesAsync();
+                user = newUser;
+            }
+
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.UserType ?? "Rider")
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
 
             var refreshToken = new RefreshToken
             {
