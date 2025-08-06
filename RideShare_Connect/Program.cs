@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RideShareConnect.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using RideShare_Connect.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,13 +15,22 @@ builder.Services.AddHttpClient("RideShareApi", client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+})
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login"; // Redirect unauthenticated users here
         options.AccessDeniedPath = "/Account/AccessDenied"; // Optional: for unauthorized access
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Match JWT expiration or set longer
         options.SlidingExpiration = true;
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     });
 
 builder.Services.AddSession(options =>
