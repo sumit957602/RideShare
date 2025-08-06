@@ -351,8 +351,11 @@
                                                         <td>@ride.DepartureTime.ToString("yyyy-MM-dd, HH:mm")</td>
                                                         <td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">@ride.Status</span></td>
                                                         <td>
-                                                            <button class="btn btn-sm btn-outline-info table-action-btn" title="View Details"><i class="bi bi-eye-fill"></i></button>
-                                                            <button class="btn btn-sm btn-outline-danger table-action-btn" title="Cancel Ride"><i class="bi bi-x-circle-fill"></i></button>
+                                                            <a asp-controller="AdminDashboard" asp-action="RideDetails" asp-route-id="@ride.Id" class="btn btn-sm btn-outline-info table-action-btn" title="View Details"><i class="bi bi-eye-fill"></i></a>
+                                                            <form asp-controller="AdminDashboard" asp-action="CancelRide" asp-route-id="@ride.Id" method="post" class="d-inline">
+                                                                @Html.AntiForgeryToken()
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger table-action-btn" title="Cancel Ride" onclick="return confirm('Are you sure you want to cancel this ride?');"><i class="bi bi-x-circle-fill"></i></button>
+                                                            </form>
                                                         </td>
                                                     </tr>
                                                 }

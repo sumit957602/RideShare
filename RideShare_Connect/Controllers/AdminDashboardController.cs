@@ -340,5 +340,61 @@ namespace RideShare_Connect.Controllers
 
             return RedirectToAction("Admin");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> RideDetails(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var ride = await _db.Rides
+                .Include(r => r.Driver)
+                .Include(r => r.Vehicle)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            var riders = await _db.RideBookings
+                .Include(rb => rb.User)
+                .ThenInclude(u => u.UserProfile)
+                .Where(rb => rb.RideId == id)
+                .Select(rb => rb.User.UserProfile != null ? rb.User.UserProfile.FullName : rb.User.Email)
+                .ToListAsync();
+
+            var viewModel = new RideDetailsViewModel
+            {
+                Ride = ride,
+                Riders = riders
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelRide(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var ride = await _db.Rides.FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            ride.Status = "Cancelled";
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
     }
 }
