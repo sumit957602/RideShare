@@ -39,7 +39,7 @@ namespace RideShare_Connect_Backend.Services
             var from = new EmailAddress(_config["SendGrid:SenderEmail"], _config["SendGrid:SenderName"]);
             var to = new EmailAddress(toEmail);
             var subject = "Verify your RideShare email";
-            var verificationUrl = $"https://localhost:7221/UserAccount/VerifyEmail?token={token}";
+            var verificationUrl = $"https://localhost:5001/api/users/verify-email?token={token}";
             var htmlContent = $"<p>Please verify your email by clicking <a href='{verificationUrl}'>here</a>.</p>";
 
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent: null, htmlContent: htmlContent);
