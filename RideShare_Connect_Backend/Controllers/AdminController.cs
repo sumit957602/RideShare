@@ -174,6 +174,50 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(users);
         }
 
+        [HttpPut("users/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto dto)
+        {
+            var user = await _context.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (dto.Email != null) user.Email = dto.Email;
+            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+            if (dto.UserType != null) user.UserType = dto.UserType;
+            if (dto.AccountStatus != null) user.AccountStatus = dto.AccountStatus;
+
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile { UserId = user.Id };
+            }
+            if (dto.FullName != null) user.UserProfile.FullName = dto.FullName;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("users/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users
+                .Include(u => u.UserProfile)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         [HttpPut("users/{id}/status")]
         public async Task<IActionResult> UpdateUserStatus(int id, UserStatusUpdateDto dto)
         {
