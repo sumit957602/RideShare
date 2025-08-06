@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RideShareConnect.Data;
 using RideShare_Connect.ViewModels;
+using RideShare_Connect.Models.PaymentManagement;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -55,6 +56,35 @@ namespace RideShare_Connect.Controllers
             };
 
             return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult AddPaymentMethod()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPaymentMethod(PaymentMethod method)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+            var userId = int.Parse(userIdClaim);
+
+            if (!ModelState.IsValid)
+            {
+                return View(method);
+            }
+
+            method.UserId = userId;
+            _db.PaymentMethods.Add(method);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Finance));
         }
     }
 }
