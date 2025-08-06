@@ -249,5 +249,91 @@ namespace RideShare_Connect.Controllers
 
             return RedirectToAction("Admin");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> EditVehicle(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditVehicleViewModel
+            {
+                Id = vehicle.Id,
+                DriverId = vehicle.DriverId,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Status = vehicle.Status,
+                Year = vehicle.Year
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVehicle(EditVehicleViewModel model)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == model.Id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            vehicle.DriverId = model.DriverId;
+            vehicle.CarMaker = model.CarMaker;
+            vehicle.Model = model.Model;
+            vehicle.VehicleType = model.VehicleType;
+            vehicle.LicensePlate = model.LicensePlate;
+            vehicle.Status = model.Status;
+            vehicle.Year = model.Year;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteVehicle(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            _db.Vehicles.Remove(vehicle);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
     }
 }
