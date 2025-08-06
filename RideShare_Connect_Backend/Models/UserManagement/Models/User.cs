@@ -22,6 +22,8 @@ namespace RideShare_Connect.Models.UserManagement
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        public bool IsEmailVerified { get; set; } = false;
+
         public virtual UserProfile UserProfile { get; set; }
 
         public virtual UserSettings UserSettings { get; set; }
