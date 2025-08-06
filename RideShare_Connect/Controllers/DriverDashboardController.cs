@@ -47,5 +47,9 @@ namespace RideShare_Connect.Controllers
 
             return View(viewModel);
         }
+        public IActionResult CreateRide()
+        {
+            return View();
+        }
     }
 }
