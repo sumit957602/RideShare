@@ -27,11 +27,10 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "DriverAccount");
             }
 
-            var profile = await _db.UserProfiles
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(p => p.UserId == userId);
-            var driverProfile = await _db.DriverProfiles
-                .FirstOrDefaultAsync(dp => dp.DriverId == userId);
+            var driver = await _db.Set<Driver>()
+                .Include(d => d.DriverProfile)
+                .FirstOrDefaultAsync(d => d.DriverId == userId);
+            var driverProfile = driver?.DriverProfile;
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
             var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                 .OrderByDescending(r => r.Timestamp)
@@ -40,7 +39,7 @@ namespace RideShare_Connect.Controllers
 
             var viewModel = new DriverDashboardViewModel
             {
-                Profile = profile,
+                Driver = driver,
                 DriverProfile = driverProfile,
                 Vehicles = vehicles,
                 AverageRating = average,
@@ -123,11 +122,10 @@ namespace RideShare_Connect.Controllers
 
             if (!ModelState.IsValid)
             {
-                var profile = await _db.UserProfiles
-                    .Include(p => p.User)
-                    .FirstOrDefaultAsync(p => p.UserId == userId);
-                var driverProfile = await _db.DriverProfiles
-                    .FirstOrDefaultAsync(dp => dp.DriverId == userId);
+                var driver = await _db.Set<Driver>()
+                    .Include(d => d.DriverProfile)
+                    .FirstOrDefaultAsync(d => d.DriverId == userId);
+                var driverProfile = driver?.DriverProfile;
                 var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
                 var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                     .OrderByDescending(r => r.Timestamp)
@@ -136,7 +134,7 @@ namespace RideShare_Connect.Controllers
 
                 var viewModel = new DriverDashboardViewModel
                 {
-                    Profile = profile,
+                    Driver = driver,
                     DriverProfile = driverProfile,
                     Vehicles = vehicles,
                     AverageRating = average,
@@ -159,6 +157,95 @@ namespace RideShare_Connect.Controllers
             };
 
             _db.Vehicles.Add(vehicle);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> EditProfile()
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var driver = await _db.Set<Driver>()
+                .Include(d => d.DriverProfile)
+                .FirstOrDefaultAsync(d => d.DriverId == userId);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditDriverViewModel
+            {
+                DriverId = driver.DriverId,
+                FullName = driver.FullName,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                LicenseNumber = driver.DriverProfile?.LicenseNumber,
+                BackgroundCheckStatus = driver.DriverProfile?.BackgroundCheckStatus,
+                DrivingExperienceYears = driver.DriverProfile?.DrivingExperienceYears ?? 0,
+                ReferenceContacts = driver.DriverProfile?.ReferenceContacts
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(EditDriverViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (userId != model.DriverId)
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var driver = await _db.Set<Driver>()
+                .Include(d => d.DriverProfile)
+                .FirstOrDefaultAsync(d => d.DriverId == userId);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            driver.FullName = model.FullName;
+            driver.Email = model.Email;
+            driver.PhoneNumber = model.PhoneNumber;
+
+            if (driver.DriverProfile != null)
+            {
+                driver.DriverProfile.LicenseNumber = model.LicenseNumber;
+                driver.DriverProfile.BackgroundCheckStatus = model.BackgroundCheckStatus;
+                driver.DriverProfile.DrivingExperienceYears = model.DrivingExperienceYears;
+                driver.DriverProfile.ReferenceContacts = model.ReferenceContacts;
+            }
+            else
+            {
+                driver.DriverProfile = new DriverProfile
+                {
+                    DriverId = driver.DriverId,
+                    LicenseNumber = model.LicenseNumber,
+                    BackgroundCheckStatus = model.BackgroundCheckStatus,
+                    DrivingExperienceYears = model.DrivingExperienceYears,
+                    ReferenceContacts = model.ReferenceContacts
+                };
+            }
+
             await _db.SaveChangesAsync();
 
             return RedirectToAction(nameof(Driver));
