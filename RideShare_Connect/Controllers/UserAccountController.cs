@@ -8,6 +8,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Net.Http.Headers;
@@ -104,6 +105,31 @@ namespace RideShare_Connect.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
             // After successful Google authentication, redirect the user to their dashboard
+            return RedirectToAction("User", "UserDashboard");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult FacebookLogin()
+        {
+            var redirectUrl = Url.Action("FacebookResponse");
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, FacebookDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> FacebookResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(FacebookDefaults.AuthenticationScheme);
+            if (!result.Succeeded)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var claimsIdentity = new ClaimsIdentity(result.Principal.Claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
             return RedirectToAction("User", "UserDashboard");
         }
 
