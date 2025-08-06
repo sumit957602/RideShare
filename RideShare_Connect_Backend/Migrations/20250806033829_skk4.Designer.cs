@@ -12,8 +12,8 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250805181804_skk1")]
-    partial class skk1
+    [Migration("20250806033829_skk4")]
+    partial class skk4
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -422,6 +422,9 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("DistanceKm")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("DriverId")
                         .HasColumnType("int");
 
@@ -444,9 +447,14 @@ namespace RideShare_Connect_Backend.Migrations
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int");
 
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Rides");
                 });
@@ -1192,7 +1200,15 @@ namespace RideShare_Connect_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Driver");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideBooking", b =>
