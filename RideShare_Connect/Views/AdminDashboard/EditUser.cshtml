@@ -1,0 +1,36 @@
+@model RideShare_Connect.ViewModels.EditUserViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<h2>Edit User</h2>
+
+<form asp-action="EditUser" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="FullName" class="form-label"></label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="UserType" class="form-label"></label>
+        <input asp-for="UserType" class="form-control" />
+        <span asp-validation-for="UserType" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="AccountStatus" class="form-label"></label>
+        <input asp-for="AccountStatus" class="form-control" />
+        <span asp-validation-for="AccountStatus" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Admin" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
