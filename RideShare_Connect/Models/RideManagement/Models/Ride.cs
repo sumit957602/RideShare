@@ -13,6 +13,10 @@ namespace RideShare_Connect.Models.RideManagement
         public int DriverId { get; set; }
 
         [Required]
+        [ForeignKey("Vehicle")]
+        public int VehicleId { get; set; }
+
+        [Required]
         [StringLength(100)]
         public string Origin { get; set; }
 
@@ -36,6 +40,10 @@ namespace RideShare_Connect.Models.RideManagement
         public decimal PricePerSeat { get; set; }
 
         [Required]
+        [Range(0, 10000)]
+        public decimal DistanceKm { get; set; }
+
+        [Required]
         [StringLength(20)]
         public string Status { get; set; } 
 
@@ -43,6 +51,7 @@ namespace RideShare_Connect.Models.RideManagement
 
         // Navigation Properties
         public virtual Driver Driver { get; set; }
+        public virtual Vehicle Vehicle { get; set; }
 
     }
 }

@@ -419,6 +419,9 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("DistanceKm")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("DriverId")
                         .HasColumnType("int");
 
@@ -441,9 +444,14 @@ namespace RideShare_Connect_Backend.Migrations
                     b.Property<int>("TotalSeats")
                         .HasColumnType("int");
 
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("VehicleId");
 
                     b.ToTable("Rides");
                 });
@@ -1189,7 +1197,15 @@ namespace RideShare_Connect_Backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Driver");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.RideManagement.RideBooking", b =>
