@@ -30,5 +30,25 @@ namespace RideShare_Connect_Backend.Services
                 throw new Exception($"SendGrid failed with status: {response.StatusCode}");
             }
         }
+
+        public async Task SendVerificationEmailAsync(string toEmail, string token)
+        {
+            var apiKey = _config["SendGrid:ApiKey"];
+            var client = new SendGridClient(apiKey);
+
+            var from = new EmailAddress(_config["SendGrid:SenderEmail"], _config["SendGrid:SenderName"]);
+            var to = new EmailAddress(toEmail);
+            var subject = "Verify your RideShare email";
+            var verificationUrl = $"https://localhost:5001/api/users/verify-email?token={token}";
+            var htmlContent = $"<p>Please verify your email by clicking <a href='{verificationUrl}'>here</a>.</p>";
+
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent: null, htmlContent: htmlContent);
+            var response = await client.SendEmailAsync(msg);
+
+            if ((int)response.StatusCode >= 400)
+            {
+                throw new Exception($"SendGrid failed with status: {response.StatusCode}");
+            }
+        }
     }
 }
