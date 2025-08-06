@@ -1,8 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RideShareConnect.Data;
+using RideShare_Connect.ViewModels;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace RideShare_Connect.Controllers
 {
+    [Authorize]
     public class FinancialDashboardController : Controller
     {
         private readonly AppDbContext _db;
@@ -10,9 +18,43 @@ namespace RideShare_Connect.Controllers
         {
             _db = db;
         }
-        public IActionResult Finance()
+
+        public async Task<IActionResult> Finance()
         {
-            return View();
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+            var userId = int.Parse(userIdClaim);
+
+            var wallet = await _db.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            var balance = wallet?.Balance ?? 0;
+
+            var startOfMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var paymentQuery = _db.Payments
+                .Include(p => p.PaymentMethod)
+                .Where(p => p.UserId == userId);
+
+            var totalSpent = await paymentQuery
+                .Where(p => p.Status == "Completed" && p.PaymentDate >= startOfMonth)
+                .SumAsync(p => p.Amount);
+
+            var paymentHistory = await paymentQuery
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+
+            var model = new FinanceViewModel
+            {
+                WalletBalance = balance,
+                TotalSpentThisMonth = totalSpent,
+                TotalSavedOnRides = 0,
+                PaymentMethods = await _db.PaymentMethods.Where(pm => pm.UserId == userId).ToListAsync(),
+                PaymentHistory = paymentHistory,
+                RecentTransactions = paymentHistory.Take(5).ToList()
+            };
+
+            return View(model);
         }
     }
 }
