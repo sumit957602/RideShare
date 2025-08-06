@@ -47,7 +47,6 @@ namespace RideShare_Connect.Controllers
                 .Include(r => r.Driver)
                 .Where(r => r.AvailableSeats > 0 && r.DepartureTime >= DateTime.Now)
                 .OrderBy(r => r.DepartureTime)
-                .Take(10)
                 .ToList();
 
             var model = new UserDashboardViewModel
