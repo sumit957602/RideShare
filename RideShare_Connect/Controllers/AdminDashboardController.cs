@@ -134,5 +134,120 @@ namespace RideShare_Connect.Controllers
 
             return RedirectToAction("Admin");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> EditDriver(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var driver = await _db.Set<Driver>().Include(d => d.DriverProfile)
+                                .FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditDriverViewModel
+            {
+                DriverId = driver.DriverId,
+                FullName = driver.FullName,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                LicenseNumber = driver.DriverProfile?.LicenseNumber,
+                BackgroundCheckStatus = driver.DriverProfile?.BackgroundCheckStatus,
+                DrivingExperienceYears = driver.DriverProfile?.DrivingExperienceYears ?? 0,
+                ReferenceContacts = driver.DriverProfile?.ReferenceContacts
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditDriver(EditDriverViewModel model)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var driver = await _db.Set<Driver>().Include(d => d.DriverProfile)
+                                .FirstOrDefaultAsync(d => d.DriverId == model.DriverId);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            driver.FullName = model.FullName;
+            driver.Email = model.Email;
+            driver.PhoneNumber = model.PhoneNumber;
+
+            if (driver.DriverProfile != null)
+            {
+                driver.DriverProfile.LicenseNumber = model.LicenseNumber;
+                driver.DriverProfile.BackgroundCheckStatus = model.BackgroundCheckStatus;
+                driver.DriverProfile.DrivingExperienceYears = model.DrivingExperienceYears;
+                driver.DriverProfile.ReferenceContacts = model.ReferenceContacts;
+            }
+            else if (!string.IsNullOrWhiteSpace(model.LicenseNumber))
+            {
+                driver.DriverProfile = new DriverProfile
+                {
+                    DriverId = driver.DriverId,
+                    LicenseNumber = model.LicenseNumber,
+                    BackgroundCheckStatus = model.BackgroundCheckStatus,
+                    DrivingExperienceYears = model.DrivingExperienceYears,
+                    ReferenceContacts = model.ReferenceContacts
+                };
+            }
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDriver(int id)
+        {
+            var role = User.FindFirstValue(ClaimTypes.Role);
+            if (!User.Identity.IsAuthenticated || role != "Admin")
+            {
+                return RedirectToAction("AdminLogin", "AdminAccount");
+            }
+
+            var driver = await _db.Set<Driver>().Include(d => d.DriverProfile)
+                                 .FirstOrDefaultAsync(d => d.DriverId == id);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
+            var vehicles = await _db.Vehicles.Where(v => v.DriverId == id).ToListAsync();
+            if (vehicles.Any())
+            {
+                _db.Vehicles.RemoveRange(vehicles);
+            }
+
+            if (driver.DriverProfile != null)
+            {
+                _db.DriverProfiles.Remove(driver.DriverProfile);
+            }
+
+            _db.Set<Driver>().Remove(driver);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Admin");
+        }
     }
 }

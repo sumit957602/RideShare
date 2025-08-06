@@ -227,6 +227,7 @@
                                           <th>Name</th>
                                           <th>Email</th>
                                           <th>Phone</th>
+                                          <th>Actions</th>
                                       </tr>
                                   </thead>
                                   <tbody>
@@ -237,6 +238,12 @@
                                               <td>@driver.FullName</td>
                                               <td>@driver.Email</td>
                                               <td>@driver.PhoneNumber</td>
+                                              <td>
+                                                  <a asp-action="EditDriver" asp-route-id="@driver.DriverId" class="btn btn-sm btn-outline-secondary table-action-btn" title="Edit Driver"><i class="bi bi-pencil-fill"></i></a>
+                                                  <form asp-action="DeleteDriver" asp-route-id="@driver.DriverId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this driver?');">
+                                                      <button type="submit" class="btn btn-sm btn-outline-danger table-action-btn" title="Delete Driver"><i class="bi bi-trash-fill"></i></button>
+                                                  </form>
+                                              </td>
                                           </tr>
                                       }
                                   </tbody>
