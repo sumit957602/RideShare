@@ -270,7 +270,7 @@
     <!-- Custom Map Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // 1. Initialize the map and set its view to Patna, Bihar
+            // 1. Initialize the map and set its view to a default location (Patna, Bihar)
             const map = L.map('map').setView([25.5941, 85.1376], 13);
 
             // 2. Add a tile layer to the map (OpenStreetMap)
@@ -278,60 +278,83 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            // 3. Mock geocoding data for demonstration purposes
-            const locations = {
-                "patna junction": [25.6044, 85.1356],
-                "airport": [25.5913, 85.0887],
-                "gandhi maidan": [25.6171, 85.1431],
-                "iit patna": [25.5357, 84.8513]
-            };
-
             let originMarker = null;
             let destinationMarker = null;
             let routeLine = null;
 
             const originInput = document.getElementById('originInput');
             const destinationInput = document.getElementById('destinationInput');
+            const distanceInput = document.getElementById('distanceInput');
 
-            // Function to update map markers and route
-            function updateMap() {
-                const originValue = originInput.value.toLowerCase();
-                const destValue = destinationInput.value.toLowerCase();
+            // Helper: Geocode an address using the Nominatim API
+            async function geocode(query) {
+                if (!query) return null;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+                try {
+                    const response = await fetch(url);
+                    const results = await response.json();
+                    if (results.length > 0) {
+                        const lat = parseFloat(results[0].lat);
+                        const lon = parseFloat(results[0].lon);
+                        return [lat, lon];
+                    }
+                } catch (err) {
+                    console.error('Geocoding error:', err);
+                }
+                return null;
+            }
 
-                const originCoords = locations[originValue];
-                const destCoords = locations[destValue];
+            // Helper: Fetch route from OSRM and draw it on the map
+            async function drawRoute(originCoords, destCoords) {
+                const url = `https://router.project-osrm.org/route/v1/driving/${originCoords[1]},${originCoords[0]};${destCoords[1]},${destCoords[0]}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                    routeLine = L.polyline(coords, { color: 'var(--primary-color)' }).addTo(map);
+                    map.fitBounds(routeLine.getBounds().pad(0.1));
+                    if (distanceInput) {
+                        distanceInput.value = (route.distance / 1000).toFixed(2);
+                    }
+                }
+            }
+
+            // Function to update map markers and route using real APIs
+            async function updateMap() {
+                const originValue = originInput.value.trim();
+                const destValue = destinationInput.value.trim();
 
                 // Clear existing markers and line
-                if (originMarker) map.removeLayer(originMarker);
-                if (destinationMarker) map.removeLayer(destinationMarker);
-                if (routeLine) map.removeLayer(routeLine);
+                if (originMarker) { map.removeLayer(originMarker); originMarker = null; }
+                if (destinationMarker) { map.removeLayer(destinationMarker); destinationMarker = null; }
+                if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+
+                const originCoords = await geocode(originValue);
+                const destCoords = await geocode(destValue);
 
                 let points = [];
 
-                // Add origin marker
                 if (originCoords) {
-                    originMarker = L.marker(originCoords).addTo(map).bindPopup(`<b>Origin:</b> ${originInput.value}`).openPopup();
+                    originMarker = L.marker(originCoords).addTo(map).bindPopup(`<b>Origin:</b> ${originValue}`).openPopup();
                     points.push(originCoords);
                 }
 
-                // Add destination marker
                 if (destCoords) {
-                    destinationMarker = L.marker(destCoords).addTo(map).bindPopup(`<b>Destination:</b> ${destinationInput.value}`).openPopup();
+                    destinationMarker = L.marker(destCoords).addTo(map).bindPopup(`<b>Destination:</b> ${destValue}`).openPopup();
                     points.push(destCoords);
                 }
 
-                // Draw line and fit map to bounds if both points exist
-                if (points.length === 2) {
-                    routeLine = L.polyline(points, { color: 'var(--primary-color)' }).addTo(map);
-                    map.fitBounds(routeLine.getBounds().pad(0.1)); // zoom the map to the route
+                if (originCoords && destCoords) {
+                    await drawRoute(originCoords, destCoords);
                 } else if (points.length === 1) {
-                    map.setView(points[0], 14); // zoom to the single point
+                    map.setView(points[0], 13);
                 }
             }
 
             // 4. Add event listeners to input fields
-            originInput.addEventListener('input', updateMap);
-            destinationInput.addEventListener('input', updateMap);
+            originInput.addEventListener('change', updateMap);
+            destinationInput.addEventListener('change', updateMap);
         });
     </script>
 
