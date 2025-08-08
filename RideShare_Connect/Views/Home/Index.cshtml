@@ -1,0 +1,326 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fs-4" href="#">
+            <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#how-it-works">How It Works</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Features</a>
+                </li>
+            </ul>
+            <!-- Dropdown for User -->
+            <div class="dropdown ms-lg-3">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    User
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="UserAccount/Login">Login</a></li>
+                    <li><a class="dropdown-item" href="UserAccount/Register">Sign Up</a></li>
+                </ul>
+            </div>
+
+            <!-- Dropdown for Driver -->
+            <div class="dropdown ms-2">
+                <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Driver
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="DriverAccount/Login">Login</a></li>
+                    <li><a class="dropdown-item" href="DriverAccount/Register">Sign Up</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="mb-4">Share Rides,<br>Save Money & Planet!</h1>
+                <p class="lead mb-4">RideShare Connect is a carpooling platform connecting drivers and passengers for cost-effective, eco-friendly, and trusted travel.</p>
+                <a href="#booking" class="btn btn-primary btn-lg me-2">Find a Ride</a>
+                <a href="#booking" class="btn btn-outline-light btn-lg">Offer a Ride</a>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0">
+                <img src="~/Image/image1.png" class="img-fluid rounded-3" alt="Carpooling">
+            </div>
+        </div>
+    </div>
+    <div class="hero-zig-zag"></div>
+</section>
+
+<!-- Why RideShare Connect Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 class="display-5">Why Choose RideShare Connect?</h2>
+                <p class="text-muted mb-4">We aim to reduce transportation costs, decrease carbon footprint, and create a reliable and safe ride-sharing ecosystem for a trusted community of users.</p>
+                <div class="stat-box">
+                    <h3 class="display-4">40-60%</h3>
+                    <p class="mb-0 fs-5">Potential Cost Reduction</p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    <h6>Eco-Friendly Travel</h6>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6>Community Trust & Safety</h6>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <h6>Platform Reliability</h6>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" role="progressbar" style="width: 98%;" aria-valuenow="98" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                <img src="https://placehold.co/600x350/ff6600/ffffff?text=Trusted+Community" class="img-fluid rounded-3 mt-4" alt="Trusted Community">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Find a Ride Section -->
+<section id="booking" class="section-padding bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2>Find Your Ride in Seconds</h2>
+                <p class="section-subtitle">Fill out the form below to find or offer a ride instantly. Connect with verified users heading your way.</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="booking-form">
+                    <form class="row g-3">
+                        <div class="col-md-6">
+                            <label for="pickup" class="form-label">Leaving from</label>
+                            <input type="text" class="form-control" id="pickup" placeholder="Enter pick-up address">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dropoff" class="form-label">Going to</label>
+                            <input type="text" class="form-control" id="dropoff" placeholder="Enter destination address">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="seats" class="form-label">Number of Seats</label>
+                            <input type="number" class="form-control" id="seats" placeholder="1" min="1">
+                        </div>
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Search Rides</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="section-padding">
+    <div class="container text-center">
+        <h2 class="mb-3">How It Works</h2>
+        <p class="section-subtitle">A simple, intuitive process to get you on your way. Connect with drivers and passengers in just a few clicks.</p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="service-card">
+                    <img src="https://placehold.co/100x100/ffc107/1a1a1a?text=1" class="rounded-circle" alt="Search">
+                    <h4 class="mt-3">Find a Ride</h4>
+                    <p>Search for available rides using multiple filters like location, date, price, and vehicle type to find your perfect match.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card">
+                    <img src="https://placehold.co/100x100/ffc107/1a1a1a?text=2" class="rounded-circle" alt="Book">
+                    <h4 class="mt-3">Book & Pay</h4>
+                    <p>Book your seat with instant confirmation. Pay securely through our platform using multiple payment options.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="service-card">
+                    <img src="https://placehold.co/100x100/ffc107/1a1a1a?text=3" class="rounded-circle" alt="Travel">
+                    <h4 class="mt-3">Travel Together</h4>
+                    <p>Meet your driver and co-passengers. Enjoy a safe and affordable journey while making new connections.</p>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="btn btn-primary mt-5">Learn More</a>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="section-padding rates-section">
+    <div class="container text-center">
+        <h2 class="mb-3">A Platform Built for You</h2>
+        <p class="section-subtitle" style="color: rgba(255,255,255,0.7);">We provide a comprehensive set of features to ensure a seamless and secure carpooling experience for everyone.</p>
+        <div class="row g-4 justify-content-center">
+            <!-- User Management -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card text-center">
+                    <h3><i class="bi bi-people-fill me-2"></i>User Management</h3>
+                    <ul class="my-4">
+                        <li><i class="bi bi-check-circle-fill"></i> Multi-step Verification</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Detailed User Profiles</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Rating & Review System</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Secure Authentication</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Ride Operations -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card text-center">
+                    <h3><i class="bi bi-geo-alt-fill me-2"></i>Ride Operations</h3>
+                    <ul class="my-4">
+                        <li><i class="bi bi-check-circle-fill"></i> One-time & Recurring Rides</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Real-time Seat Tracking</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Automatic Ride Matching</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Flexible Cancellation Policies</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Payment System -->
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card text-center">
+                    <h3><i class="bi bi-wallet2 me-2"></i>Secure Payments</h3>
+                    <ul class="my-4">
+                        <li><i class="bi bi-check-circle-fill"></i> Multiple Payment Methods</li>
+                        <li><i class="bi bi-check-circle-fill"></i> PCI Compliant Processing</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Integrated Wallet System</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Automated Commission & Refunds</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section id="testimonials" class="section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-3">What Our Community Says</h2>
+                <p class="section-subtitle">Don't just take our word for it. Here's what our users have to say about their experience with RideShare Connect.</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="testimonial-card">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://placehold.co/80x80/ffc107/1a1a1a?text=User" class="rounded-circle" alt="Rider">
+                        <div class="ms-3">
+                            <h5 class="mb-0 text-light">Alex Rodriguez</h5>
+                            <p class="mb-0 text-muted">Daily Commuter</p>
+                        </div>
+                    </div>
+                    <p class="fst-italic">"Using RideShare Connect has cut my daily commute costs by half! It's easy to use, and I've met some great people along the way. The verification process makes me feel safe."</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Section -->
+<section class="video-section">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 p-0">
+                <div class="video-container">
+                    <img src="https://placehold.co/1920x600/ff6600/ffffff?text=Join+Our+Community" class="img-fluid w-100" alt="Video thumbnail">
+                    <i class="bi bi-play-circle-fill play-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Download App Section -->
+<section id="download" class="section-padding download-section text-center">
+    <div class="container">
+        <h2 class="text-light">Download the RideShare Connect App Today</h2>
+        <p class="lead mb-4">Get the full experience. Find, offer, track, and pay for your rides seamlessly with our mobile app.</p>
+        <div>
+            <a href="#" class="btn btn-light btn-lg me-2 mb-2"><i class="bi bi-apple me-2"></i> App Store</a>
+            <a href="#" class="btn btn-dark btn-lg ms-2 mb-2"><i class="bi bi-google-play me-2"></i> Google Play</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5>
+                <p>Your trusted platform for safe, comfortable, and affordable shared rides. Building a community, one ride at a time.</p>
+                <div class="social-icons mt-3">
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#">About Us</a></li>
+                    <li class="mb-2"><a href="#how-it-works">How It Works</a></li>
+                    <li class="mb-2"><a href="#features">Features</a></li>
+                    <li class="mb-2"><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6">
+                <h5>Legal</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                    <li class="mb-2"><a href="#">Terms of Service</a></li>
+                    <li class="mb-2"><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-4">
+                <h5>Contact Us</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li>
+                    <li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li>
+                    <li class="mb-2"><i class="bi bi-telephone-fill me-2"></i> +91 123-456-7890</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+        <div class="text-center">
+            <p>&copy; 2025 RideShare Connect. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+</body>

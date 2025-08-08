@@ -1,0 +1,191 @@
+@model RideShare_Connect.ViewModels.DriverDashboardViewModel
+@using System.Linq
+@{
+    ViewData["Title"] = "Driver Dashboard";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/driver.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="../../Home">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/images/default-profile.png" alt="" width="32" height="32" class="rounded-circle me-2" />
+                        <strong>@Model.Driver?.FullName</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li>
+                            <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+
+
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1 py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Driver Menu</h5>
+                            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                <button class="nav-link active text-start" data-bs-toggle="pill" data-bs-target="#v-pills-overview" type="button" role="tab"><i class="bi bi-speedometer2 me-2"></i>Overview</button>
+                                <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab"><i class="bi bi-person-badge-fill me-2"></i>Driver Profile</button>
+                                <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#v-pills-vehicles" type="button" role="tab"><i class="bi bi-car-front-fill me-2"></i>My Vehicles</button>
+                                <button class="nav-link text-start" data-bs-toggle="pill" data-bs-target="#v-pills-ratings" type="button" role="tab"><i class="bi bi-star-fill me-2"></i>Ratings & Reviews</button>
+                                <div class="p-3 mt-4">
+                                    <a class="btn btn-primary w-100" asp-action="CreateRide">
+                                        <i class="bi bi-plus-circle-fill me-2"></i>Create a New Ride
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <div class="tab-pane fade show active" id="v-pills-overview" role="tabpanel">
+                            <h4 class="mb-4">Driver Overview</h4>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-warning-subtle text-warning me-3"><i class="bi bi-star-fill"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.AverageRating.ToString("0.0")</h5>
+                                                <p class="text-muted mb-0">Overall Rating</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel">
+                            <h4 class="mb-4">Driver Profile</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item"><strong>Name:</strong> @Model.Driver?.FullName</li>
+                                        <li class="list-group-item"><strong>Email:</strong> @Model.Driver?.Email</li>
+                                        <li class="list-group-item"><strong>Phone:</strong> @Model.Driver?.PhoneNumber</li>
+                                        <li class="list-group-item"><strong>License Number:</strong> @Model.DriverProfile?.LicenseNumber</li>
+                                        <li class="list-group-item"><strong>Background Check:</strong> @Model.DriverProfile?.BackgroundCheckStatus</li>
+                                        <li class="list-group-item"><strong>Experience:</strong> @Model.DriverProfile?.DrivingExperienceYears years</li>
+                                        <li class="list-group-item"><strong>References:</strong> @Model.DriverProfile?.ReferenceContacts</li>
+                                    </ul>
+                                    <div class="mt-3 text-end">
+                                        <a asp-action="EditProfile" class="btn btn-primary">Update Profile</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-vehicles" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="mb-0">My Vehicles</h4>
+                                <a asp-action="AddVehicle" class="btn btn-primary"><i class="bi bi-plus-circle-fill me-2"></i>Register New Vehicle</a>
+                            </div>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead><tr><th>Vehicle</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+                                            <tbody>
+                                                @if (Model.Vehicles.Any())
+                                                {
+                                                    foreach (var v in Model.Vehicles)
+                                                    {
+                                                        <tr>
+                                                            <td>@v.LicensePlate (@v.Model)</td>
+                                                            <td>@v.VehicleType</td>
+                                                            <td><span class="badge bg-secondary">@v.Status</span></td>
+                                                            <td>
+                                                                <a asp-action="EditVehicle" asp-route-id="@v.Id" class="btn btn-sm btn-primary me-2">Edit</a>
+                                                                <form asp-action="DeleteVehicle" asp-route-id="@v.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                                </form>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <tr><td colspan="4">No vehicles registered.</td></tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane fade" id="v-pills-ratings" role="tabpanel">
+                            <h4 class="mb-4">Passenger Ratings & Reviews</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <h2 class="display-4 fw-bold">@Model.AverageRating.ToString("0.0") <i class="bi bi-star-fill text-warning"></i></h2>
+                                    </div>
+                                    <h5 class="mt-4">Recent Feedback</h5>
+                                    @if (Model.RecentRatings.Any())
+                                    {
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var r in Model.RecentRatings)
+                                            {
+                                                <li class="list-group-item"><strong>@r.Rating <i class="bi bi-star-fill text-warning"></i>:</strong> @r.Review</li>
+                                            }
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <p>No ratings available.</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4"><h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5><p>Your trusted platform for safe, comfortable, and affordable shared rides.</p></div>
+                <div class="col-lg-2 col-md-4 col-6"><h5>Quick Links</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">About Us</a></li><li class="mb-2"><a href="#">Contact</a></li></ul></div>
+                <div class="col-lg-3 col-md-4 col-6"><h5>Legal</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">Privacy Policy</a></li><li class="mb-2"><a href="#">Terms of Service</a></li></ul></div>
+                <div class="col-lg-3 col-md-4"><h5>Contact Us</h5><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li><li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li></ul></div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);"><div class="text-center"><p>&copy; 2025 RideShare Connect. All Rights Reserved.</p></div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

@@ -1,0 +1,49 @@
+# Dependencies
+**/[Dd]ependencies/
+**/[Pp]ackages/
+
+# Build results
+[Bb]uild/
+[Bb]uildArtefacts/
+[Tt]est[Rr]esult*/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio generated files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files
+*.rsuser
+config.Debug.xcg
+config.Release.xcg
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.log
+*.scc
+
+# Local secrets and configuration files
+secrets.json

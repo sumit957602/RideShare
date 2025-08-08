@@ -1,0 +1,115 @@
+﻿:root {
+    --primary-color: #ff6600;
+    --secondary-color: #ffc107;
+    --dark-color: #1a1a1a;
+    --light-color: #f8f9fa;
+    --text-dark: #333;
+    --text-light: #fff;
+    --body-bg: #f1f5f9;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--body-bg);
+}
+
+.navbar {
+    background-color: var(--dark-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+    .navbar .nav-link {
+        color: var(--text-light) !important;
+        font-weight: 500;
+    }
+
+        .navbar .nav-link:hover, .navbar .nav-link.active {
+            color: var(--secondary-color) !important;
+        }
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--text-light) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+    .btn-primary:hover {
+        background-color: #e65c00;
+        border-color: #e65c00;
+    }
+
+#sidebar {
+    background-color: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    transition: margin-left .3s;
+}
+
+    #sidebar .nav-link {
+        color: #555;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-left: 3px solid transparent;
+        cursor: pointer;
+    }
+
+        #sidebar .nav-link.active,
+        #sidebar .nav-link:hover {
+            color: var(--primary-color);
+            background-color: #fef2e6;
+            border-left-color: var(--primary-color);
+        }
+
+        #sidebar .nav-link i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+
+.main-content {
+    padding: 2rem;
+}
+
+.stat-card {
+    background-color: #fff;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+    .stat-card .icon {
+        font-size: 2rem;
+        padding: 1rem;
+        border-radius: 50%;
+    }
+
+.card {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    border: none;
+}
+
+.profile-img-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    margin: 0 auto 1.5rem auto;
+}
+
+    .profile-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.form-group-label-left .form-label {
+    text-align: left !important; 
+    width: 100%; 
+}

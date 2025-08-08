@@ -1,0 +1,93 @@
+﻿.about-container {
+    width: 100%;
+    margin: 0;
+    padding: 3rem 2rem;
+    background: #222;
+    color: #fff;
+    border-radius: 1.6rem;
+    box-shadow: 0 5px 18px #0003;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.about-hero h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #ffc107;
+}
+
+    .about-hero h1 span {
+        color: #ff4500;
+    }
+
+.about-hero p {
+    margin-top: 1rem;
+    font-size: 1.18rem;
+}
+
+.about-mission, .about-values, .about-contact {
+    margin: 2.2rem 0;
+}
+
+    .about-mission h2, .about-values h2, .about-contact h2 {
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .about-mission p {
+        font-size: 1.1rem;
+    }
+
+.about-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem 0;
+    gap: 1.3rem;
+}
+
+.about-stat {
+    background: #191919;
+    border-radius: 1.2rem;
+    text-align: center;
+    flex: 1;
+    margin: 0 0.5rem;
+    padding: 1.5rem 0.8rem;
+    box-shadow: 0 1px 6px #0002;
+}
+
+    .about-stat h3 {
+        font-size: 2.2rem;
+        color: #ffc107;
+        margin-bottom: 0.3rem;
+    }
+
+    .about-stat span {
+        font-size: 1.1rem;
+        color: #fff;
+    }
+
+.about-values ul {
+    list-style: disc inside;
+    padding-left: 1.5rem;
+}
+
+.about-values li {
+    margin-bottom: 0.65rem;
+    font-size: 1.08rem;
+}
+
+.about-contact a {
+    color: #ffc107;
+    text-decoration: underline;
+}
+
+@media (max-width: 800px) {
+    .about-stats {
+        flex-direction: column;
+    }
+
+    .about-stat {
+        margin-bottom: 1rem;
+    }
+}

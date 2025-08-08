@@ -1,0 +1,175 @@
+﻿
+
+@{
+    ViewData["Title"] = "Privacy Settings";
+
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/userprivacysettings.css" asp-append-version="true" / >
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="#">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../Home/Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../UserDashboard/User">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../FinancialDashboard/Finance">Payments & Finance</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="" alt="Profile" width="32" height="32" class="rounded-circle me-2">
+                        <strong>Saras Kamble</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column" id="sidebar-nav" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" href="../UserDashboard/User">
+                                <i class="bi bi-speedometer2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../UserDashboard/UserProfile">
+                                <i class="bi bi-person-circle"></i>Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="bi bi-person-circle"></i>Privacy Settings
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="nav-link btn btn-link p-0">
+                                    <i class="bi bi-box-arrow-left"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-9 ms-sm-auto col-lg-10 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Privacy Settings</h1>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card p-4">
+                            <div class="card-body">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        @TempData["SuccessMessage"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+
+                                <form asp-action="PrivacySettings" method="post">
+                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <input type="hidden" />
+                                    <input type="hidden"  />
+
+                                    <h5 class="mb-3">Profile and Data Visibility</h5>
+
+                                    <div class="mb-3 form-group-label-left">
+                                        <label  class="form-label">Who can see my profile?</label>
+                                        <select  class="form-select">
+                                            <option value="Public">Public (Everyone)</option>
+                                            <option value="Friends">Friends Only</option>
+                                            <option value="Private">Private (Only Me)</option>
+                                        </select>
+                                        <span  class="text-danger"></span>
+                                    </div>
+
+
+                                    <hr class="my-4">
+                                    <h5 class="mb-3">Notification Preferences</h5>
+                                    <div class="mb-3 form-group-label-left">
+                                        <label  class="form-label">How would you like to receive notifications?</label>
+                                        <select  class="form-select">
+                                            <option value="Email">Email</option>
+                                            <option value="SMS">SMS</option>
+                                            <option value="Both">Email & SMS</option>
+                                            <option value="None">No Notifications</option>
+                                        </select>
+                                        <span  class="text-danger"></span>
+                                    </div>
+
+                                    <hr class="my-4">
+                                    <h5 class="mb-3">General Settings</h5>
+                                    <div class="mb-3 form-group-label-left">
+                                        <label  class="form-label">Preferred Language</label>
+                                        <select  class="form-select">
+                                            <option value="English">English</option>
+                                            <option value="Hindi">Hindi</option>
+                                            <option value="Marathi">Marathi</option>
+
+                                        </select>
+                                        <span class="text-danger"></span>
+                                    </div>
+
+
+                                    <div class="col-12 text-end mt-4">
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+
+                                <hr class="my-4" />
+                                <h5 class="mb-3 text-danger">Delete Account</h5>
+                                <a class="btn btn-danger" asp-action="DeleteAccount" asp-controller="UserDashboard">Delete My Account</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bootstrap JS Bundle -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                <script>
+                    // This script handles the sidebar navigation to control the main content tabs
+                    document.addEventListener('DOMContentLoaded', function () {
+                        const sidebarNav = document.getElementById('sidebar-nav');
+                        const navLinks = sidebarNav.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+
+                        navLinks.forEach(link => {
+                            link.addEventListener('click', function (event) {
+                                // Remove active class from all sidebar links
+                                navLinks.forEach(l => l.classList.remove('active'));
+                                // Add active class to the clicked link
+                                event.currentTarget.classList.add('active');
+                            });
+                        });
+                    });
+                </script>
+</body>

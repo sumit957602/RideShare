@@ -1,0 +1,19 @@
+@RideShare_Connect_HostAddress = https://localhost:7221
+
+GET {{RideShare_Connect_HostAddress}}/
+Accept: text/html
+
+### Update a user
+PUT {{RideShare_Connect_HostAddress}}/api/admin/users/1
+Content-Type: application/json
+
+{
+  "email": "new@example.com",
+  "phoneNumber": "1234567890",
+  "fullName": "Updated User",
+  "userType": "Driver",
+  "accountStatus": "Active"
+}
+
+### Delete a user
+DELETE {{RideShare_Connect_HostAddress}}/api/admin/users/1

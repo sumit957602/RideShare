@@ -1,0 +1,24 @@
+@model RideShare_Connect.Models.PaymentManagement.PaymentMethod
+@{
+    ViewData["Title"] = "Add Payment Method";
+}
+<h2 class="mb-4">Add Payment Method</h2>
+<form asp-action="AddPaymentMethod" method="post">
+    <div class="mb-3">
+        <label asp-for="MethodType" class="form-label"></label>
+        <input asp-for="MethodType" class="form-control" />
+        <span asp-validation-for="MethodType" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="CardNumber" class="form-label"></label>
+        <input asp-for="CardNumber" class="form-control" />
+        <span asp-validation-for="CardNumber" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ExpiryDate" class="form-label"></label>
+        <input asp-for="ExpiryDate" class="form-control" type="date" />
+        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
+</form>

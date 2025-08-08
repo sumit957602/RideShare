@@ -1,0 +1,158 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using RideShare_Connect.Api.Data;
+using RideShare_Connect.DTOs;
+using RideShare_Connect.Models.PaymentManagement;
+
+namespace RideShare_Connect.Services
+{
+    public class PaymentService
+    {
+        private readonly ApplicationDbContext _context;
+
+        public PaymentService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Payment> ProcessPaymentAsync(PaymentProcessDto dto)
+        {
+            var payment = new Payment
+            {
+                UserId = dto.UserId,
+                BookingId = dto.BookingId,
+                Amount = dto.Amount,
+                PaymentMethodId = dto.PaymentMethodId,
+                PaymentDate = DateTime.UtcNow,
+                Status = "Completed"
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+            return payment;
+        }
+
+        public async Task<Wallet> AddMoneyAsync(AddMoneyDto dto)
+        {
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == dto.UserId);
+            if (wallet == null)
+            {
+                wallet = new Wallet
+                {
+                    UserId = dto.UserId,
+                    Balance = 0,
+                    LastUpdated = DateTime.UtcNow
+                };
+                _context.Wallets.Add(wallet);
+            }
+
+            wallet.Balance += dto.Amount;
+            wallet.LastUpdated = DateTime.UtcNow;
+
+            _context.WalletTransactions.Add(new WalletTransaction
+            {
+                Wallet = wallet,
+                Amount = dto.Amount,
+                TxnType = "Credit",
+                TxnDate = DateTime.UtcNow,
+                Description = "Wallet top-up"
+            });
+
+            await _context.SaveChangesAsync();
+            return wallet;
+        }
+
+        public async Task<decimal> GetWalletBalanceAsync(int userId)
+        {
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
+            return wallet?.Balance ?? 0m;
+        }
+
+        public async Task<List<Payment>> GetPaymentHistoryAsync(int userId)
+        {
+            return await _context.Payments
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+        }
+
+        public async Task<Refund> RequestRefundAsync(RefundRequestDto dto)
+        {
+            var refund = new Refund
+            {
+                PaymentId = dto.PaymentId,
+                Amount = dto.Amount,
+                Reason = dto.Reason,
+                RefundStatus = "Pending",
+                ProcessedAt = DateTime.UtcNow
+            };
+            _context.Refunds.Add(refund);
+            await _context.SaveChangesAsync();
+            return refund;
+        }
+
+        public async Task<List<PaymentMethod>> GetPaymentMethodsAsync(int userId)
+        {
+            return await _context.PaymentMethods
+                .Where(pm => pm.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<PaymentMethod> SavePaymentMethodAsync(SavePaymentMethodDto dto)
+        {
+            var method = new PaymentMethod
+            {
+                UserId = dto.UserId,
+                MethodType = dto.MethodType,
+                CardNumber = dto.CardNumber,
+                ExpiryDate = dto.ExpiryDate
+            };
+            _context.PaymentMethods.Add(method);
+            await _context.SaveChangesAsync();
+            return method;
+        }
+
+        public async Task<PaymentMethod?> UpdatePaymentMethodAsync(PaymentMethodUpdateDto dto)
+        {
+            var method = await _context.PaymentMethods.FindAsync(dto.Id);
+            if (method == null)
+            {
+                return null;
+            }
+
+            if (!string.IsNullOrEmpty(dto.MethodType))
+            {
+                method.MethodType = dto.MethodType;
+            }
+
+            if (!string.IsNullOrEmpty(dto.CardNumber))
+            {
+                method.CardNumber = dto.CardNumber;
+            }
+
+            if (dto.ExpiryDate.HasValue)
+            {
+                method.ExpiryDate = dto.ExpiryDate;
+            }
+
+            await _context.SaveChangesAsync();
+            return method;
+        }
+
+        public async Task<bool> DeletePaymentMethodAsync(int id)
+        {
+            var method = await _context.PaymentMethods.FindAsync(id);
+            if (method == null)
+            {
+                return false;
+            }
+
+            _context.PaymentMethods.Remove(method);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    }
+}
