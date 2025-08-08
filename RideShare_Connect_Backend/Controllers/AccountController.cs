@@ -14,10 +14,7 @@ using System.Security.Claims; // Required for Claims
 using System.Text; // Required for Encoding
 using System.IO;
 using RideShare_Connect_Backend.Services;
-using Google.Apis.Auth;
-using System.Net.Http;
-using System.Net.Http.Json;
-
+using Microsoft.Extensions.Caching.Distributed;
 namespace RideShare_Connect.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -30,14 +27,15 @@ namespace RideShare_Connect.Api.Controllers
         private readonly IConfiguration _configuration; // Inject IConfiguration
         private readonly IWebHostEnvironment _environment;
         private readonly IEmailService _emailService;
-
-        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment, IEmailService emailService)
+        private readonly IDistributedCache _cache;
+        public UsersController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher, IConfiguration configuration, IWebHostEnvironment environment, IEmailService emailService, IDistributedCache cache)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration; // Initialize IConfiguration
             _environment = environment;
             _emailService = emailService;
+            _cache = cache;
         }
 
         // GET: api/Users
@@ -91,12 +89,47 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(userDto);
         }
 
+        [AllowAnonymous]
+        [HttpPost("send-verification-otp")]
+        public async Task<IActionResult> SendVerificationOtp([FromBody] UserRegisterDto dto)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            {
+                return Conflict("User with this email already exists.");
+            }
+
+            // Generate a 6-digit OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+            var cacheKey = $"Registration-Otp-{dto.Email}";
+            var expiration = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // OTP valid for 5 minutes
+            };
+
+            // Store the OTP in the cache (key: email, value: otp)
+            await _cache.SetStringAsync(cacheKey, otp, expiration);
+
+            // Send the OTP via email
+            await _emailService.SendOtpEmailAsync(dto.Email, dto.FullName ?? "New User", otp, "Registration");
+
+            return Ok("An OTP has been sent to your email for verification.");
+        }
+
         // POST: api/Users/register
         // This endpoint should *not* require authorization as new users won't have a token.
-        [AllowAnonymous] // <--- IMPORTANT: Allow unauthenticated access
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> RegisterUser(UserRegisterDto userRegisterDto)
         {
+            // Validate OTP from cache
+            var cacheKey = $"Registration-Otp-{userRegisterDto.Email}";
+            var storedOtp = await _cache.GetStringAsync(cacheKey);
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != userRegisterDto.Otp)
+            {
+                return BadRequest("Invalid or expired OTP.");
+            }
+
             if (await _context.Users.AnyAsync(u => u.Email == userRegisterDto.Email))
             {
                 return Conflict("User with this email already exists.");
@@ -124,6 +157,9 @@ namespace RideShare_Connect.Api.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
             await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.UserProfile.FullName);
+
+            // Remove OTP from cache after successful registration
+            await _cache.RemoveAsync(cacheKey);
 
             var userDto = new UserDto
             {
@@ -213,171 +249,58 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("google-token")]
-        public async Task<ActionResult<GoogleTokenResponseDto>> GetGoogleToken(GoogleTokenRequestDto dto)
-        {
-            var clientId = _configuration["GoogleAuth:ClientId"];
-            var clientSecret = _configuration["GoogleAuth:ClientSecret"];
-
-            var values = new Dictionary<string, string>
-            {
-                {"code", dto.Code},
-                {"client_id", clientId},
-                {"client_secret", clientSecret},
-                {"redirect_uri", dto.RedirectUri},
-                {"grant_type", "authorization_code"}
-            };
-
-            using var content = new FormUrlEncodedContent(values);
-            using var httpClient = new HttpClient();
-            var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token", content);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                return StatusCode((int)response.StatusCode, error);
-            }
-
-            var tokenResponse = await response.Content.ReadFromJsonAsync<GoogleTokenResponseDto>();
-            if (tokenResponse == null)
-            {
-                return StatusCode(500, "Failed to parse Google token response.");
-            }
-
-            return Ok(tokenResponse);
-        }
-
-        [AllowAnonymous]
-        [HttpPost("google-login")]
-        public async Task<ActionResult<AuthResponseDto>> GoogleLogin(GoogleLoginDto googleDto)
-        {
-            GoogleJsonWebSignature.Payload payload;
-            try
-            {
-                payload = await GoogleJsonWebSignature.ValidateAsync(googleDto.IdToken, new GoogleJsonWebSignature.ValidationSettings
-                {
-                    Audience = new[] { _configuration["GoogleAuth:ClientId"] }
-                });
-            }
-            catch (InvalidJwtException)
-            {
-                return Unauthorized("Invalid Google token.");
-            }
-
-            var user = await _context.Users
-                                     .Include(u => u.UserProfile)
-                                     .FirstOrDefaultAsync(u => u.Email.ToLower() == payload.Email.ToLower());
-
-            if (user == null)
-            {
-                var newUser = new User
-                {
-                    Email = payload.Email,
-                    PhoneNumber = string.Empty,
-                    UserType = "Rider",
-                    AccountStatus = "Active",
-                    CreatedAt = DateTime.UtcNow,
-                };
-
-                newUser.PasswordHash = _passwordHasher.HashPassword(newUser, Guid.NewGuid().ToString());
-                newUser.UserProfile = new UserProfile
-                {
-                    FullName = payload.Name,
-                    ProfilePicture = payload.Picture,
-                    Bio = "Default bio message for new users.",
-                    EmergencyContact = "Nan",
-                };
-
-                _context.Users.Add(newUser);
-                await _context.SaveChangesAsync();
-                user = newUser;
-            }
-
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.UserType ?? "Rider")
-            };
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Issuer = jwtSettings["Issuer"],
-                Audience = jwtSettings["Audience"]
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            var refreshToken = new RefreshToken
-            {
-                UserId = user.Id,
-                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
-                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.RefreshTokens.Add(refreshToken);
-            await _context.SaveChangesAsync();
-
-            var responseDto = new AuthResponseDto
-            {
-                Token = tokenString,
-                RefreshToken = refreshToken.Token,
-                UserId = user.Id,
-                Email = user.Email,
-                FullName = user.UserProfile?.FullName,
-                ProfilePicture = user.UserProfile?.ProfilePicture,
-                UserType = user.UserType
-            };
-
-            return Ok(responseDto);
-        }
-
-        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (user == null)
             {
-                return NotFound("User not found.");
+                // For security, don't reveal if a user exists or not.
+                return Ok("If your account exists, a password reset OTP has been sent to your email.");
             }
 
-            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            var record = new PasswordResetToken
+            // Generate a 6-digit OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+            var cacheKey = $"PasswordReset-Otp-{user.Email}";
+            var expiration = new DistributedCacheEntryOptions
             {
-                UserId = user.Id,
-                Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(1)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // OTP valid for 5 minutes
             };
-            _context.PasswordResetTokens.Add(record);
-            await _context.SaveChangesAsync();
 
-            // In production, send the token via email. Here we return it for testing.
-            return Ok(new { Token = token });
+            // Store the OTP in the cache
+            await _cache.SetStringAsync(cacheKey, otp, expiration);
+
+            // Send the OTP via email
+            await _emailService.SendOtpEmailAsync(user.Email, user.UserProfile?.FullName ?? "User", otp, "PasswordReset");
+
+            return Ok("Password reset OTP sent to your email.");
         }
+
 
         [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
         {
-            var record = await _context.PasswordResetTokens.Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Token == dto.Token && r.ExpiresAt > DateTime.UtcNow);
-            if (record == null)
+            // Validate OTP from cache
+            var cacheKey = $"PasswordReset-Otp-{dto.Email}";
+            var storedOtp = await _cache.GetStringAsync(cacheKey);
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != dto.Otp)
             {
-                return BadRequest("Invalid or expired token.");
+                return BadRequest("Invalid or expired OTP.");
             }
 
-            var user = record.User;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
             user.PasswordHash = _passwordHasher.HashPassword(user, dto.NewPassword);
-            _context.PasswordResetTokens.Remove(record);
+
+            // Remove the OTP from the cache after successful use
+            await _cache.RemoveAsync(cacheKey);
+
             await _context.SaveChangesAsync();
 
             return Ok("Password reset successful.");
@@ -429,7 +352,7 @@ namespace RideShare_Connect.Api.Controllers
             return NoContent();
         }
 
-        
+
         // PUT: api/Users/5
         // This endpoint should typically require authorization for a user to update their own profile
         // [Authorize] // Uncomment this to protect this endpoint

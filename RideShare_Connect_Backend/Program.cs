@@ -21,7 +21,7 @@ builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

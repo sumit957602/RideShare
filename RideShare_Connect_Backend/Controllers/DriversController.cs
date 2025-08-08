@@ -2,18 +2,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
+using RideShare_Connect_Backend.Services;
+using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -24,12 +26,16 @@ namespace RideShare_Connect.Api.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<Driver> _passwordHasher;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
+        private readonly IDistributedCache _cache;
 
-        public DriversController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher, IConfiguration configuration)
+        public DriversController(ApplicationDbContext context, IPasswordHasher<Driver> passwordHasher, IConfiguration configuration, IEmailService emailService, IDistributedCache cache)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _configuration = configuration;
+            _emailService = emailService;
+            _cache = cache;
         }
 
         [AllowAnonymous]
@@ -128,41 +134,55 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
-            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.Email == dto.Email);
+            var driver = await _context.Driver.FirstOrDefaultAsync(u => u.Email == dto.Email);
             if (driver == null)
             {
-                return NotFound("Driver not found.");
+                // For security, don't reveal if a user exists or not.
+                return Ok("If your account exists, a password reset OTP has been sent to your email.");
             }
 
-            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-            var record = new DriverPasswordResetToken
+            // Generate a 6-digit OTP
+            var otp = new Random().Next(100000, 999999).ToString();
+            var cacheKey = $"PasswordReset-Otp-{driver.Email}";
+            var expiration = new DistributedCacheEntryOptions
             {
-                DriverId = driver.DriverId,
-                Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(1)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // OTP valid for 5 minutes
             };
 
-            _context.DriverPasswordResetTokens.Add(record);
-            await _context.SaveChangesAsync();
+            // Store the OTP in the cache
+            await _cache.SetStringAsync(cacheKey, otp, expiration);
 
-            // In production, send the token via email. Returning for testing.
-            return Ok(new { Token = token });
+            // Send the OTP via email
+            await _emailService.SendOtpEmailAsync(driver.Email, driver?.FullName ?? "User", otp, "PasswordReset");
+
+            return Ok("Password reset OTP sent to your email.");
         }
+
 
         [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
         {
-            var record = await _context.DriverPasswordResetTokens.Include(r => r.Driver)
-                .FirstOrDefaultAsync(r => r.Token == dto.Token && r.ExpiresAt > DateTime.UtcNow);
-            if (record == null)
+            // Validate OTP from cache
+            var cacheKey = $"PasswordReset-Otp-{dto.Email}";
+            var storedOtp = await _cache.GetStringAsync(cacheKey);
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != dto.Otp)
             {
-                return BadRequest("Invalid or expired token.");
+                return BadRequest("Invalid or expired OTP.");
             }
 
-            var driver = record.Driver;
+            var driver = await _context.Driver.FirstOrDefaultAsync(u => u.Email == dto.Email);
+            if (driver == null)
+            {
+                return NotFound("User not found.");
+            }
+
             driver.PasswordHash = _passwordHasher.HashPassword(driver, dto.NewPassword);
-            _context.DriverPasswordResetTokens.Remove(record);
+
+            // Remove the OTP from the cache after successful use
+            await _cache.RemoveAsync(cacheKey);
+
             await _context.SaveChangesAsync();
 
             return Ok("Password reset successful.");
