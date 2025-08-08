@@ -151,11 +151,13 @@ namespace RideShare_Connect.Controllers
             var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                var response = await httpClient.PostAsJsonAsync("api/Drivers/forgot-password", dto);
+                // Step 1: Request OTP for password reset
+                var response = await httpClient.PostAsJsonAsync("api/drivers/forgot-password", dto);
                 if (response.IsSuccessStatusCode)
                 {
-                    var tokenResponse = await response.Content.ReadFromJsonAsync<PasswordResetTokenDto>();
-                    return RedirectToAction("ResetPassword", new { token = tokenResponse?.Token });
+                    TempData["SuccessMessage"] = "A password reset OTP has been sent to your email. Please check your inbox to continue.";
+                    TempData["UserEmailForReset"] = dto.Email; // Store email to pass to the next view
+                    return RedirectToAction("ResetPassword");
                 }
                 var error = await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError(string.Empty, $"Error: {error}");
@@ -164,13 +166,21 @@ namespace RideShare_Connect.Controllers
             {
                 ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
             }
-
             return View(dto);
         }
 
-        public IActionResult ResetPassword(string token)
+        public IActionResult ResetPassword()
         {
-            return View(new ResetPasswordDto { Token = token });
+            // Retrieve the email from TempData
+            var email = TempData["UserEmailForReset"] as string;
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = "Password reset process not initiated or expired. Please request a new OTP.";
+                return RedirectToAction("ForgotPassword");
+            }
+            // Keep the email in TempData for subsequent postback if validation fails
+            TempData.Keep("UserEmailForReset");
+            return View(new ResetPasswordDto { Email = email });
         }
 
         [HttpPost]
@@ -179,26 +189,29 @@ namespace RideShare_Connect.Controllers
         {
             if (!ModelState.IsValid)
             {
+                TempData.Keep("UserEmailForReset"); // Keep email if validation fails
                 return View(dto);
             }
 
             var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                var response = await httpClient.PostAsJsonAsync("api/Drivers/reset-password", dto);
+                // Step 2: Verify OTP and reset password
+                var response = await httpClient.PostAsJsonAsync("api/drivers/reset-password", dto);
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "Password reset successful. Please log in.";
+                    TempData["SuccessMessage"] = "Password reset successful. Please log in with your new password.";
                     return RedirectToAction("Login");
                 }
                 var error = await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError(string.Empty, $"Error: {error}");
+                TempData.Keep("UserEmailForReset"); // Keep email if API call fails
             }
             catch (HttpRequestException ex)
             {
                 ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                TempData.Keep("UserEmailForReset");
             }
-
             return View(dto);
         }
     }
