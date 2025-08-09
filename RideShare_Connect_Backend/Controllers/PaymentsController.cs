@@ -22,6 +22,17 @@ namespace RideShare_Connect.Controllers
             return Ok(payment);
         }
 
+        [HttpPost("confirm")]
+        public async Task<IActionResult> ConfirmPayment(PaymentConfirmDto dto)
+        {
+            var payment = await _paymentService.ConfirmPaymentAsync(dto);
+            if (payment == null)
+            {
+                return NotFound();
+            }
+            return Ok(payment);
+        }
+
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory([FromQuery] int userId)
         {
