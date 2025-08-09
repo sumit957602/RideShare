@@ -35,6 +35,11 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound("Vehicle not found");
             }
 
+            if (dto.DepartureTime < DateTime.UtcNow)
+            {
+                return BadRequest("Cannot create a ride in the past.");
+            }
+
             var ride = new Ride
             {
                 DriverId = dto.DriverId,
