@@ -50,13 +50,14 @@ namespace RideShare_Connect.Controllers
             var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                // Corrected: Send the entire 'model' object, not an anonymous object.
                 var response = await httpClient.PostAsJsonAsync("api/Users/send-verification-otp", model);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "An OTP has been sent to your email. Please check your inbox to verify and complete registration.";
-                    TempData["RegistrationData"] = JsonSerializer.Serialize(model);
+                    var result = await response.Content.ReadFromJsonAsync<RegistrationOtpResponseDto>();
+
+                    TempData["SuccessMessage"] = result?.Message ?? "An OTP has been sent to your email. Please check your inbox to verify and complete registration.";
+                    TempData["RegistrationId"] = result?.Id;
                     return RedirectToAction("VerifyRegistrationOtp");
                 }
                 else
@@ -82,14 +83,13 @@ namespace RideShare_Connect.Controllers
 
         public IActionResult VerifyRegistrationOtp()
         {
-            // Ensure registration data is present before showing the view
-            if (TempData["RegistrationData"] == null)
+            if (TempData["RegistrationId"] == null)
             {
                 TempData["ErrorMessage"] = "Registration process not initiated or expired. Please register again.";
                 return RedirectToAction("Register");
             }
-            // Keep the TempData for subsequent postback if validation fails
-            TempData.Keep("RegistrationData");
+
+            TempData.Keep("RegistrationId");
             return View();
         }
 
@@ -97,55 +97,51 @@ namespace RideShare_Connect.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifyRegistrationOtp(string otp)
         {
-            var registrationDataJson = TempData["RegistrationData"]?.ToString();
-            if (string.IsNullOrEmpty(registrationDataJson))
+            var registrationId = TempData["RegistrationId"]?.ToString();
+            if (string.IsNullOrEmpty(registrationId))
             {
                 TempData["ErrorMessage"] = "Registration process expired. Please try again.";
                 return RedirectToAction("Register");
             }
 
-            var model = JsonSerializer.Deserialize<UserRegisterDto>(registrationDataJson);
-            model.Otp = otp; // Add the OTP received from the user
+            var verifyDto = new UserRegisterVerifyDto
+            {
+                RegistrationId = registrationId,
+                Otp = otp
+            };
 
             var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                // Step 2: Verify OTP and complete registration
-                var jsonContent = new StringContent(
-                    JsonSerializer.Serialize(model),
-                    Encoding.UTF8,
-                    "application/json"
-                );
-                var response = await httpClient.PostAsync("api/Users/register", jsonContent);
+                var response = await httpClient.PostAsJsonAsync("api/Users/register", verifyDto);
 
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "User registered successfully! You can now log in.";
-                    _logger.LogInformation("User {Email} registered successfully after OTP verification.", model.Email);
+                    _logger.LogInformation("User registration completed for RegistrationId {RegistrationId}.", registrationId);
                     return RedirectToAction("Login");
                 }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     ModelState.AddModelError(string.Empty, $"Verification failed: {response.StatusCode} - {errorContent}");
-                    _logger.LogError("Error verifying OTP and registering user {Email}: {StatusCode} - {ErrorContent}", model.Email, response.StatusCode, errorContent);
-                    // Keep the registration data if verification fails, so user can re-enter OTP
-                    TempData["RegistrationData"] = registrationDataJson;
+                    _logger.LogError("Error verifying OTP for RegistrationId {RegistrationId}: {StatusCode} - {ErrorContent}", registrationId, response.StatusCode, errorContent);
+                    TempData["RegistrationId"] = registrationId;
                 }
             }
             catch (HttpRequestException ex)
             {
                 ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}. Make sure your API is running and accessible.");
-                _logger.LogError(ex, "HTTP request error during OTP verification and registration for {Email}.", model.Email);
-                TempData["RegistrationData"] = registrationDataJson;
+                _logger.LogError(ex, "HTTP request error during OTP verification for RegistrationId {RegistrationId}.", registrationId);
+                TempData["RegistrationId"] = registrationId;
             }
             catch (JsonException ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error parsing API response during OTP verification and registration: {ex.Message}");
-                _logger.LogError(ex, "JSON parsing error during OTP verification and registration for {Email}.", model.Email);
-                TempData["RegistrationData"] = registrationDataJson;
+                ModelState.AddModelError(string.Empty, $"Error parsing API response during OTP verification: {ex.Message}");
+                _logger.LogError(ex, "JSON parsing error during OTP verification for RegistrationId {RegistrationId}.", registrationId);
+                TempData["RegistrationId"] = registrationId;
             }
-            return View(); // Stay on the verification page if there's an error
+            return View();
         }
         public IActionResult Login()
         {
