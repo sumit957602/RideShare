@@ -167,6 +167,30 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(new { totalUsers, totalRides, totalDrivers, totalVehicles });
         }
 
+        [HttpGet("rides")]
+        public async Task<IActionResult> GetRides()
+        {
+            var rides = await _context.Rides
+                .Select(r => new RideDto
+                {
+                    Id = r.Id,
+                    DriverId = r.DriverId,
+                    VehicleId = r.VehicleId,
+                    Origin = r.Origin,
+                    Destination = r.Destination,
+                    DepartureTime = r.DepartureTime,
+                    TotalSeats = r.TotalSeats,
+                    AvailableSeats = r.AvailableSeats,
+                    DistanceKm = r.DistanceKm,
+                    PricePerSeat = r.PricePerSeat,
+                    Status = r.Status,
+                    IsRecurring = r.IsRecurring
+                })
+                .ToListAsync();
+
+            return Ok(rides);
+        }
+
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
