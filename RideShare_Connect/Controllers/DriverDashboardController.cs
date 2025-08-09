@@ -87,6 +87,13 @@ namespace RideShare_Connect.Controllers
 
             var departure = model.DepartureDate.Date + model.DepartureTime;
 
+            if (departure < DateTime.Now)
+            {
+                ModelState.AddModelError(string.Empty, "Departure time cannot be in the past.");
+                model.Vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+                return View(model);
+            }
+
             var ride = new Ride
             {
                 DriverId = userId,
