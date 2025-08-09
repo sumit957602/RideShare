@@ -20,6 +20,31 @@ namespace RideShare_Connect.Api.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllRides()
+        {
+            var rides = await _context.Rides
+                .AsNoTracking()
+                .Select(r => new RideDto
+                {
+                    Id = r.Id,
+                    DriverId = r.DriverId,
+                    VehicleId = r.VehicleId,
+                    Origin = r.Origin,
+                    Destination = r.Destination,
+                    DepartureTime = r.DepartureTime,
+                    TotalSeats = r.TotalSeats,
+                    AvailableSeats = r.AvailableSeats,
+                    DistanceKm = r.DistanceKm,
+                    PricePerSeat = r.PricePerSeat,
+                    Status = r.Status,
+                    IsRecurring = r.IsRecurring
+                })
+                .ToListAsync();
+
+            return Ok(rides);
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateRide([FromBody] RideCreateDto dto)
         {
