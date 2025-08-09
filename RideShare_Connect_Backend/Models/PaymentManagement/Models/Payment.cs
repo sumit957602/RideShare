@@ -24,9 +24,8 @@ namespace RideShare_Connect.Models.PaymentManagement
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
 
-        [Required]
         [ForeignKey("PaymentMethod")]
-        public int PaymentMethodId { get; set; }
+        public int? PaymentMethodId { get; set; }
 
         [Required]
         public DateTime PaymentDate { get; set; }
@@ -38,6 +37,6 @@ namespace RideShare_Connect.Models.PaymentManagement
         // Navigation Properties
         public virtual User User { get; set; }
         public virtual RideBooking Booking { get; set; }
-        public virtual PaymentMethod PaymentMethod { get; set; }
+        public virtual PaymentMethod? PaymentMethod { get; set; }
     }
 }

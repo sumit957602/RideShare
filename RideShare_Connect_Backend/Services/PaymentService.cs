@@ -35,6 +35,26 @@ namespace RideShare_Connect.Services
             return payment;
         }
 
+        public async Task<Payment?> ConfirmPaymentAsync(PaymentConfirmDto dto)
+        {
+            var payment = await _context.Payments.FindAsync(dto.PaymentId);
+            if (payment == null)
+            {
+                return null;
+            }
+
+            if (dto.PaymentMethodId.HasValue)
+            {
+                payment.PaymentMethodId = dto.PaymentMethodId;
+            }
+
+            payment.PaymentDate = DateTime.UtcNow;
+            payment.Status = "Completed";
+
+            await _context.SaveChangesAsync();
+            return payment;
+        }
+
         public async Task<Wallet> AddMoneyAsync(AddMoneyDto dto)
         {
             var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == dto.UserId);
