@@ -420,6 +420,74 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(ride);
         }
 
+        [HttpGet("rides/{id}/driver")]
+        public async Task<IActionResult> GetRideDriver(int id)
+        {
+            var ride = await _context.Rides.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var driver = await _context.Driver
+                .Include(d => d.DriverProfile)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(d => d.DriverId == ride.DriverId);
+
+            if (driver == null || driver.DriverProfile == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            var profile = driver.DriverProfile;
+
+            var driverDto = new DriverDto
+            {
+                Id = driver.DriverId,
+                Email = driver.Email,
+                PhoneNumber = driver.PhoneNumber,
+                FullName = driver.FullName,
+                LicenseNumber = profile.LicenseNumber,
+                BackgroundCheckStatus = profile.BackgroundCheckStatus,
+                DrivingExperienceYears = profile.DrivingExperienceYears,
+                ReferenceContacts = profile.ReferenceContacts
+            };
+
+            return Ok(driverDto);
+        }
+
+        [HttpGet("rides/{id}/vehicle")]
+        public async Task<IActionResult> GetRideVehicle(int id)
+        {
+            var ride = await _context.Rides.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var vehicle = await _context.Vehicles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(v => v.Id == ride.VehicleId);
+
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            var vehicleDto = new VehicleDto
+            {
+                Id = vehicle.Id,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                Status = vehicle.Status
+            };
+
+            return Ok(vehicleDto);
+        }
+
         [HttpPut("rides/{id}")]
         public async Task<IActionResult> UpdateRide(int id, [FromBody] RideUpdateDto dto)
         {
@@ -471,6 +539,53 @@ namespace RideShare_Connect.Api.Controllers
             };
 
             return Ok(result);
+        }
+
+        [HttpPut("rides/{id}/driver")]
+        public async Task<IActionResult> UpdateRideDriver(int id, [FromBody] RideDriverUpdateDto dto)
+        {
+            var ride = await _context.Rides.FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == dto.DriverId);
+            if (driver == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            ride.DriverId = dto.DriverId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPut("rides/{id}/vehicle")]
+        public async Task<IActionResult> UpdateRideVehicle(int id, [FromBody] RideVehicleUpdateDto dto)
+        {
+            var ride = await _context.Rides.FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == dto.VehicleId);
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            if (vehicle.DriverId != ride.DriverId)
+            {
+                return BadRequest("Vehicle does not belong to the ride's driver");
+            }
+
+            ride.VehicleId = dto.VehicleId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpDelete("rides/{id}")]
