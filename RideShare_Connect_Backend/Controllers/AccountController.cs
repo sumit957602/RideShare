@@ -15,6 +15,7 @@ using System.Text; // Required for Encoding
 using System.IO;
 using RideShare_Connect_Backend.Services;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 namespace RideShare_Connect.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -36,6 +37,12 @@ namespace RideShare_Connect.Api.Controllers
             _environment = environment;
             _emailService = emailService;
             _cache = cache;
+        }
+
+        private class PendingRegistration
+        {
+            public UserRegisterDto User { get; set; }
+            public string Otp { get; set; }
         }
 
         // GET: api/Users
@@ -98,37 +105,52 @@ namespace RideShare_Connect.Api.Controllers
                 return Conflict("User with this email already exists.");
             }
 
-            // Generate a 6-digit OTP
+            // Generate a 6-digit OTP and a registration id
             var otp = new Random().Next(100000, 999999).ToString();
-            var cacheKey = $"Registration-Otp-{dto.Email}";
+            var registrationId = Guid.NewGuid().ToString();
+
+            var pending = new PendingRegistration
+            {
+                User = dto,
+                Otp = otp
+            };
+
+            var cacheKey = $"Registration-{registrationId}";
             var expiration = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5) // OTP valid for 5 minutes
             };
 
-            // Store the OTP in the cache (key: email, value: otp)
-            await _cache.SetStringAsync(cacheKey, otp, expiration);
+            var json = JsonSerializer.Serialize(pending);
+            await _cache.SetStringAsync(cacheKey, json, expiration);
 
             // Send the OTP via email
             await _emailService.SendOtpEmailAsync(dto.Email, dto.FullName ?? "New User", otp, "Registration");
 
-            return Ok("An OTP has been sent to your email for verification.");
+            return Ok(new { Id = registrationId, Message = "An OTP has been sent to your email for verification." });
         }
 
         // POST: api/Users/register
         // This endpoint should *not* require authorization as new users won't have a token.
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> RegisterUser(UserRegisterDto userRegisterDto)
+        public async Task<ActionResult<UserDto>> RegisterUser(UserRegisterVerifyDto verificationDto)
         {
-            // Validate OTP from cache
-            var cacheKey = $"Registration-Otp-{userRegisterDto.Email}";
-            var storedOtp = await _cache.GetStringAsync(cacheKey);
+            var cacheKey = $"Registration-{verificationDto.RegistrationId}";
+            var registrationJson = await _cache.GetStringAsync(cacheKey);
 
-            if (string.IsNullOrEmpty(storedOtp) || storedOtp != userRegisterDto.Otp)
+            if (string.IsNullOrEmpty(registrationJson))
+            {
+                return BadRequest("Invalid or expired registration.");
+            }
+
+            var pending = JsonSerializer.Deserialize<PendingRegistration>(registrationJson);
+            if (pending == null || pending.Otp != verificationDto.Otp)
             {
                 return BadRequest("Invalid or expired OTP.");
             }
+
+            var userRegisterDto = pending.User;
 
             if (await _context.Users.AnyAsync(u => u.Email == userRegisterDto.Email))
             {
@@ -158,7 +180,6 @@ namespace RideShare_Connect.Api.Controllers
             await _context.SaveChangesAsync();
             await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.UserProfile.FullName);
 
-            // Remove OTP from cache after successful registration
             await _cache.RemoveAsync(cacheKey);
 
             var userDto = new UserDto
