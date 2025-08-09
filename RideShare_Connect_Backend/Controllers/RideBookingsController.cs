@@ -44,6 +44,9 @@ namespace RideShare_Connect.Api.Controllers
                 RideId = dto.RideId,
                 PassengerId = dto.UserId,
                 BookedSeats = dto.Seats,
+                PickupLocation = dto.PickupLocation,
+                DropLocation = dto.DropLocation,
+                DistanceKm = dto.DistanceKm,
                 BookingTime = DateTime.UtcNow,
                 Status = "Pending"
             };

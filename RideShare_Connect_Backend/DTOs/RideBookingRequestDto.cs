@@ -13,5 +13,17 @@ namespace RideShare_Connect.DTOs
         [Required]
         [Range(1, 10)]
         public int Seats { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string PickupLocation { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string DropLocation { get; set; }
+
+        [Required]
+        [Range(0, 10000)]
+        public decimal DistanceKm { get; set; }
     }
 }
