@@ -218,7 +218,7 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [HttpPut("profile")]
-        public async Task<IActionResult> UpdateProfile([FromQuery] int driverId, DriverUpdateDto dto)
+        public async Task<IActionResult> UpdateProfile([FromQuery] int driverId, DriverProfileUpdateDto dto)
         {
             var driverProfile = await _context.DriverProfiles
                 .Include(dp => dp.Driver)
@@ -229,14 +229,14 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
-            if (dto.Email != null) driverProfile.Driver.Email = dto.Email;
             if (dto.PhoneNumber != null) driverProfile.Driver.PhoneNumber = dto.PhoneNumber;
             if (dto.FullName != null) driverProfile.Driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
-            if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
             if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
             if (dto.DOB.HasValue) driverProfile.DOB = dto.DOB.Value;
+
+            driverProfile.BackgroundCheckStatus = "Pending";
 
             await _context.SaveChangesAsync();
 
