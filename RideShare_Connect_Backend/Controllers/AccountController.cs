@@ -49,19 +49,13 @@ namespace RideShare_Connect.Api.Controllers
         // This endpoint would typically require authorization to list all users
         // [Authorize] // Uncomment this to protect this endpoint
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserSummaryDto>>> GetUsers()
         {
             var users = await _context.Users
-                                    .Include(u => u.UserProfile)
-                                    .Select(u => new UserDto
+                                    .Select(u => new UserSummaryDto
                                     {
                                         Id = u.Id,
-                                        Email = u.Email,
-                                        PhoneNumber = u.PhoneNumber,
-                                        FullName = u.UserProfile != null ? u.UserProfile.FullName : null,
-                                        UserType = u.UserType,
-                                        AccountStatus = u.AccountStatus,
-                                        CreatedAt = u.CreatedAt
+                                        Email = u.Email
                                     })
                                     .ToListAsync();
             return Ok(users);
