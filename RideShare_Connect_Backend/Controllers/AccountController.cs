@@ -316,6 +316,12 @@ namespace RideShare_Connect.Api.Controllers
                                      .Include(u => u.UserProfile)
                                      .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
+            var profilePic = !string.IsNullOrEmpty(dto.ProfilePicture)
+                ? dto.ProfilePicture
+                : !string.IsNullOrEmpty(payload.Picture)
+                    ? payload.Picture
+                    : "https://avatar.iran.liara.run/public/boy?username=Ash";
+
             if (user == null)
             {
                 user = new User
@@ -333,12 +339,17 @@ namespace RideShare_Connect.Api.Controllers
                 user.UserProfile = new UserProfile
                 {
                     FullName = !string.IsNullOrEmpty(payload.Name) ? payload.Name : GenerateRandomName(),
-                    ProfilePicture = !string.IsNullOrEmpty(payload.Picture) ? payload.Picture : "https://avatar.iran.liara.run/public/boy?username=Ash",
+                    ProfilePicture = profilePic,
                     Bio = "Default bio message for Google users.",
                     EmergencyContact = GenerateRandomPhoneNumber()
                 };
 
                 _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            else if (user.UserProfile != null && string.IsNullOrEmpty(user.UserProfile.ProfilePicture))
+            {
+                user.UserProfile.ProfilePicture = profilePic;
                 await _context.SaveChangesAsync();
             }
 
