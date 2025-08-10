@@ -105,6 +105,9 @@ namespace RideShare_Connect.Api.Controllers
                 return Conflict("User with this email already exists.");
             }
 
+            // Ensure user type defaults to Rider if not provided
+            dto.UserType = string.IsNullOrWhiteSpace(dto.UserType) ? "Rider" : dto.UserType;
+
             // Generate a 6-digit OTP and a registration id
             var otp = new Random().Next(100000, 999999).ToString();
             var registrationId = Guid.NewGuid().ToString();
