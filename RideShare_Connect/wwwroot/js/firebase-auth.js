@@ -21,13 +21,14 @@ window.googleSignIn = async function () {
         const idToken = credential.idToken;
 
         const profilePicture = result.user.photoURL || 'https://avatar.iran.liara.run/public/boy?username=Ash';
+        const fullName = result.user.displayName || '';
 
         const response = await fetch('/UserAccount/GoogleFirebaseSignIn', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ idToken, profilePicture })
+            body: JSON.stringify({ idToken, profilePicture, fullName })
         });
 
         if (response.ok) {

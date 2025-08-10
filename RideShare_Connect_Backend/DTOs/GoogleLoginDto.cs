@@ -8,5 +8,7 @@ namespace RideShare_Connect.Api.DTOs
         public string IdToken { get; set; }
 
         public string ProfilePicture { get; set; }
+
+        public string FullName { get; set; }
     }
 }
