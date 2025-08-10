@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using RideShare_Connect_Backend.Validators;
 
 namespace RideShare_Connect.Api.DTOs
 {
@@ -33,6 +34,7 @@ namespace RideShare_Connect.Api.DTOs
 
         [Required]
         [DataType(DataType.Date)]
+        [MinimumAge(18)]
         public DateTime DOB { get; set; }
     }
 }
