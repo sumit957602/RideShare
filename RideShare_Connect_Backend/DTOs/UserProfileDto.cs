@@ -8,5 +8,6 @@ namespace RideShare_Connect.Api.DTOs
         public string ProfilePicture { get; set; }
         public string EmergencyContact { get; set; }
         public string Bio { get; set; }
+        public string PhoneNumber { get; set; }
     }
 }
