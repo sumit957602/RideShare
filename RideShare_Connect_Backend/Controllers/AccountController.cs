@@ -17,6 +17,7 @@ using System.IO;
 using RideShare_Connect_Backend.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using System.Net.Http;
 namespace RideShare_Connect.Api.Controllers
 {
     [Route("api/[controller]")]
@@ -265,6 +266,35 @@ namespace RideShare_Connect.Api.Controllers
             };
 
             return Ok(responseDto);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("google-token")]
+        public async Task<ActionResult<GoogleTokenResponseDto>> GoogleToken(GoogleTokenRequestDto dto)
+        {
+            var clientId = _configuration["GoogleAuth:ClientId"];
+            var clientSecret = _configuration["GoogleAuth:ClientSecret"];
+
+            var parameters = new Dictionary<string, string>
+            {
+                { "code", dto.Code },
+                { "client_id", clientId ?? string.Empty },
+                { "client_secret", clientSecret ?? string.Empty },
+                { "redirect_uri", dto.RedirectUri },
+                { "grant_type", "authorization_code" }
+            };
+
+            using var httpClient = new HttpClient();
+            var response = await httpClient.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(parameters));
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode, "Google token exchange failed.");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var token = JsonSerializer.Deserialize<GoogleTokenResponseDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return Ok(token);
         }
 
         [AllowAnonymous]
