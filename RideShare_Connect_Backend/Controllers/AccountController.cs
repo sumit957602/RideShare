@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration; // Required for IConfiguration
 using Microsoft.IdentityModel.Tokens; // Required for security tokens
+using Google.Apis.Auth;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.UserManagement;
@@ -267,6 +268,98 @@ namespace RideShare_Connect.Api.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("google-signin")]
+        public async Task<ActionResult<AuthResponseDto>> GoogleSignIn(GoogleLoginDto dto)
+        {
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken);
+            }
+            catch (Exception)
+            {
+                return Unauthorized("Invalid Google token.");
+            }
+
+            var email = payload.Email ?? $"{Guid.NewGuid():N}@example.com";
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = email,
+                    PhoneNumber = GenerateRandomPhoneNumber(),
+                    UserType = "Rider",
+                    AccountStatus = "Active",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                var randomPassword = Guid.NewGuid().ToString("N");
+                user.PasswordHash = _passwordHasher.HashPassword(user, randomPassword);
+
+                user.UserProfile = new UserProfile
+                {
+                    FullName = !string.IsNullOrEmpty(payload.Name) ? payload.Name : GenerateRandomName(),
+                    ProfilePicture = !string.IsNullOrEmpty(payload.Picture) ? payload.Picture : "https://avatar.iran.liara.run/public/boy?username=Ash",
+                    Bio = "Default bio message for Google users.",
+                    EmergencyContact = GenerateRandomPhoneNumber()
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.UserType ?? "Rider")
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpirationMinutes"])),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            var refreshToken = new RefreshToken
+            {
+                UserId = user.Id,
+                Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+                ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(jwtSettings["RefreshTokenDays"] ?? "7")),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
+            var responseDto = new AuthResponseDto
+            {
+                Token = tokenString,
+                RefreshToken = refreshToken.Token,
+                UserId = user.Id,
+                Email = user.Email,
+                FullName = user.UserProfile?.FullName,
+                ProfilePicture = user.UserProfile?.ProfilePicture,
+                UserType = user.UserType
+            };
+
+            return Ok(responseDto);
+        }
+
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
         {
@@ -405,6 +498,19 @@ namespace RideShare_Connect.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private static string GenerateRandomPhoneNumber()
+        {
+            var random = new Random();
+            var firstDigit = random.Next(6, 10);
+            var rest = random.Next(100000000, 1000000000);
+            return firstDigit.ToString() + rest.ToString();
+        }
+
+        private static string GenerateRandomName()
+        {
+            return $"User{Guid.NewGuid():N}".Substring(0, 10);
         }
 
         private bool UserExists(int id)
