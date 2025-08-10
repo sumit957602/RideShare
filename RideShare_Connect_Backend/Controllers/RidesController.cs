@@ -4,6 +4,7 @@ using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.RideManagement;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -189,7 +190,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = profile.LicenseNumber,
                 BackgroundCheckStatus = profile.BackgroundCheckStatus,
                 DrivingExperienceYears = profile.DrivingExperienceYears,
-                DOB = profile.DOB
+                DOB = DateOnly.FromDateTime(profile.DOB)
             };
 
             return Ok(driverDto);
