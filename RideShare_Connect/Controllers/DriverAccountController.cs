@@ -51,6 +51,7 @@ namespace RideShare_Connect.Controllers
                 var response = await httpClient.PostAsync("api/drivers/register", formData);
                 if (response.IsSuccessStatusCode)
                 {
+                    TempData["SuccessMessage"] = "Driver registered successfully! You can now log in.";
                     return RedirectToAction("Login");
                 }
                 var errorContent = await response.Content.ReadAsStringAsync();

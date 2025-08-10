@@ -42,6 +42,10 @@
                                 <p class="mb-0">Welcome back! Log in to manage your rides.</p>
                             </div>
                             <div class="login-card-body">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                                }
                                 <form asp-action="Login" asp-controller="DriverAccount">
                                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                     <!-- Email Address -->
