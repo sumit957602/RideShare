@@ -223,7 +223,8 @@ namespace RideShare_Connect.Controllers
                         new Claim(ClaimTypes.Email, authResponse.Email),
                         new Claim("Token", authResponse.Token),
                         new Claim(ClaimTypes.Role, authResponse.UserType ?? "Rider"),
-                        new Claim("ProfilePicture", authResponse.ProfilePicture ?? "https://avatar.iran.liara.run/public/boy?username=Ash")
+                        new Claim("ProfilePicture", authResponse.ProfilePicture ?? "https://avatar.iran.liara.run/public/boy?username=Ash"),
+                        new Claim(ClaimTypes.Name, authResponse.FullName ?? string.Empty)
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

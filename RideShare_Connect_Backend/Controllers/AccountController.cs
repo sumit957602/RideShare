@@ -321,6 +321,11 @@ namespace RideShare_Connect.Api.Controllers
                 : !string.IsNullOrEmpty(payload.Picture)
                     ? payload.Picture
                     : "https://avatar.iran.liara.run/public/boy?username=Ash";
+            var fullName = !string.IsNullOrEmpty(dto.FullName)
+                ? dto.FullName
+                : !string.IsNullOrEmpty(payload.Name)
+                    ? payload.Name
+                    : null;
 
             if (user == null)
             {
@@ -338,7 +343,7 @@ namespace RideShare_Connect.Api.Controllers
 
                 user.UserProfile = new UserProfile
                 {
-                    FullName = !string.IsNullOrEmpty(payload.Name) ? payload.Name : GenerateRandomName(),
+                    FullName = !string.IsNullOrEmpty(fullName) ? fullName : GenerateRandomName(),
                     ProfilePicture = profilePic,
                     Bio = "Default bio message for Google users.",
                     EmergencyContact = GenerateRandomPhoneNumber()
@@ -347,10 +352,23 @@ namespace RideShare_Connect.Api.Controllers
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
             }
-            else if (user.UserProfile != null && string.IsNullOrEmpty(user.UserProfile.ProfilePicture))
+            else if (user.UserProfile != null)
             {
-                user.UserProfile.ProfilePicture = profilePic;
-                await _context.SaveChangesAsync();
+                var updated = false;
+                if (string.IsNullOrEmpty(user.UserProfile.ProfilePicture))
+                {
+                    user.UserProfile.ProfilePicture = profilePic;
+                    updated = true;
+                }
+                if (string.IsNullOrEmpty(user.UserProfile.FullName) && !string.IsNullOrEmpty(fullName))
+                {
+                    user.UserProfile.FullName = fullName;
+                    updated = true;
+                }
+                if (updated)
+                {
+                    await _context.SaveChangesAsync();
+                }
             }
 
             var jwtSettings = _configuration.GetSection("JwtSettings");
