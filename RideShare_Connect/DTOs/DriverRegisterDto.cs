@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace RideShare_Connect.DTOs
@@ -25,7 +26,8 @@ namespace RideShare_Connect.DTOs
         [Range(0,50)]
         public int DrivingExperienceYears { get; set; }
 
-        [StringLength(500)]
-        public string ReferenceContacts { get; set; }
+        [Required]
+        [DataType(DataType.Date)]
+        public DateTime DOB { get; set; }
     }
 }

@@ -45,8 +45,7 @@ namespace RideShare_Connect.Controllers
             formData.Add(new StringContent(model.FullName), "FullName");
             formData.Add(new StringContent(model.LicenseNumber), "LicenseNumber");
             formData.Add(new StringContent(model.DrivingExperienceYears.ToString()), "DrivingExperienceYears");
-            if (!string.IsNullOrEmpty(model.ReferenceContacts))
-                formData.Add(new StringContent(model.ReferenceContacts), "ReferenceContacts");
+            formData.Add(new StringContent(model.DOB.ToString("o")), "DOB");
             try
             {
                 var response = await httpClient.PostAsync("api/drivers/register", formData);

@@ -889,10 +889,8 @@ namespace RideShare_Connect_Backend.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("ReferenceContacts")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<DateTime>("DOB")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

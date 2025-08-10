@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RideShare_Connect.Models.VehicleManagement
@@ -22,8 +23,8 @@ namespace RideShare_Connect.Models.VehicleManagement
         [Range(0, 50)]
         public int DrivingExperienceYears { get; set; }
 
-        [StringLength(500)]
-        public string ReferenceContacts { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime DOB { get; set; }
 
         public virtual Driver Driver { get; set; }
     }

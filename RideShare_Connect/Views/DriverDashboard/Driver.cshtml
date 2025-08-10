@@ -96,7 +96,7 @@
                                         <li class="list-group-item"><strong>License Number:</strong> @Model.DriverProfile?.LicenseNumber</li>
                                         <li class="list-group-item"><strong>Background Check:</strong> @Model.DriverProfile?.BackgroundCheckStatus</li>
                                         <li class="list-group-item"><strong>Experience:</strong> @Model.DriverProfile?.DrivingExperienceYears years</li>
-                                        <li class="list-group-item"><strong>References:</strong> @Model.DriverProfile?.ReferenceContacts</li>
+                                        <li class="list-group-item"><strong>Date of Birth:</strong> @(Model.DriverProfile != null ? Model.DriverProfile.DOB.ToString("yyyy-MM-dd") : "")</li>
                                     </ul>
                                     <div class="mt-3 text-end">
                                         <a asp-action="EditProfile" class="btn btn-primary">Update Profile</a>

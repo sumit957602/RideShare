@@ -329,7 +329,7 @@ namespace RideShare_Connect.Api.Controllers
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
-                          ReferenceContacts = dp.ReferenceContacts
+                          DOB = dp.DOB
                       }).ToListAsync();
 
             return Ok(drivers);
@@ -357,7 +357,7 @@ namespace RideShare_Connect.Api.Controllers
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
             if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
-            if (dto.ReferenceContacts != null) driverProfile.ReferenceContacts = dto.ReferenceContacts;
+            if (dto.DOB.HasValue) driverProfile.DOB = dto.DOB.Value;
 
             await _context.SaveChangesAsync();
             return NoContent();
@@ -450,7 +450,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = profile.LicenseNumber,
                 BackgroundCheckStatus = profile.BackgroundCheckStatus,
                 DrivingExperienceYears = profile.DrivingExperienceYears,
-                ReferenceContacts = profile.ReferenceContacts
+                DOB = profile.DOB
             };
 
             return Ok(driverDto);

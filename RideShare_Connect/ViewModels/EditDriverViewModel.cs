@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace RideShare_Connect.ViewModels
@@ -26,7 +27,8 @@ namespace RideShare_Connect.ViewModels
         [Display(Name = "Driving Experience Years")]
         public int DrivingExperienceYears { get; set; }
 
-        [Display(Name = "Reference Contacts")]
-        public string ReferenceContacts { get; set; }
+        [Display(Name = "Date of Birth")]
+        [DataType(DataType.Date)]
+        public DateTime DOB { get; set; }
     }
 }
