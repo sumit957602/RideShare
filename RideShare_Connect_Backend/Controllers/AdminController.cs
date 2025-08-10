@@ -329,7 +329,7 @@ namespace RideShare_Connect.Api.Controllers
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
-                          DOB = dp.DOB
+                          DOB = DateOnly.FromDateTime(dp.DOB)
                       }).ToListAsync();
 
             return Ok(drivers);
@@ -450,7 +450,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = profile.LicenseNumber,
                 BackgroundCheckStatus = profile.BackgroundCheckStatus,
                 DrivingExperienceYears = profile.DrivingExperienceYears,
-                DOB = profile.DOB
+                DOB = DateOnly.FromDateTime(profile.DOB)
             };
 
             return Ok(driverDto);
