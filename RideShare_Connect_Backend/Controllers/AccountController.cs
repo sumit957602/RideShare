@@ -328,21 +328,24 @@ namespace RideShare_Connect.Api.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<UserProfileDto>> GetProfile([FromQuery] int userId)
         {
-            var profile = await _context.UserProfiles
-                                         .FirstOrDefaultAsync(p => p.UserId == userId);
-            if (profile == null)
+            var user = await _context.Users
+                                     .Include(u => u.UserProfile)
+                                     .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user?.UserProfile == null)
             {
                 return NotFound();
             }
 
             var profileDto = new UserProfileDto
             {
-                Id = profile.Id,
-                UserId = profile.UserId,
-                FullName = profile.FullName,
-                ProfilePicture = profile.ProfilePicture,
-                EmergencyContact = profile.EmergencyContact,
-                Bio = profile.Bio
+                Id = user.UserProfile.Id,
+                UserId = user.UserProfile.UserId,
+                FullName = user.UserProfile.FullName,
+                ProfilePicture = user.UserProfile.ProfilePicture,
+                EmergencyContact = user.UserProfile.EmergencyContact,
+                Bio = user.UserProfile.Bio,
+                PhoneNumber = user.PhoneNumber
             };
 
             return Ok(profileDto);
