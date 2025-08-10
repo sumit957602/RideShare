@@ -1,3 +1,5 @@
+using System;
+
 namespace RideShare_Connect.Api.DTOs
 {
     public class DriverDto
@@ -9,6 +11,6 @@ namespace RideShare_Connect.Api.DTOs
         public string LicenseNumber { get; set; }
         public string BackgroundCheckStatus { get; set; }
         public int DrivingExperienceYears { get; set; }
-        public string ReferenceContacts { get; set; }
+        public DateTime DOB { get; set; }
     }
 }

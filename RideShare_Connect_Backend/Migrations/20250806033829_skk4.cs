@@ -122,7 +122,7 @@ namespace RideShare_Connect_Backend.Migrations
                     LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     BackgroundCheckStatus = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     DrivingExperienceYears = table.Column<int>(type: "int", nullable: false),
-                    ReferenceContacts = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false)
+                    DOB = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

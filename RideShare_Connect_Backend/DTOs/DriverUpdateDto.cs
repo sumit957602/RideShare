@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 namespace RideShare_Connect.Api.DTOs
 {
@@ -10,6 +11,7 @@ namespace RideShare_Connect.Api.DTOs
         public string LicenseNumber { get; set; }
         public string BackgroundCheckStatus { get; set; }
         public int? DrivingExperienceYears { get; set; }
-        public string ReferenceContacts { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime? DOB { get; set; }
     }
 }

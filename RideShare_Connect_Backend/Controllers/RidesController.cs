@@ -189,7 +189,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = profile.LicenseNumber,
                 BackgroundCheckStatus = profile.BackgroundCheckStatus,
                 DrivingExperienceYears = profile.DrivingExperienceYears,
-                ReferenceContacts = profile.ReferenceContacts
+                DOB = profile.DOB
             };
 
             return Ok(driverDto);

@@ -64,7 +64,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = dto.LicenseNumber,
                 BackgroundCheckStatus = "Pending",
                 DrivingExperienceYears = dto.DrivingExperienceYears,
-                ReferenceContacts = dto.ReferenceContacts
+                DOB = dto.DOB
             };
             _context.DriverProfiles.Add(driverProfile);
 
@@ -79,7 +79,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = driverProfile.LicenseNumber,
                 BackgroundCheckStatus = driverProfile.BackgroundCheckStatus,
                 DrivingExperienceYears = driverProfile.DrivingExperienceYears,
-                ReferenceContacts = driverProfile.ReferenceContacts
+                DOB = driverProfile.DOB
             };
             return CreatedAtAction(nameof(GetDriver), new { id = driverDto.Id }, driverDto);
         }
@@ -211,7 +211,7 @@ namespace RideShare_Connect.Api.Controllers
                 LicenseNumber = driverProfile.LicenseNumber,
                 BackgroundCheckStatus = driverProfile.BackgroundCheckStatus,
                 DrivingExperienceYears = driverProfile.DrivingExperienceYears,
-                ReferenceContacts = driverProfile.ReferenceContacts
+                DOB = driverProfile.DOB
             };
 
             return Ok(driverDto);
@@ -236,7 +236,7 @@ namespace RideShare_Connect.Api.Controllers
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
             if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
-            if (dto.ReferenceContacts != null) driverProfile.ReferenceContacts = dto.ReferenceContacts;
+            if (dto.DOB.HasValue) driverProfile.DOB = dto.DOB.Value;
 
             await _context.SaveChangesAsync();
 
@@ -296,7 +296,7 @@ namespace RideShare_Connect.Api.Controllers
                           LicenseNumber = dp.LicenseNumber,
                           BackgroundCheckStatus = dp.BackgroundCheckStatus,
                           DrivingExperienceYears = dp.DrivingExperienceYears,
-                          ReferenceContacts = dp.ReferenceContacts
+                          DOB = dp.DOB
                       })
                 .FirstOrDefaultAsync();
 
@@ -331,7 +331,7 @@ namespace RideShare_Connect.Api.Controllers
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
             if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
             if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
-            if (dto.ReferenceContacts != null) driverProfile.ReferenceContacts = dto.ReferenceContacts;
+            if (dto.DOB.HasValue) driverProfile.DOB = dto.DOB.Value;
 
             try
             {

@@ -272,7 +272,7 @@ namespace RideShare_Connect.Controllers
                 LicenseNumber = driver.DriverProfile?.LicenseNumber,
                 BackgroundCheckStatus = driver.DriverProfile?.BackgroundCheckStatus,
                 DrivingExperienceYears = driver.DriverProfile?.DrivingExperienceYears ?? 0,
-                ReferenceContacts = driver.DriverProfile?.ReferenceContacts
+                DOB = driver.DriverProfile?.DOB ?? DateTime.MinValue
             };
 
             return View(model);
@@ -316,7 +316,7 @@ namespace RideShare_Connect.Controllers
                 driver.DriverProfile.LicenseNumber = model.LicenseNumber;
                 driver.DriverProfile.BackgroundCheckStatus = model.BackgroundCheckStatus;
                 driver.DriverProfile.DrivingExperienceYears = model.DrivingExperienceYears;
-                driver.DriverProfile.ReferenceContacts = model.ReferenceContacts;
+                driver.DriverProfile.DOB = model.DOB;
             }
             else
             {
@@ -326,7 +326,7 @@ namespace RideShare_Connect.Controllers
                     LicenseNumber = model.LicenseNumber,
                     BackgroundCheckStatus = model.BackgroundCheckStatus,
                     DrivingExperienceYears = model.DrivingExperienceYears,
-                    ReferenceContacts = model.ReferenceContacts
+                    DOB = model.DOB
                 };
             }
 
