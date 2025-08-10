@@ -41,6 +41,7 @@ namespace RideShare_Connect.Controllers
             if (!string.IsNullOrEmpty(model.PhoneNumber))
                 formData.Add(new StringContent(model.PhoneNumber), "PhoneNumber");
             formData.Add(new StringContent(model.Password), "Password");
+            formData.Add(new StringContent(model.ConfirmPassword), "ConfirmPassword");
             formData.Add(new StringContent(model.FullName), "FullName");
             formData.Add(new StringContent(model.LicenseNumber), "LicenseNumber");
             formData.Add(new StringContent(model.DrivingExperienceYears.ToString()), "DrivingExperienceYears");

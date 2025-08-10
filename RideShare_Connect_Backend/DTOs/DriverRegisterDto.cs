@@ -11,8 +11,13 @@ namespace RideShare_Connect.Api.DTOs
         public string PhoneNumber { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 6)]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long.")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$", ErrorMessage = "Password must contain uppercase, lowercase, number, and special character.")]
         public string Password { get; set; }
+
+        [Required]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; }
 
         [Required]
         [StringLength(100)]

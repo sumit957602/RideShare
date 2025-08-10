@@ -12,7 +12,8 @@ namespace RideShare_Connect.DTOs
         public string Otp { get; set; }
 
         [Required]
-        [MinLength(6, ErrorMessage = "New password must be at least 6 characters long.")]
+        [MinLength(8, ErrorMessage = "New password must be at least 8 characters long.")]
+        [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$", ErrorMessage = "Password must contain uppercase, lowercase, number, and special character.")]
         public string NewPassword { get; set; }
 
         [Required]
