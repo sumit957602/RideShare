@@ -200,6 +200,54 @@ namespace RideShare_Connect.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> GoogleFirebaseSignIn([FromBody] GoogleLoginDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync("api/Users/google-signin", dto);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
+                        new Claim(ClaimTypes.Email, authResponse.Email),
+                        new Claim("Token", authResponse.Token),
+                        new Claim(ClaimTypes.Role, authResponse.UserType ?? "Rider")
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                    return Ok(new { redirectUrl = Url.Action("User", "UserDashboard") });
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Google sign-in failed: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
+                return StatusCode((int)response.StatusCode, errorContent);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error during Google sign-in.");
+                return StatusCode(500, "An error occurred while communicating with the API.");
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "JSON parsing error during Google sign-in.");
+                return StatusCode(500, "Invalid response from API.");
+            }
+        }
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginDto model, string returnUrl = null)
         {
