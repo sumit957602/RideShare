@@ -59,16 +59,16 @@ namespace RideShare_Connect.Api.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserReport>()
-            .HasOne(ur => ur.ReportedUser)
-            .WithMany()
-            .HasForeignKey(ur => ur.ReportedUserId)
-            .OnDelete(DeleteBehavior.Restrict); 
+                .HasOne(ur => ur.ReportedUser)
+                .WithMany()
+                .HasForeignKey(ur => ur.ReportedUserId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserReport>()
                 .HasOne(ur => ur.ReportingUser)
                 .WithMany()
                 .HasForeignKey(ur => ur.ReportingUserId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<UserReport>()
                 .HasOne(ur => ur.HandledByAdmin)
