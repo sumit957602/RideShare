@@ -350,14 +350,14 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound();
             }
 
-            if (dto.Email != null) driver.Email = dto.Email;
             if (dto.PhoneNumber != null) driver.PhoneNumber = dto.PhoneNumber;
             if (dto.FullName != null) driver.FullName = dto.FullName;
 
             if (dto.LicenseNumber != null) driverProfile.LicenseNumber = dto.LicenseNumber;
-            if (dto.BackgroundCheckStatus != null) driverProfile.BackgroundCheckStatus = dto.BackgroundCheckStatus;
             if (dto.DrivingExperienceYears.HasValue) driverProfile.DrivingExperienceYears = dto.DrivingExperienceYears.Value;
             if (dto.DOB.HasValue) driverProfile.DOB = dto.DOB.Value;
+
+            driverProfile.BackgroundCheckStatus = "Pending";
 
             await _context.SaveChangesAsync();
             return NoContent();
