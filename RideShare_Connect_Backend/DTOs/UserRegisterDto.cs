@@ -8,7 +8,7 @@ namespace RideShare_Connect.Api.DTOs
         [Required, EmailAddress]
         public string Email { get; set; }
 
-        [Phone]
+        [RegularExpression(@"^[6-9]\d{9}$", ErrorMessage = "Phone number must be 10 digits and start with 6,7,8, or 9.")]
         public string PhoneNumber { get; set; }
 
         [Required]
