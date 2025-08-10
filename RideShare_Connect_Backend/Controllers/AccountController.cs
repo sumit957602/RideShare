@@ -371,53 +371,6 @@ namespace RideShare_Connect.Api.Controllers
         }
 
 
-        // PUT: api/Users/5
-        // This endpoint should typically require authorization for a user to update their own profile
-        // [Authorize] // Uncomment this to protect this endpoint
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserUpdateDto userUpdateDto)
-        {
-
-            var userToUpdate = await _context.Users
-                                            .Include(u => u.UserProfile)
-                                            .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (userToUpdate == null)
-            {
-                return NotFound();
-            }
-
-            if (userUpdateDto.Email != null) userToUpdate.Email = userUpdateDto.Email;
-            if (userUpdateDto.PhoneNumber != null) userToUpdate.PhoneNumber = userUpdateDto.PhoneNumber;
-            if (userUpdateDto.UserType != null) userToUpdate.UserType = userUpdateDto.UserType;
-            if (userUpdateDto.AccountStatus != null) userToUpdate.AccountStatus = userUpdateDto.AccountStatus;
-
-            if (userToUpdate.UserProfile == null)
-            {
-                userToUpdate.UserProfile = new UserProfile { UserId = userToUpdate.Id };
-            }
-            if (userUpdateDto.FullName != null) userToUpdate.UserProfile.FullName = userUpdateDto.FullName;
-
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // DELETE: api/Users/{id}/account
         // Allows a user to permanently remove their account by confirming their password
         [HttpDelete("{id}/account")]
