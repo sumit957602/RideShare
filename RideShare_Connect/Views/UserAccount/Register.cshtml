@@ -78,14 +78,7 @@
                                         <label for="phone" class="form-label">Phone Number</label>
                                         <input type="tel" asp-for="PhoneNumber" class="form-control" id="phone" placeholder="e.g., +91 9876543210" required />
                                     </div>
-                                    <div class="mb-3">
-                                        <label asp-for="UserType" class="form-label">User Type</label>
-                                        <select asp-for="UserType" class="form-control">
-                                            <option value="Rider">Rider</option>
-                                            <option value="Driver">Driver</option>
-                                        </select>
-                                        <span asp-validation-for="UserType" class="text-danger"></span>
-                                    </div>
+                                    <input type="hidden" asp-for="UserType" value="Rider" />
                                     <!-- Terms and Conditions -->
                                     <div class="form-check mb-3">
                                         <input class="form-check-input" type="checkbox" value="" id="termsCheck" required />
