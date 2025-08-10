@@ -355,6 +355,12 @@ namespace RideShare_Connect.Api.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromQuery] int userId, UserProfileUpdateDto dto)
         {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
             var profile = await _context.UserProfiles
                                          .FirstOrDefaultAsync(p => p.UserId == userId);
 
@@ -368,6 +374,7 @@ namespace RideShare_Connect.Api.Controllers
             if (dto.ProfilePicture != null) profile.ProfilePicture = dto.ProfilePicture;
             if (dto.EmergencyContact != null) profile.EmergencyContact = dto.EmergencyContact;
             if (dto.Bio != null) profile.Bio = dto.Bio;
+            if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
 
             await _context.SaveChangesAsync();
             return NoContent();
