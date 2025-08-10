@@ -265,23 +265,14 @@ namespace RideShare_Connect.Api.Controllers
 
         // GET: api/Drivers
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DriverDto>>> GetDrivers()
+        public async Task<ActionResult<IEnumerable<DriverSummaryDto>>> GetDrivers()
         {
             var drivers = await _context.Driver
-                .Join(_context.DriverProfiles,
-                      d => d.DriverId,
-                      dp => dp.DriverId,
-                      (d, dp) => new DriverDto
-                      {
-                          Id = d.DriverId,
-                          Email = d.Email,
-                          PhoneNumber = d.PhoneNumber,
-                          FullName = d.FullName,
-                          LicenseNumber = dp.LicenseNumber,
-                          BackgroundCheckStatus = dp.BackgroundCheckStatus,
-                          DrivingExperienceYears = dp.DrivingExperienceYears,
-                          ReferenceContacts = dp.ReferenceContacts
-                      })
+                .Select(d => new DriverSummaryDto
+                {
+                    Id = d.DriverId,
+                    Email = d.Email
+                })
                 .ToListAsync();
 
             return Ok(drivers);
