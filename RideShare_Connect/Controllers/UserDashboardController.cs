@@ -6,16 +6,23 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 using RideShare_Connect.DTOs;
+using System.Net.Http;
+using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 
 namespace RideShare_Connect.Controllers
 {
     public class UserDashboardController : Controller
     {
         private readonly AppDbContext _db;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<UserDashboardController> _logger;
 
-        public UserDashboardController(AppDbContext db)
+        public UserDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<UserDashboardController> logger)
         {
             _db = db;
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         public IActionResult User()
@@ -63,7 +70,7 @@ namespace RideShare_Connect.Controllers
             return View(model);
         }
 
-        public IActionResult UserProfile()
+        public async Task<IActionResult> UserProfile()
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -71,13 +78,29 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "UserAccount");
             }
 
-            var userProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
-            return View(userProfile);
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var response = await httpClient.GetAsync($"api/Users/profile?userId={userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var userProfile = await response.Content.ReadFromJsonAsync<UserProfileDto>();
+                    return View(userProfile);
+                }
+
+                _logger.LogError("Failed to fetch profile for user {UserId}: {StatusCode}", userId, response.StatusCode);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Error fetching profile for user {UserId}", userId);
+            }
+
+            return View(new UserProfileDto());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UserProfile(UserProfile profile)
+        public async Task<IActionResult> UserProfile(UserProfileDto profile)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -85,22 +108,33 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "UserAccount");
             }
 
-            var existingProfile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
-            if (existingProfile == null)
+            var updateDto = new UserProfileUpdateDto
             {
-                profile.UserId = userId;
-                _db.UserProfiles.Add(profile);
-            }
-            else
-            {
-                existingProfile.FullName = profile.FullName;
-                existingProfile.ProfilePicture = profile.ProfilePicture;
-                existingProfile.EmergencyContact = profile.EmergencyContact;
-                existingProfile.Bio = profile.Bio;
-                _db.UserProfiles.Update(existingProfile);
-            }
+                FullName = profile.FullName,
+                ProfilePicture = profile.ProfilePicture,
+                EmergencyContact = profile.EmergencyContact,
+                Bio = profile.Bio,
+                PhoneNumber = profile.PhoneNumber
+            };
 
-            _db.SaveChanges();
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            try
+            {
+                var response = await httpClient.PutAsJsonAsync($"api/Users/profile?userId={userId}", updateDto);
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Error updating profile for user {UserId}: {StatusCode} - {Error}", userId, response.StatusCode, errorContent);
+                    ModelState.AddModelError(string.Empty, "Failed to update profile.");
+                    return View(profile);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while updating profile for user {UserId}", userId);
+                ModelState.AddModelError(string.Empty, "An error occurred while updating profile.");
+                return View(profile);
+            }
 
             return RedirectToAction(nameof(UserProfile));
         }
