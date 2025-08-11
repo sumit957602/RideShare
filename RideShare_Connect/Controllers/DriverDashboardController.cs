@@ -198,25 +198,50 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "DriverAccount");
             }
 
-            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id && v.DriverId == userId);
-            if (vehicle == null)
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+
+            try
             {
-                return NotFound();
+                var response = await httpClient.GetAsync($"api/vehicles/getmyvehicles?driverId={userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var vehicles = await response.Content.ReadFromJsonAsync<List<VehicleDto>>();
+                    var vehicle = vehicles?.FirstOrDefault(v => v.Id == id);
+                    if (vehicle == null)
+                    {
+                        return NotFound();
+                    }
+
+                    var model = new EditVehicleViewModel
+                    {
+                        Id = vehicle.Id,
+                        DriverId = userId,
+                        CarMaker = vehicle.CarMaker,
+                        Model = vehicle.Model,
+                        VehicleType = vehicle.VehicleType,
+                        LicensePlate = vehicle.LicensePlate,
+                        VerificationStatus = vehicle.VerificationStatus,
+                        Year = vehicle.Year
+                    };
+
+                    return View(model);
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Error retrieving vehicle {VehicleId} for driver {DriverId}: {StatusCode} - {ErrorContent}", id, userId, response.StatusCode, errorContent);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request error while fetching vehicle {VehicleId} for driver {DriverId}", id, userId);
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "JSON parsing error while fetching vehicle {VehicleId} for driver {DriverId}", id, userId);
+                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
             }
 
-            var model = new EditVehicleViewModel
-            {
-                Id = vehicle.Id,
-                DriverId = vehicle.DriverId,
-                CarMaker = vehicle.CarMaker,
-                Model = vehicle.Model,
-                VehicleType = vehicle.VehicleType,
-                LicensePlate = vehicle.LicensePlate,
-                VerificationStatus = vehicle.VerificationStatus,
-                Year = vehicle.Year
-            };
-
-            return View(model);
+            return View(new EditVehicleViewModel());
         }
 
         [Authorize(Roles = "Driver")]
@@ -240,22 +265,40 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == model.Id && v.DriverId == userId);
-            if (vehicle == null)
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            var dto = new DriverVehicleUpdateDto
             {
-                return NotFound();
+                CarMaker = model.CarMaker,
+                Model = model.Model,
+                VehicleType = model.VehicleType,
+                LicensePlate = model.LicensePlate,
+                Year = model.Year
+            };
+
+            try
+            {
+                var response = await httpClient.PutAsJsonAsync($"api/vehicles/update?driverId={userId}&vehicleId={model.Id}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Driver));
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
+                _logger.LogError("Error updating vehicle {VehicleId} for driver {DriverId}: {StatusCode} - {ErrorContent}", model.Id, userId, response.StatusCode, errorContent);
+            }
+            catch (HttpRequestException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                _logger.LogError(ex, "HTTP request error during vehicle update for driver {DriverId}", userId);
+            }
+            catch (JsonException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
+                _logger.LogError(ex, "JSON parsing error during vehicle update for driver {DriverId}", userId);
             }
 
-            vehicle.CarMaker = model.CarMaker;
-            vehicle.Model = model.Model;
-            vehicle.VehicleType = model.VehicleType;
-            vehicle.LicensePlate = model.LicensePlate;
-            vehicle.Year = model.Year;
-            vehicle.VerificationStatus = model.VerificationStatus;
-
-            await _db.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Driver));
+            return View(model);
         }
 
         [Authorize(Roles = "Driver")]
