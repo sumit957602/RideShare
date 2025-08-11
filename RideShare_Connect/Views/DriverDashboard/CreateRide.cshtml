@@ -139,19 +139,19 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="dashboard.html">My Rides</a>
+                        <a class="nav-link" href="dashboard">My Rides</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="driver-dashboard.html">Driver Dashboard</a>
+                         <a class="nav-link" asp-controller="DriverDashboard" asp-action="Driver">Driver Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Offer a Ride</a>
+                        <a class="nav-link active" asp-controller="DriverDashboard" asp-action="CreateRide">Offer a Ride</a>
                     </li>
                 </ul>
                 <div class="dropdown ms-lg-3">
                     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://images.pexels.com/photos/775358/pexels-photo-775358.jpeg" alt="Driver Profile Picture" width="32" height="32" class="rounded-circle me-2">
-                        <strong>Ravi Kumar</strong>
+                        <img src="" alt="Driver Profile Picture" width="32" height="32" class="rounded-circle me-2">
+                        <strong>Sumit Kumar</strong>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end text-small shadow" aria-labelledby="dropdownUser1">
                         <li><a class="dropdown-item" href="#">Profile</a></li>
