@@ -5,17 +5,12 @@
 
 <h2>Edit Profile</h2>
 
-<form asp-action="EditProfile" method="post">
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="DriverId" />
     <div class="mb-3">
         <label asp-for="FullName" class="form-label"></label>
         <input asp-for="FullName" class="form-control" />
         <span asp-validation-for="FullName" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
         <label asp-for="PhoneNumber" class="form-label"></label>
@@ -28,9 +23,12 @@
         <span asp-validation-for="LicenseNumber" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="BackgroundCheckStatus" class="form-label"></label>
-        <input asp-for="BackgroundCheckStatus" class="form-control" />
-        <span asp-validation-for="BackgroundCheckStatus" class="text-danger"></span>
+        <label class="form-label">Profile Picture</label><br />
+        @if (!string.IsNullOrEmpty(Model.ExistingProfilePicture))
+        {
+            <img src="@Model.ExistingProfilePicture" alt="Profile Picture" class="img-thumbnail mb-2" style="max-width:150px;" />
+        }
+        <input asp-for="ProfilePicture" type="file" class="form-control" />
     </div>
     <div class="mb-3">
         <label asp-for="DrivingExperienceYears" class="form-label"></label>

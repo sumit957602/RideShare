@@ -6,6 +6,8 @@ using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
 using System.Security.Claims;
+using System.IO;
+using System;
 
 namespace RideShare_Connect.Controllers
 {
@@ -268,12 +270,11 @@ namespace RideShare_Connect.Controllers
             {
                 DriverId = driver.DriverId,
                 FullName = driver.FullName,
-                Email = driver.Email,
                 PhoneNumber = driver.PhoneNumber,
                 LicenseNumber = driver.DriverProfile?.LicenseNumber,
-                BackgroundCheckStatus = driver.DriverProfile?.BackgroundCheckStatus,
                 DrivingExperienceYears = driver.DriverProfile?.DrivingExperienceYears ?? 0,
-                DOB = driver.DriverProfile?.DOB ?? DateTime.MinValue
+                DOB = driver.DriverProfile?.DOB ?? DateTime.MinValue,
+                ExistingProfilePicture = driver.DriverProfile?.ProfilePicture
             };
 
             return View(model);
@@ -309,26 +310,53 @@ namespace RideShare_Connect.Controllers
             }
 
             driver.FullName = model.FullName;
-            driver.Email = model.Email;
             driver.PhoneNumber = model.PhoneNumber;
 
             if (driver.DriverProfile != null)
             {
                 driver.DriverProfile.LicenseNumber = model.LicenseNumber;
-                driver.DriverProfile.BackgroundCheckStatus = model.BackgroundCheckStatus;
                 driver.DriverProfile.DrivingExperienceYears = model.DrivingExperienceYears;
                 driver.DriverProfile.DOB = model.DOB;
+                driver.DriverProfile.BackgroundCheckStatus = "Pending";
+
+                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                {
+                    var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Image");
+                    Directory.CreateDirectory(uploads);
+                    var fileName = $"{Guid.NewGuid()}_{model.ProfilePicture.FileName}";
+                    var filePath = Path.Combine(uploads, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ProfilePicture.CopyToAsync(stream);
+                    }
+                    driver.DriverProfile.ProfilePicture = "/Image/" + fileName;
+                }
             }
             else
             {
-                driver.DriverProfile = new DriverProfile
+                var profile = new DriverProfile
                 {
                     DriverId = driver.DriverId,
                     LicenseNumber = model.LicenseNumber,
-                    BackgroundCheckStatus = model.BackgroundCheckStatus,
                     DrivingExperienceYears = model.DrivingExperienceYears,
-                    DOB = model.DOB
+                    DOB = model.DOB,
+                    BackgroundCheckStatus = "Pending"
                 };
+
+                if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+                {
+                    var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Image");
+                    Directory.CreateDirectory(uploads);
+                    var fileName = $"{Guid.NewGuid()}_{model.ProfilePicture.FileName}";
+                    var filePath = Path.Combine(uploads, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ProfilePicture.CopyToAsync(stream);
+                    }
+                    profile.ProfilePicture = "/Image/" + fileName;
+                }
+
+                driver.DriverProfile = profile;
             }
 
             await _db.SaveChangesAsync();
