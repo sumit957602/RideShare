@@ -13,7 +13,5 @@ namespace RideShare_Connect.Api.DTOs
         [RegularExpression("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$", ErrorMessage = "Password must contain uppercase, lowercase, number, and special character.")]
         public string Password { get; set; }
 
-        [StringLength(20)]
-        public string Role { get; set; } = "Admin";
     }
 }

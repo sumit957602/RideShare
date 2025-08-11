@@ -99,7 +99,7 @@ namespace RideShare_Connect.Api.Controllers
             var admin = new Admin
             {
                 Username = dto.Username,
-                Role = dto.Role ?? "Admin",
+                Role = "Admin",
                 Status = "Active"
             };
 
