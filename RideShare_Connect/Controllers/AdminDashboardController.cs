@@ -278,7 +278,7 @@ namespace RideShare_Connect.Controllers
                 Model = vehicle.Model,
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
-                Status = vehicle.Status,
+                VerificationStatus = vehicle.VerificationStatus,
                 Year = vehicle.Year
             };
 
@@ -311,7 +311,7 @@ namespace RideShare_Connect.Controllers
             vehicle.Model = model.Model;
             vehicle.VehicleType = model.VehicleType;
             vehicle.LicensePlate = model.LicensePlate;
-            vehicle.Status = model.Status;
+            vehicle.VerificationStatus = model.VerificationStatus;
             vehicle.Year = model.Year;
 
             await _db.SaveChangesAsync();
