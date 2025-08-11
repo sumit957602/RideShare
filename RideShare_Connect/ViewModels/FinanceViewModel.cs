@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using RideShare_Connect.Models.PaymentManagement;
+using RideShare_Connect.Models.UserManagement;
 
 namespace RideShare_Connect.ViewModels
 {
@@ -11,5 +12,6 @@ namespace RideShare_Connect.ViewModels
         public List<Payment> RecentTransactions { get; set; } = new();
         public List<Payment> PaymentHistory { get; set; } = new();
         public List<PaymentMethod> PaymentMethods { get; set; } = new();
+        public UserProfile Profile { get; set; }
     }
 }
