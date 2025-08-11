@@ -1,0 +1,44 @@
+@model RideShare_Connect.ViewModels.CreateVehicleViewModel
+@{
+    ViewData["Title"] = "Register Vehicle";
+}
+
+<h2>Register Vehicle</h2>
+<form asp-controller="DriverAccount" asp-action="CreateVehicle" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="DriverId" class="control-label"></label>
+        <input asp-for="DriverId" class="form-control" />
+        <span asp-validation-for="DriverId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CarMaker" class="control-label"></label>
+        <input asp-for="CarMaker" class="form-control" />
+        <span asp-validation-for="CarMaker" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Model" class="control-label"></label>
+        <input asp-for="Model" class="form-control" />
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="VehicleType" class="control-label"></label>
+        <input asp-for="VehicleType" class="form-control" />
+        <span asp-validation-for="VehicleType" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="LicensePlate" class="control-label"></label>
+        <input asp-for="LicensePlate" class="form-control" />
+        <span asp-validation-for="LicensePlate" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Year" class="control-label"></label>
+        <input asp-for="Year" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary mt-3">Register Vehicle</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

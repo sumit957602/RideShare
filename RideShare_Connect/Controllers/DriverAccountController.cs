@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using RideShare_Connect.DTOs;
+using RideShare_Connect.ViewModels;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -63,6 +64,57 @@ namespace RideShare_Connect.Controllers
                 ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
                 _logger.LogError(ex, "HTTP request error during driver registration for {Email}", model.Email);
             }
+            return View(model);
+        }
+
+        public IActionResult CreateVehicle()
+        {
+            return View(new CreateVehicleViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateVehicle(CreateVehicleViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            var dto = new VehicleRegisterDto
+            {
+                CarMaker = model.CarMaker,
+                Model = model.Model,
+                VehicleType = model.VehicleType,
+                LicensePlate = model.LicensePlate,
+                Year = model.Year
+            };
+
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync($"api/vehicles/register?driverId={model.DriverId}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Vehicle registered successfully!";
+                    return RedirectToAction("Login");
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
+                _logger.LogError("Error registering vehicle for driver {DriverId}: {StatusCode} - {ErrorContent}", model.DriverId, response.StatusCode, errorContent);
+            }
+            catch (HttpRequestException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                _logger.LogError(ex, "HTTP request error during vehicle registration for driver {DriverId}", model.DriverId);
+            }
+            catch (JsonException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
+                _logger.LogError(ex, "JSON parsing error during vehicle registration for driver {DriverId}", model.DriverId);
+            }
+
             return View(model);
         }
 
