@@ -33,7 +33,7 @@ namespace RideShare_Connect.Api.Controllers
                 Model = dto.Model,
                 VehicleType = dto.VehicleType,
                 LicensePlate = dto.LicensePlate,
-                Status = "Active",
+                VerificationStatus = "Pending",
                 Year = dto.Year
             };
             _context.Vehicles.Add(vehicle);
@@ -47,7 +47,7 @@ namespace RideShare_Connect.Api.Controllers
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
                 Year = vehicle.Year,
-                Status = vehicle.Status
+                VerificationStatus = vehicle.VerificationStatus
             };
             return CreatedAtAction(nameof(RegisterVehicle), new { id = result.Id }, result);
         }
@@ -95,14 +95,14 @@ namespace RideShare_Connect.Api.Controllers
                     VehicleType = v.VehicleType,
                     LicensePlate = v.LicensePlate,
                     Year = v.Year,
-                    Status = v.Status
+                    VerificationStatus = v.VerificationStatus
                 }).ToListAsync();
 
             return Ok(vehicles);
         }
 
         [HttpPut("update")]
-        public async Task<IActionResult> UpdateVehicle([FromQuery] int driverId, [FromQuery] int vehicleId, [FromBody] VehicleUpdateDto dto)
+        public async Task<IActionResult> UpdateVehicle([FromQuery] int driverId, [FromQuery] int vehicleId, [FromBody] DriverVehicleUpdateDto dto)
         {
             var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.DriverId == driverId);
             if (vehicle == null)
@@ -110,12 +110,17 @@ namespace RideShare_Connect.Api.Controllers
                 return NotFound("Vehicle not found");
             }
 
-            if (!string.IsNullOrEmpty(dto.CarMaker)) vehicle.CarMaker = dto.CarMaker;
-            if (!string.IsNullOrEmpty(dto.Model)) vehicle.Model = dto.Model;
-            if (!string.IsNullOrEmpty(dto.VehicleType)) vehicle.VehicleType = dto.VehicleType;
-            if (!string.IsNullOrEmpty(dto.LicensePlate)) vehicle.LicensePlate = dto.LicensePlate;
-            if (dto.Year.HasValue) vehicle.Year = dto.Year.Value;
-            if (!string.IsNullOrEmpty(dto.Status)) vehicle.Status = dto.Status;
+            bool modified = false;
+            if (!string.IsNullOrEmpty(dto.CarMaker)) { vehicle.CarMaker = dto.CarMaker; modified = true; }
+            if (!string.IsNullOrEmpty(dto.Model)) { vehicle.Model = dto.Model; modified = true; }
+            if (!string.IsNullOrEmpty(dto.VehicleType)) { vehicle.VehicleType = dto.VehicleType; modified = true; }
+            if (!string.IsNullOrEmpty(dto.LicensePlate)) { vehicle.LicensePlate = dto.LicensePlate; modified = true; }
+            if (dto.Year.HasValue) { vehicle.Year = dto.Year.Value; modified = true; }
+
+            if (modified)
+            {
+                vehicle.VerificationStatus = "Pending";
+            }
 
             await _context.SaveChangesAsync();
 
@@ -127,7 +132,7 @@ namespace RideShare_Connect.Api.Controllers
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
                 Year = vehicle.Year,
-                Status = vehicle.Status
+                VerificationStatus = vehicle.VerificationStatus
             };
 
             return Ok(result);

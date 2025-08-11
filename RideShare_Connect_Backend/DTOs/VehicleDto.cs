@@ -8,6 +8,6 @@ namespace RideShare_Connect.Api.DTOs
         public string VehicleType { get; set; }
         public string LicensePlate { get; set; }
         public int Year { get; set; }
-        public string Status { get; set; }
+        public string VerificationStatus { get; set; }
     }
 }
