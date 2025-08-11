@@ -43,9 +43,7 @@ namespace RideShare_Connect.Api.Controllers
                 .Select(a => new AdminDto
                 {
                     Id = a.Id,
-                    Username = a.Username,
-                    Role = a.Role,
-                    Status = a.Status
+                    Username = a.Username
                 })
                 .ToListAsync();
 
