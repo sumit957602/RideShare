@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace RideShare_Connect.ViewModels
 {
@@ -12,6 +11,9 @@ namespace RideShare_Connect.ViewModels
         [Display(Name = "Full Name")]
         public string FullName { get; set; }
 
+        [Required, EmailAddress]
+        public string Email { get; set; }
+
         [Required]
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; }
@@ -19,10 +21,8 @@ namespace RideShare_Connect.ViewModels
         [Display(Name = "License Number")]
         public string LicenseNumber { get; set; }
 
-        [Display(Name = "Profile Picture")]
-        public IFormFile? ProfilePicture { get; set; }
-
-        public string? ExistingProfilePicture { get; set; }
+        [Display(Name = "Background Check Status")]
+        public string BackgroundCheckStatus { get; set; }
 
         [Display(Name = "Driving Experience Years")]
         public int DrivingExperienceYears { get; set; }
