@@ -222,7 +222,7 @@ namespace RideShare_Connect.Api.Controllers
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
                 Year = vehicle.Year,
-                Status = vehicle.Status
+                VerificationStatus = vehicle.VerificationStatus
             };
 
             return Ok(vehicleDto);

@@ -482,7 +482,7 @@ namespace RideShare_Connect.Api.Controllers
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
                 Year = vehicle.Year,
-                Status = vehicle.Status
+                VerificationStatus = vehicle.VerificationStatus
             };
 
             return Ok(vehicleDto);
@@ -622,7 +622,7 @@ namespace RideShare_Connect.Api.Controllers
                     v.VehicleType,
                     v.LicensePlate,
                     v.Year,
-                    v.Status
+                    v.VerificationStatus
                 }).ToListAsync();
 
             return Ok(vehicles);
@@ -642,7 +642,7 @@ namespace RideShare_Connect.Api.Controllers
             if (dto.VehicleType != null) vehicle.VehicleType = dto.VehicleType;
             if (dto.LicensePlate != null) vehicle.LicensePlate = dto.LicensePlate;
             if (dto.Year.HasValue) vehicle.Year = dto.Year.Value;
-            if (dto.Status != null) vehicle.Status = dto.Status;
+            if (dto.VerificationStatus != null) vehicle.VerificationStatus = dto.VerificationStatus;
 
             await _context.SaveChangesAsync();
             return NoContent();

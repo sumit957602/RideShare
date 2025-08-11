@@ -30,7 +30,7 @@ namespace RideShare_Connect.Models.VehicleManagement
 
         [Required]
         [StringLength(20)]
-        public string Status { get; set; } 
+        public string VerificationStatus { get; set; }
 
         [Range(1990, 2100)]
         public int Year { get; set; }
