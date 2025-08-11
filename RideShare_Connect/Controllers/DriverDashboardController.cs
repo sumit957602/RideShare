@@ -127,7 +127,13 @@ namespace RideShare_Connect.Controllers
         [HttpGet]
         public IActionResult AddVehicle()
         {
-            return View(new AddVehicleViewModel());
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            return View(new AddVehicleViewModel { DriverId = userId });
         }
 
         [Authorize(Roles = "Driver")]
@@ -139,6 +145,12 @@ namespace RideShare_Connect.Controllers
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (model.DriverId != userId)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid driver information.");
+                return View(model);
             }
 
             if (!ModelState.IsValid)
@@ -158,7 +170,7 @@ namespace RideShare_Connect.Controllers
                     Year = model.Year
                 };
 
-                var response = await httpClient.PostAsJsonAsync($"api/Vehicles/register?driverId={userId}", dto);
+                var response = await httpClient.PostAsJsonAsync($"api/Vehicles/register?driverId={model.DriverId}", dto);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction(nameof(Driver));
@@ -166,12 +178,12 @@ namespace RideShare_Connect.Controllers
 
                 var errorContent = await response.Content.ReadAsStringAsync();
                 ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
-                _logger.LogError("Vehicle registration failed for driver {DriverId}: {Status} - {Error}", userId, response.StatusCode, errorContent);
+                _logger.LogError("Vehicle registration failed for driver {DriverId}: {Status} - {Error}", model.DriverId, response.StatusCode, errorContent);
             }
             catch (HttpRequestException ex)
             {
                 ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
-                _logger.LogError(ex, "HTTP request error during vehicle registration for driver {DriverId}", userId);
+                _logger.LogError(ex, "HTTP request error during vehicle registration for driver {DriverId}", model.DriverId);
             }
 
             return View(model);
