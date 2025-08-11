@@ -66,13 +66,10 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "DriverAccount");
             }
 
-            var driver = await _db.Set<Driver>()
-                .FirstOrDefaultAsync(d => d.DriverId == userId);
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
 
             var viewModel = new CreateRideViewModel
             {
-                Driver = driver,
                 Vehicles = vehicles,
                 DepartureDate = DateTime.Today
             };
@@ -94,8 +91,6 @@ namespace RideShare_Connect.Controllers
             if (!ModelState.IsValid)
             {
                 model.Vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-                model.Driver = await _db.Set<Driver>()
-                    .FirstOrDefaultAsync(d => d.DriverId == userId);
                 return View(model);
             }
 
@@ -105,8 +100,6 @@ namespace RideShare_Connect.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Departure time cannot be in the past.");
                 model.Vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-                model.Driver = await _db.Set<Driver>()
-                    .FirstOrDefaultAsync(d => d.DriverId == userId);
                 return View(model);
             }
 
