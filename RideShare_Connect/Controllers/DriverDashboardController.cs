@@ -5,6 +5,10 @@ using RideShareConnect.Data;
 using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
+using RideShare_Connect.DTOs;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
 
@@ -14,10 +18,12 @@ namespace RideShare_Connect.Controllers
     {
         private readonly AppDbContext _db;
         private readonly ILogger<DriverDashboardController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public DriverDashboardController(AppDbContext db, ILogger<DriverDashboardController> logger)
+        public DriverDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<DriverDashboardController> logger)
         {
             _db = db;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
 
@@ -147,29 +153,40 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            var driver = await _db.Set<Driver>()
-                .Include(d => d.DriverProfile)
-                .FirstOrDefaultAsync(d => d.DriverId == userId);
-            if (driver == null)
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            var dto = new VehicleRegisterDto
             {
-                return NotFound();
-            }
-
-            var vehicle = new Vehicle
-            {
-                DriverId = driver.DriverId,
                 CarMaker = model.CarMaker,
                 Model = model.Model,
                 VehicleType = model.VehicleType,
                 LicensePlate = model.LicensePlate,
-                Year = model.Year,
-                VerificationStatus = "Pending"
+                Year = model.Year
             };
 
-            _db.Vehicles.Add(vehicle);
-            await _db.SaveChangesAsync();
+            try
+            {
+                var response = await httpClient.PostAsJsonAsync($"api/vehicles/register?driverId={userId}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Driver));
+                }
 
-            return RedirectToAction(nameof(Driver));
+                var errorContent = await response.Content.ReadAsStringAsync();
+                ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
+                _logger.LogError("Error registering vehicle for driver {DriverId}: {StatusCode} - {ErrorContent}", userId, response.StatusCode, errorContent);
+            }
+            catch (HttpRequestException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                _logger.LogError(ex, "HTTP request error during vehicle registration for driver {DriverId}", userId);
+            }
+            catch (JsonException ex)
+            {
+                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
+                _logger.LogError(ex, "JSON parsing error during vehicle registration for driver {DriverId}", userId);
+            }
+
+            return View(model);
         }
 
         [Authorize(Roles = "Driver")]
