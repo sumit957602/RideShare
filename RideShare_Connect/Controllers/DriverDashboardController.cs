@@ -147,9 +147,17 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
+            var driver = await _db.Set<Driver>()
+                .Include(d => d.DriverProfile)
+                .FirstOrDefaultAsync(d => d.DriverId == userId);
+            if (driver == null)
+            {
+                return NotFound();
+            }
+
             var vehicle = new Vehicle
             {
-                DriverId = userId,
+                DriverId = driver.DriverId,
                 CarMaker = model.CarMaker,
                 Model = model.Model,
                 VehicleType = model.VehicleType,
