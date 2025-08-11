@@ -60,14 +60,17 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="#">
+                            <a class="nav-link active" asp-action="UserProfile" asp-controller="UserDashboard">
                                 <i class="bi bi-person-circle"></i>Profile
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="../UserDashboard/PrivacySettings">
+                            <a class="nav-link" asp-action="PrivacySettings" asp-controller="UserDashboard">
                                 <i class="bi bi-person-circle"></i>Privacy Settings
                             </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-danger" asp-action="DeleteAccount" asp-controller="UserDashboard">Delete My Account</a>
                         </li>
                         <li class="nav-item">
                             <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
