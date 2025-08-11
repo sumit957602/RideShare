@@ -165,7 +165,14 @@ namespace RideShare_Connect.Controllers
 
         public IActionResult PrivacySettings()
         {
-            return View();
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+
+            var profile = _db.UserProfiles.FirstOrDefault(u => u.UserId == userId);
+            return View(profile);
         }
 
         public IActionResult DeleteAccount()
