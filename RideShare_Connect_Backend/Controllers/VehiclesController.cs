@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
 using System.Threading.Tasks;
 using System.Linq;
 using System.IO;
+using System.Security.Claims;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -23,9 +25,34 @@ namespace RideShare_Connect.Api.Controllers
             _passwordHasher = passwordHasher;
         }
 
+        [Authorize(Roles = "Driver")]
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterVehicle([FromQuery] int driverId, [FromBody] VehicleRegisterDto dto)
+        public async Task<IActionResult> RegisterVehicle([FromBody] VehicleRegisterDto dto)
         {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var driverId))
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var driver = await _context.Driver.FirstOrDefaultAsync(d => d.DriverId == driverId);
+            if (driver == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            var licenseExists = await _context.Vehicles
+                .AnyAsync(v => v.DriverId == driverId && v.LicensePlate == dto.LicensePlate);
+            if (licenseExists)
+            {
+                return Conflict("Vehicle with this license plate already registered.");
+            }
+
             var vehicle = new Vehicle
             {
                 DriverId = driverId,
