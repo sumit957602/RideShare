@@ -121,7 +121,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Driver" asp-action="Driver">Driver Dashboard</a>
+                        <a class="nav-link" asp-controller="DriverDashboard" asp-action="Driver">Driver Dashboard</a>
                     </li>
                 </ul>
             </div>
@@ -140,7 +140,7 @@
                                 <p class="mb-0">Update your vehicle's details below.</p>
                             </div>
                             <div class="card-body p-4 p-md-5">
-                                <form asp-action="EditVehicle" method="post">
+                                <form asp-controller="DriverDashboard" asp-action="EditVehicle" method="post">
                                     <input type="hidden" asp-for="Id" />
                                     <input type="hidden" asp-for="DriverId" />
                                     <input type="hidden" asp-for="VerificationStatus" />
@@ -172,7 +172,7 @@
                                             <span asp-validation-for="Year" class="text-danger"></span>
                                         </div>
                                         <div class="col-12 text-end mt-5">
-                                            <a asp-action="Driver" class="btn btn-secondary">Cancel</a>
+                                            <a asp-controller="DriverDashboard" asp-action="Driver" class="btn btn-secondary">Cancel</a>
                                             <button type="submit" class="btn btn-primary">Save Vehicle</button>
                                         </div>
                                     </div>
