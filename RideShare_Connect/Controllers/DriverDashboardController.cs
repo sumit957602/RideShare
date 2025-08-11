@@ -133,8 +133,6 @@ namespace RideShare_Connect.Controllers
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
-            var vehicle = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-
             return View(new AddVehicleViewModel { DriverId = userId });
         }
 
@@ -148,7 +146,6 @@ namespace RideShare_Connect.Controllers
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -156,19 +153,19 @@ namespace RideShare_Connect.Controllers
 
             var vehicle = new Vehicle
             {
-                DriverId = model.DriverId,
+                DriverId = userId,
                 CarMaker = model.CarMaker,
                 Model = model.Model,
                 VehicleType = model.VehicleType,
                 LicensePlate = model.LicensePlate,
-                Year = model.Year
+                Year = model.Year,
+                VerificationStatus = "Pending"
             };
 
             _db.Vehicles.Add(vehicle);
             await _db.SaveChangesAsync();
 
-
-            return View(model);
+            return RedirectToAction(nameof(Driver));
         }
 
         [Authorize(Roles = "Driver")]
