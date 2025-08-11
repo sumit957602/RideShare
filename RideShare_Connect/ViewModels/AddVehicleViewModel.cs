@@ -5,10 +5,6 @@ namespace RideShare_Connect.ViewModels
     public class AddVehicleViewModel
     {
         [Required]
-        [Display(Name = "Driver ID")]
-        public int DriverId { get; set; }
-
-        [Required]
         [Display(Name = "Car Maker")]
         public string CarMaker { get; set; }
 
