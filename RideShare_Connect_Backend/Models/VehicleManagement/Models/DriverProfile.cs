@@ -26,6 +26,8 @@ namespace RideShare_Connect.Models.VehicleManagement
         [DataType(DataType.Date)]
         public DateTime DOB { get; set; }
 
+        public string? ProfilePicture { get; set; }
+
         public virtual Driver Driver { get; set; }
     }
 }
