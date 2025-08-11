@@ -26,7 +26,8 @@ namespace RideShare_Connect.ViewModels
         public string LicensePlate { get; set; }
 
         [Required]
-        public string Status { get; set; }
+        [Display(Name = "Verification Status")]
+        public string VerificationStatus { get; set; }
 
         [Range(1990, 2100)]
         public int Year { get; set; }
