@@ -9,6 +9,7 @@ using RideShare_Connect.DTOs;
 using System.Net.Http;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace RideShare_Connect.Controllers
 {
@@ -125,7 +126,30 @@ namespace RideShare_Connect.Controllers
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("Error updating profile for user {UserId}: {StatusCode} - {Error}", userId, response.StatusCode, errorContent);
-                    ModelState.AddModelError(string.Empty, "Failed to update profile.");
+
+                    try
+                    {
+                        var problemDetails = JsonSerializer.Deserialize<ValidationProblemDetails>(errorContent);
+                        if (problemDetails?.Errors != null)
+                        {
+                            foreach (var key in problemDetails.Errors.Keys)
+                            {
+                                foreach (var error in problemDetails.Errors[key])
+                                {
+                                    ModelState.AddModelError(key, error);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, errorContent);
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        ModelState.AddModelError(string.Empty, errorContent);
+                    }
+
                     return View(profile);
                 }
             }
