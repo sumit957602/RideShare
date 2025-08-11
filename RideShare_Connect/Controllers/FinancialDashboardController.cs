@@ -45,6 +45,8 @@ namespace RideShare_Connect.Controllers
                 .OrderByDescending(p => p.PaymentDate)
                 .ToListAsync();
 
+            var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+
             var model = new FinanceViewModel
             {
                 WalletBalance = balance,
@@ -52,7 +54,8 @@ namespace RideShare_Connect.Controllers
                 TotalSavedOnRides = 0,
                 PaymentMethods = await _db.PaymentMethods.Where(pm => pm.UserId == userId).ToListAsync(),
                 PaymentHistory = paymentHistory,
-                RecentTransactions = paymentHistory.Take(5).ToList()
+                RecentTransactions = paymentHistory.Take(5).ToList(),
+                Profile = profile
             };
 
             return View(model);

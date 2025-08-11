@@ -32,11 +32,11 @@
                 </ul>
                 <div class="dropdown ms-lg-3">
                     <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="" width="32" height="32" class="rounded-circle me-2">
-                        <strong>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</strong>
+                        <img src="@Model.Profile?.ProfilePicture" alt="Profile" width="32" height="32" class="rounded-circle me-2">
+                        <strong>@Model.Profile?.FullName</strong>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="../../UserDashboard/UserProfile">Profile</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form asp-controller="UserAccount" asp-action="Logout" method="post" class="d-inline">
