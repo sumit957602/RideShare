@@ -5,6 +5,9 @@ namespace RideShare_Connect.DTOs
     public class VehicleRegisterDto
     {
         [Required]
+        public int DriverId { get; set; }
+
+        [Required]
         [StringLength(50)]
         public string CarMaker { get; set; }
 

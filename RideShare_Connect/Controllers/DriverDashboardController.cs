@@ -126,13 +126,14 @@ namespace RideShare_Connect.Controllers
 
         [Authorize(Roles = "Driver")]
         [HttpGet]
-        public IActionResult AddVehicle()
+        public async Task<IActionResult> AddVehicle()
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
+            var vehicle = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
 
             return View(new AddVehicleViewModel { DriverId = userId });
         }
@@ -143,7 +144,7 @@ namespace RideShare_Connect.Controllers
         public async Task<IActionResult> AddVehicle(AddVehicleViewModel model)
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdValue))
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
@@ -153,9 +154,9 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
-            var dto = new VehicleRegisterDto
+            var vehicle = new Vehicle
             {
+                DriverId = model.DriverId,
                 CarMaker = model.CarMaker,
                 Model = model.Model,
                 VehicleType = model.VehicleType,
@@ -163,28 +164,9 @@ namespace RideShare_Connect.Controllers
                 Year = model.Year
             };
 
-            try
-            {
-                var response = await httpClient.PostAsJsonAsync($"api/vehicles/register?driverId={model.DriverId}", dto);
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Driver));
-                }
+            _db.Vehicles.Add(vehicle);
+            await _db.SaveChangesAsync();
 
-                var errorContent = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
-                _logger.LogError("Error registering vehicle for driver {DriverId}: {StatusCode} - {ErrorContent}", model.DriverId, response.StatusCode, errorContent);
-            }
-            catch (HttpRequestException ex)
-            {
-                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
-                _logger.LogError(ex, "HTTP request error during vehicle registration for driver {DriverId}", model.DriverId);
-            }
-            catch (JsonException ex)
-            {
-                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
-                _logger.LogError(ex, "JSON parsing error during vehicle registration for driver {DriverId}", model.DriverId);
-            }
 
             return View(model);
         }
