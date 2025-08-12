@@ -189,6 +189,44 @@ namespace RideShare_Connect.Api.Controllers
         }
 
 
+        [HttpPost("register-vehicle")]
+        public async Task<IActionResult> RegisterVehicle([FromQuery] int driverId, [FromBody] VehicleRegisterDto dto)
+        {
+            var driver = await _context.Driver.FindAsync(driverId);
+            if (driver == null)
+            {
+                return NotFound("Driver not found");
+            }
+
+            var vehicle = new Vehicle
+            {
+                DriverId = driverId,
+                CarMaker = dto.CarMaker,
+                Model = dto.Model,
+                VehicleType = dto.VehicleType,
+                LicensePlate = dto.LicensePlate,
+                VerificationStatus = "Pending",
+                Year = dto.Year
+            };
+
+            _context.Vehicles.Add(vehicle);
+            await _context.SaveChangesAsync();
+
+            var result = new VehicleDto
+            {
+                Id = vehicle.Id,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                VerificationStatus = vehicle.VerificationStatus
+            };
+
+            return CreatedAtAction(nameof(RegisterVehicle), new { id = result.Id }, result);
+        }
+
+
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
         {
