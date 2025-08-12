@@ -1,0 +1,152 @@
+@model RideShare_Connect.ViewModels.RideDetailsViewModel
+@{
+    ViewData["Title"] = "Ride Details";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Details - RideShare Connect</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #ff6600;
+            --secondary-color: #ffc107;
+            --dark-color: #1a1a1a;
+            --light-color: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #fff;
+            --body-bg: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--body-bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .navbar {
+            background-color: var(--dark-color);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--text-light) !important;
+        }
+
+        .navbar .nav-link {
+            color: var(--text-light) !important;
+            font-weight: 500;
+        }
+
+        .navbar .nav-link:hover, .navbar .nav-link.active {
+            color: var(--secondary-color) !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: #e65c00;
+            border-color: #e65c00;
+        }
+
+        .card {
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            border: none;
+        }
+
+        .form-card-header {
+            background-color: var(--dark-color);
+            color: var(--text-light);
+            padding: 2rem;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header & Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="/Home">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content: Ride Details -->
+    <main class="flex-grow-1 py-5">
+        <div class="container">
+            <div class="card">
+                <div class="form-card-header text-center">
+                    <h2 class="mb-0">Ride Details</h2>
+                    <p class="mb-0">Review the ride information below.</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <p><strong>Origin:</strong> @Model.Ride.Origin</p>
+                            <p><strong>Destination:</strong> @Model.Ride.Destination</p>
+                            <p><strong>Departure Time:</strong> @Model.Ride.DepartureTime.ToString("g")</p>
+                            <p><strong>Price per Seat:</strong> ₹@Model.Ride.PricePerSeat</p>
+                            <p><strong>Seats Available:</strong> @Model.Ride.AvailableSeats</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Driver:</strong> @Model.Ride.Driver?.FullName</p>
+                            <p><strong>Vehicle:</strong> @Model.Ride.Vehicle?.Model (@Model.Ride.Vehicle?.LicensePlate)</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h5>Riders</h5>
+                    <ul class="list-group">
+                        @if (Model.Riders.Any())
+                        {
+                            foreach (var rider in Model.Riders)
+                            {
+                                <li class="list-group-item">@rider</li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item">No riders for this ride.</li>
+                        }
+                    </ul>
+
+                    <div class="mt-4">
+                        <a asp-action="User" class="btn btn-secondary">Back to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
+

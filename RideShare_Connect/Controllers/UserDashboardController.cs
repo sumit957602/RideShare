@@ -184,5 +184,32 @@ namespace RideShare_Connect.Controllers
             }
             return View(new DeleteAccountDto());
         }
+
+        public async Task<IActionResult> RideDetails(int id)
+        {
+            var ride = await _db.Rides
+                .Include(r => r.Driver)
+                .Include(r => r.Vehicle)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            var riders = await _db.RideBookings
+                .Include(rb => rb.User)
+                .ThenInclude(u => u.UserProfile)
+                .Where(rb => rb.RideId == id)
+                .Select(rb => rb.User.UserProfile != null ? rb.User.UserProfile.FullName : rb.User.Email)
+                .ToListAsync();
+
+            var viewModel = new RideDetailsViewModel
+            {
+                Ride = ride,
+                Riders = riders
+            };
+
+            return View(viewModel);
+        }
     }
 }
