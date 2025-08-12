@@ -131,6 +131,111 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> EditRide(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var ride = await _db.Rides.FirstOrDefaultAsync(r => r.Id == id && r.DriverId == userId);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+
+            var model = new EditRideViewModel
+            {
+                Id = ride.Id,
+                Origin = ride.Origin,
+                Destination = ride.Destination,
+                DepartureDate = ride.DepartureTime.Date,
+                DepartureTime = ride.DepartureTime.TimeOfDay,
+                Seats = ride.TotalSeats,
+                PricePerSeat = ride.PricePerSeat,
+                VehicleId = ride.VehicleId,
+                DistanceKm = ride.DistanceKm,
+                IsRecurring = ride.IsRecurring,
+                Vehicles = vehicles
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditRide(EditRideViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+                return View(model);
+            }
+
+            var ride = await _db.Rides.FirstOrDefaultAsync(r => r.Id == model.Id && r.DriverId == userId);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            var departure = model.DepartureDate.Date + model.DepartureTime;
+            if (departure < DateTime.Now)
+            {
+                ModelState.AddModelError(string.Empty, "Departure time cannot be in the past.");
+                model.Vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
+                return View(model);
+            }
+
+            var bookedSeats = ride.TotalSeats - ride.AvailableSeats;
+            ride.Origin = model.Origin;
+            ride.Destination = model.Destination;
+            ride.DepartureTime = departure;
+            ride.VehicleId = model.VehicleId;
+            ride.TotalSeats = model.Seats;
+            ride.AvailableSeats = Math.Max(0, model.Seats - bookedSeats);
+            ride.PricePerSeat = model.PricePerSeat;
+            ride.DistanceKm = model.DistanceKm;
+            ride.IsRecurring = model.IsRecurring;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRide(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var ride = await _db.Rides.FirstOrDefaultAsync(r => r.Id == id && r.DriverId == userId);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            _db.Rides.Remove(ride);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
         [HttpGet]
         public IActionResult AddVehicle()
         {

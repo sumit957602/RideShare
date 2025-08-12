@@ -151,7 +151,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Route</th><th>Departure</th><th>Status</th><th>Seats</th></tr></thead>
+                                            <thead><tr><th>Route</th><th>Departure</th><th>Status</th><th>Seats</th><th>Actions</th></tr></thead>
                                             <tbody>
                                                 @if (Model.CreatedRides.Any())
                                                 {
@@ -162,6 +162,12 @@
                                                             <td>@ride.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
                                                             <td><span class="badge bg-secondary">@ride.Status</span></td>
                                                             <td>@ride.AvailableSeats/@ride.TotalSeats</td>
+                                                            <td>
+                                                                <a asp-action="EditRide" asp-route-id="@ride.Id" class="btn btn-sm btn-primary me-2">Edit</a>
+                                                                <form asp-action="DeleteRide" asp-route-id="@ride.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this ride?');">
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     }
                                                 }
