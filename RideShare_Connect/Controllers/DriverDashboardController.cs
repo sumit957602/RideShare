@@ -126,14 +126,14 @@ namespace RideShare_Connect.Controllers
 
         [Authorize(Roles = "Driver")]
         [HttpGet]
-        public async Task<IActionResult> AddVehicle()
+        public IActionResult AddVehicle()
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
-            return View(new AddVehicleViewModel { DriverId = userId });
+            return View();
         }
 
         [Authorize(Roles = "Driver")]
