@@ -402,6 +402,27 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("delete-ride")]
+        public async Task<IActionResult> DeleteRide([FromQuery] int driverId, [FromQuery] int vehicleId, [FromQuery] int rideId)
+        {
+            var ride = await _context.Rides.FirstOrDefaultAsync(r => r.Id == rideId && r.DriverId == driverId && r.VehicleId == vehicleId);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            var routePoints = _context.RoutePoints.Where(rp => rp.RideId == rideId);
+            _context.RoutePoints.RemoveRange(routePoints);
+
+            var recurrences = _context.RideRecurrences.Where(rr => rr.RideId == rideId);
+            _context.RideRecurrences.RemoveRange(recurrences);
+
+            _context.Rides.Remove(ride);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
