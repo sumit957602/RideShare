@@ -15,6 +15,9 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -86,6 +89,14 @@
             border-top-left-radius: 0.75rem;
             border-top-right-radius: 0.75rem;
         }
+
+        /* Map Styles */
+        #map {
+            height: 100%;
+            min-height: 400px;
+            width: 100%;
+            border-radius: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -122,6 +133,8 @@
                         </div>
                     </div>
 
+                    <div id="map" class="mt-4"></div>
+
                     <hr />
 
                     <h5>Riders</h5>
@@ -146,6 +159,72 @@
             </div>
         </div>
     </main>
+    <!-- Leaflet JS for Map -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom Map Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const map = L.map('map').setView([25.5941, 85.1376], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            const origin = @System.Text.Json.JsonSerializer.Serialize(Model.Ride.Origin);
+            const destination = @System.Text.Json.JsonSerializer.Serialize(Model.Ride.Destination);
+
+            async function geocode(query) {
+                if (!query) return null;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+                try {
+                    const response = await fetch(url);
+                    const results = await response.json();
+                    if (results.length > 0) {
+                        return [parseFloat(results[0].lat), parseFloat(results[0].lon)];
+                    }
+                } catch (err) {
+                    console.error('Geocoding error:', err);
+                }
+                return null;
+            }
+
+            async function drawRoute(originCoords, destCoords) {
+                const url = `https://router.project-osrm.org/route/v1/driving/${originCoords[1]},${originCoords[0]};${destCoords[1]},${destCoords[0]}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                    L.polyline(coords, { color: 'var(--primary-color)' }).addTo(map);
+                    map.fitBounds(coords);
+                }
+            }
+
+            async function initMap() {
+                const originCoords = await geocode(origin);
+                const destCoords = await geocode(destination);
+
+                if (originCoords) {
+                    L.marker(originCoords).addTo(map).bindPopup(`<b>Origin:</b> ${origin}`);
+                }
+                if (destCoords) {
+                    L.marker(destCoords).addTo(map).bindPopup(`<b>Destination:</b> ${destination}`);
+                }
+
+                if (originCoords && destCoords) {
+                    await drawRoute(originCoords, destCoords);
+                } else if (originCoords) {
+                    map.setView(originCoords, 13);
+                } else if (destCoords) {
+                    map.setView(destCoords, 13);
+                }
+            }
+
+            initMap();
+        });
+    </script>
 
 </body>
 </html>
