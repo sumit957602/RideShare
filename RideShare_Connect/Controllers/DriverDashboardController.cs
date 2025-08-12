@@ -271,42 +271,71 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        [HttpGet]
         public IActionResult AddVehicle()
-        {
-            return View(new EditVehicleViewModel());
-        }
-
-        [Authorize(Roles = "Driver")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddVehicle(EditVehicleViewModel model)
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
             }
+            return View();
+        }
 
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVehicle(AddVehicleViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var vehicle = new Vehicle
+            try
             {
-                DriverId = userId,
-                CarMaker = model.CarMaker,
-                Model = model.Model,
-                VehicleType = model.VehicleType,
-                LicensePlate = model.LicensePlate,
-                Year = model.Year,
-                VerificationStatus = "Pending"
-            };
+                var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+                var dto = new VehicleRegisterDto
+                {
+                    CarMaker = model.CarMaker,
+                    Model = model.Model,
+                    VehicleType = model.VehicleType,
+                    LicensePlate = model.LicensePlate,
+                    Year = model.Year
+                };
 
-            _db.Vehicles.Add(vehicle);
-            await _db.SaveChangesAsync();
+                var response = await httpClient.PostAsJsonAsync($"api/Drivers/register-vehicle?driverId={userId}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Driver));
+                }
 
-            return RedirectToAction(nameof(Driver));
+                string? apiError;
+                try
+                {
+                    var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+                    apiError = problem?.Detail ?? problem?.Title;
+                }
+                catch (Exception)
+                {
+                    apiError = await response.Content.ReadAsStringAsync();
+                }
+
+                _logger.LogError("Failed to register vehicle: {Error}", apiError);
+                ModelState.AddModelError(string.Empty, string.IsNullOrWhiteSpace(apiError) ? "Failed to register vehicle." : apiError);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error registering vehicle");
+                ModelState.AddModelError(string.Empty, "An error occurred while registering vehicle.");
+            }
+
+            return View(model);
         }
 
         [Authorize(Roles = "Driver")]
@@ -327,13 +356,12 @@ namespace RideShare_Connect.Controllers
             var model = new EditVehicleViewModel
             {
                 Id = vehicle.Id,
-                DriverId = vehicle.DriverId,
                 CarMaker = vehicle.CarMaker,
                 Model = vehicle.Model,
                 VehicleType = vehicle.VehicleType,
                 LicensePlate = vehicle.LicensePlate,
-                Year = vehicle.Year,
-                VerificationStatus = vehicle.VerificationStatus
+                VerificationStatus = vehicle.VerificationStatus,
+                Year = vehicle.Year
             };
 
             return View(model);
@@ -366,6 +394,7 @@ namespace RideShare_Connect.Controllers
             vehicle.VehicleType = model.VehicleType;
             vehicle.LicensePlate = model.LicensePlate;
             vehicle.Year = model.Year;
+            vehicle.VerificationStatus = model.VerificationStatus;
 
             await _db.SaveChangesAsync();
 

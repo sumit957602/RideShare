@@ -6,26 +6,27 @@ namespace RideShare_Connect.ViewModels
     {
         public int Id { get; set; }
 
+        [Display(Name = "Driver Id")]
         public int DriverId { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [Display(Name = "Car Maker")]
         public string CarMaker { get; set; }
 
         [Required]
-        [StringLength(50)]
         public string Model { get; set; }
 
         [Required]
-        [StringLength(30)]
+        [Display(Name = "Vehicle Type")]
         public string VehicleType { get; set; }
 
         [Required]
-        [StringLength(20)]
+        [Display(Name = "License Plate")]
         public string LicensePlate { get; set; }
 
-        [StringLength(20)]
-        public string? VerificationStatus { get; set; }
+        [Required]
+        [Display(Name = "Verification Status")]
+        public string VerificationStatus { get; set; }
 
         [Range(1990, 2100)]
         public int Year { get; set; }
