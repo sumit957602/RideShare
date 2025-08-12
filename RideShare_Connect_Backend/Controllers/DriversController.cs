@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
+using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect_Backend.Services;
 using System;
@@ -295,6 +296,31 @@ namespace RideShare_Connect.Api.Controllers
                 }).ToListAsync();
 
             return Ok(vehicles);
+        }
+
+        [HttpGet("rides")]
+        public async Task<IActionResult> GetRides([FromQuery] int driverId)
+        {
+            var rides = await _context.Rides
+                .AsNoTracking()
+                .Where(r => r.DriverId == driverId)
+                .Select(r => new RideDto
+                {
+                    Id = r.Id,
+                    DriverId = r.DriverId,
+                    VehicleId = r.VehicleId,
+                    Origin = r.Origin,
+                    Destination = r.Destination,
+                    DepartureTime = r.DepartureTime,
+                    TotalSeats = r.TotalSeats,
+                    AvailableSeats = r.AvailableSeats,
+                    DistanceKm = r.DistanceKm,
+                    PricePerSeat = r.PricePerSeat,
+                    Status = r.Status,
+                    IsRecurring = r.IsRecurring
+                }).ToListAsync();
+
+            return Ok(rides);
         }
 
 
