@@ -263,6 +263,25 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("vehicles")]
+        public async Task<IActionResult> GetVehicles([FromQuery] int driverId)
+        {
+            var vehicles = await _context.Vehicles
+                .Where(v => v.DriverId == driverId)
+                .Select(v => new VehicleDto
+                {
+                    Id = v.Id,
+                    CarMaker = v.CarMaker,
+                    Model = v.Model,
+                    VehicleType = v.VehicleType,
+                    LicensePlate = v.LicensePlate,
+                    Year = v.Year,
+                    VerificationStatus = v.VerificationStatus
+                }).ToListAsync();
+
+            return Ok(vehicles);
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
