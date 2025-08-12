@@ -151,21 +151,35 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            var vehicle = new Vehicle
+            try
             {
-                DriverId = userId,
-                CarMaker = model.CarMaker,
-                Model = model.Model,
-                VehicleType = model.VehicleType,
-                LicensePlate = model.LicensePlate,
-                Year = model.Year,
-                VerificationStatus = "Pending"
-            };
+                var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+                var dto = new VehicleRegisterDto
+                {
+                    CarMaker = model.CarMaker,
+                    Model = model.Model,
+                    VehicleType = model.VehicleType,
+                    LicensePlate = model.LicensePlate,
+                    Year = model.Year
+                };
 
-            _db.Vehicles.Add(vehicle);
-            await _db.SaveChangesAsync();
+                var response = await httpClient.PostAsJsonAsync($"api/Drivers/register-vehicle?driverId={userId}", dto);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction(nameof(Driver));
+                }
 
-            return RedirectToAction(nameof(Driver));
+                var error = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Failed to register vehicle: {Error}", error);
+                ModelState.AddModelError(string.Empty, "Failed to register vehicle.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error registering vehicle");
+                ModelState.AddModelError(string.Empty, "An error occurred while registering vehicle.");
+            }
+
+            return View(model);
         }
 
         [Authorize(Roles = "Driver")]
