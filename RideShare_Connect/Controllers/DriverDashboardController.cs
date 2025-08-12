@@ -271,6 +271,108 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        public IActionResult AddVehicle()
+        {
+            return View(new EditVehicleViewModel());
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddVehicle(EditVehicleViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vehicle = new Vehicle
+            {
+                DriverId = userId,
+                CarMaker = model.CarMaker,
+                Model = model.Model,
+                VehicleType = model.VehicleType,
+                LicensePlate = model.LicensePlate,
+                Year = model.Year,
+                VerificationStatus = "Pending"
+            };
+
+            _db.Vehicles.Add(vehicle);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> EditVehicle(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == id && v.DriverId == userId);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditVehicleViewModel
+            {
+                Id = vehicle.Id,
+                DriverId = vehicle.DriverId,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                VerificationStatus = vehicle.VerificationStatus
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditVehicle(EditVehicleViewModel model)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var vehicle = await _db.Vehicles.FirstOrDefaultAsync(v => v.Id == model.Id && v.DriverId == userId);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            vehicle.CarMaker = model.CarMaker;
+            vehicle.Model = model.Model;
+            vehicle.VehicleType = model.VehicleType;
+            vehicle.LicensePlate = model.LicensePlate;
+            vehicle.Year = model.Year;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteVehicle(int id)
