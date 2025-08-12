@@ -169,9 +169,19 @@ namespace RideShare_Connect.Controllers
                     return RedirectToAction(nameof(Driver));
                 }
 
-                var error = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Failed to register vehicle: {Error}", error);
-                ModelState.AddModelError(string.Empty, "Failed to register vehicle.");
+                string? apiError;
+                try
+                {
+                    var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+                    apiError = problem?.Detail ?? problem?.Title;
+                }
+                catch (Exception)
+                {
+                    apiError = await response.Content.ReadAsStringAsync();
+                }
+
+                _logger.LogError("Failed to register vehicle: {Error}", apiError);
+                ModelState.AddModelError(string.Empty, string.IsNullOrWhiteSpace(apiError) ? "Failed to register vehicle." : apiError);
             }
             catch (Exception ex)
             {
