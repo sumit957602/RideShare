@@ -44,6 +44,11 @@ namespace RideShare_Connect.Controllers
             var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                 .OrderByDescending(r => r.Timestamp)
                 .ToListAsync();
+            var rides = await _db.Rides
+                .Where(r => r.DriverId == userId)
+                .Include(r => r.Vehicle)
+                .OrderByDescending(r => r.DepartureTime)
+                .ToListAsync();
             var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
 
             var viewModel = new DriverDashboardViewModel
@@ -51,6 +56,7 @@ namespace RideShare_Connect.Controllers
                 Driver = driver,
                 DriverProfile = driverProfile,
                 Vehicles = vehicles,
+                CreatedRides = rides,
                 AverageRating = average,
                 RecentRatings = ratings.Take(5)
             };
