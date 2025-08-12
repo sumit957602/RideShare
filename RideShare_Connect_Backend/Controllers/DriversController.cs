@@ -9,6 +9,7 @@ using RideShare_Connect.Api.Data;
 using RideShare_Connect.Api.DTOs;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
+using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect_Backend.Services;
 using System;
 using System.Collections.Generic;
@@ -346,6 +347,59 @@ namespace RideShare_Connect.Api.Controllers
                 }).ToListAsync();
 
             return Ok(rides);
+        }
+
+        [HttpPut("update-ride")]
+        public async Task<IActionResult> UpdateRide([FromQuery] int driverId, [FromQuery] int vehicleId, [FromQuery] int rideId, [FromBody] RideUpdateDto dto)
+        {
+            var ride = await _context.Rides.FirstOrDefaultAsync(r => r.Id == rideId && r.DriverId == driverId && r.VehicleId == vehicleId);
+            if (ride == null)
+            {
+                return NotFound("Ride not found");
+            }
+
+            ride.Origin = dto.Origin;
+            ride.Destination = dto.Destination;
+            ride.DepartureTime = dto.DepartureTime;
+            ride.DistanceKm = dto.DistanceKm;
+            ride.AvailableSeats += dto.TotalSeats - ride.TotalSeats;
+            ride.TotalSeats = dto.TotalSeats;
+
+            var existingRoutePoints = _context.RoutePoints.Where(rp => rp.RideId == rideId);
+            _context.RoutePoints.RemoveRange(existingRoutePoints);
+
+            if (dto.RoutePoints != null && dto.RoutePoints.Count > 0)
+            {
+                foreach (var rp in dto.RoutePoints)
+                {
+                    _context.RoutePoints.Add(new RoutePoint
+                    {
+                        RideId = rideId,
+                        Location = rp.Location,
+                        SequenceNumber = rp.SequenceNumber
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            var result = new RideDto
+            {
+                Id = ride.Id,
+                DriverId = ride.DriverId,
+                VehicleId = ride.VehicleId,
+                Origin = ride.Origin,
+                Destination = ride.Destination,
+                DepartureTime = ride.DepartureTime,
+                TotalSeats = ride.TotalSeats,
+                AvailableSeats = ride.AvailableSeats,
+                DistanceKm = ride.DistanceKm,
+                PricePerSeat = ride.PricePerSeat,
+                Status = ride.Status,
+                IsRecurring = ride.IsRecurring
+            };
+
+            return Ok(result);
         }
 
 
