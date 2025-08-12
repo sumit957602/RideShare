@@ -226,6 +226,43 @@ namespace RideShare_Connect.Api.Controllers
             return CreatedAtAction(nameof(RegisterVehicle), new { id = result.Id }, result);
         }
 
+        [HttpPut("update-vehicle")]
+        public async Task<IActionResult> UpdateVehicle([FromQuery] int driverId, [FromQuery] int vehicleId, [FromBody] DriverVehicleUpdateDto dto)
+        {
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.DriverId == driverId);
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            bool modified = false;
+            if (!string.IsNullOrEmpty(dto.CarMaker)) { vehicle.CarMaker = dto.CarMaker; modified = true; }
+            if (!string.IsNullOrEmpty(dto.Model)) { vehicle.Model = dto.Model; modified = true; }
+            if (!string.IsNullOrEmpty(dto.VehicleType)) { vehicle.VehicleType = dto.VehicleType; modified = true; }
+            if (!string.IsNullOrEmpty(dto.LicensePlate)) { vehicle.LicensePlate = dto.LicensePlate; modified = true; }
+            if (dto.Year.HasValue) { vehicle.Year = dto.Year.Value; modified = true; }
+
+            if (modified)
+            {
+                vehicle.VerificationStatus = "Pending";
+            }
+
+            await _context.SaveChangesAsync();
+
+            var result = new VehicleDto
+            {
+                Id = vehicle.Id,
+                CarMaker = vehicle.CarMaker,
+                Model = vehicle.Model,
+                VehicleType = vehicle.VehicleType,
+                LicensePlate = vehicle.LicensePlate,
+                Year = vehicle.Year,
+                VerificationStatus = vehicle.VerificationStatus
+            };
+
+            return Ok(result);
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
