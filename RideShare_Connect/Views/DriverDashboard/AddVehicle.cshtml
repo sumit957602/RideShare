@@ -141,7 +141,7 @@
                             <div class="card-body p-4 p-md-5">
                                 <form asp-controller="DriverDashboard" asp-action="AddVehicle" method="post">
                                     @Html.AntiForgeryToken()
-                                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                                     <div class="row g-4">
                                         <div class="col-md-6">
                                             <label asp-for="CarMaker" class="form-label"></label>
