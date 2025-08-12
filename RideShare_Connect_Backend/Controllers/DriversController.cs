@@ -323,6 +323,31 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(rides);
         }
 
+        [HttpGet("vehicle-rides")]
+        public async Task<IActionResult> GetVehicleRides([FromQuery] int driverId, [FromQuery] int vehicleId)
+        {
+            var rides = await _context.Rides
+                .AsNoTracking()
+                .Where(r => r.DriverId == driverId && r.VehicleId == vehicleId)
+                .Select(r => new RideDto
+                {
+                    Id = r.Id,
+                    DriverId = r.DriverId,
+                    VehicleId = r.VehicleId,
+                    Origin = r.Origin,
+                    Destination = r.Destination,
+                    DepartureTime = r.DepartureTime,
+                    TotalSeats = r.TotalSeats,
+                    AvailableSeats = r.AvailableSeats,
+                    DistanceKm = r.DistanceKm,
+                    PricePerSeat = r.PricePerSeat,
+                    Status = r.Status,
+                    IsRecurring = r.IsRecurring
+                }).ToListAsync();
+
+            return Ok(rides);
+        }
+
 
         [HttpGet("profile")]
         public async Task<ActionResult<DriverDto>> GetProfile([FromQuery] int driverId)
