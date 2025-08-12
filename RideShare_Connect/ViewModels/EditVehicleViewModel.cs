@@ -6,7 +6,6 @@ namespace RideShare_Connect.ViewModels
     {
         public int Id { get; set; }
 
-        [Required]
         [Display(Name = "Driver Id")]
         public int DriverId { get; set; }
 
