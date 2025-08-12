@@ -356,7 +356,6 @@ namespace RideShare_Connect.Controllers
             var model = new EditVehicleViewModel
             {
                 Id = vehicle.Id,
-                DriverId = vehicle.DriverId,
                 CarMaker = vehicle.CarMaker,
                 Model = vehicle.Model,
                 VehicleType = vehicle.VehicleType,
@@ -377,11 +376,6 @@ namespace RideShare_Connect.Controllers
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
             {
                 return RedirectToAction("Login", "DriverAccount");
-            }
-
-            if (userId != model.DriverId)
-            {
-                return Unauthorized();
             }
 
             if (!ModelState.IsValid)
