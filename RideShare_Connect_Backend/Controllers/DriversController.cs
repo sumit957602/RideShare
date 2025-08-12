@@ -263,6 +263,21 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("delete-vehicle")]
+        public async Task<IActionResult> DeleteVehicle([FromQuery] int driverId, [FromQuery] int vehicleId)
+        {
+            var vehicle = await _context.Vehicles.FirstOrDefaultAsync(v => v.Id == vehicleId && v.DriverId == driverId);
+            if (vehicle == null)
+            {
+                return NotFound("Vehicle not found");
+            }
+
+            _context.Vehicles.Remove(vehicle);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         [HttpGet("vehicles")]
         public async Task<IActionResult> GetVehicles([FromQuery] int driverId)
         {
