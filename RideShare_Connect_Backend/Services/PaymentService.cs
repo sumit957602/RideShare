@@ -9,7 +9,7 @@ using RideShare_Connect.Models.PaymentManagement;
 
 namespace RideShare_Connect.Services
 {
-    public class PaymentService
+    public class PaymentService : IPaymentService
     {
         private readonly ApplicationDbContext _context;
         private readonly IPaymentGateway _gateway;
