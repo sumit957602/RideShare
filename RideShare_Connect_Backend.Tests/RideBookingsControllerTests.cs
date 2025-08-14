@@ -1,0 +1,90 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using RideShare_Connect.Api.Controllers;
+using RideShare_Connect.Api.Data;
+using RideShare_Connect.DTOs;
+using RideShare_Connect.Models.RideManagement;
+using RideShare_Connect.Models.PaymentManagement;
+using RideShare_Connect.Models.VehicleManagement;
+
+namespace RideShare_Connect_Backend.Tests;
+
+public class RideBookingsControllerTests
+{
+    [Test]
+    public async Task AcceptRide_ValidRequest_CreatesBookingAndPayment()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        using var context = new ApplicationDbContext(options);
+        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
+        var ride = new Ride
+        {
+            Id = 1,
+            DriverId = 1,
+            VehicleId = 1,
+            Origin = "O",
+            Destination = "D",
+            DepartureTime = DateTime.UtcNow.AddHours(1),
+            TotalSeats = 3,
+            AvailableSeats = 3,
+            PricePerSeat = 10m,
+            DistanceKm = 10,
+            Status = "Scheduled"
+        };
+        context.Rides.Add(ride);
+        await context.SaveChangesAsync();
+        var controller = new RideBookingsController(context);
+        var dto = new RideBookingRequestDto
+        {
+            RideId = 1,
+            UserId = 1,
+            Seats = 2,
+            PickupLocation = "A",
+            DropLocation = "B",
+            DistanceKm = 5
+        };
+
+        // Act
+        var result = await controller.AcceptRide(dto);
+
+        // Assert
+        var ok = result as OkObjectResult;
+        Assert.That(ok, Is.Not.Null);
+        Assert.That(await context.RideBookings.CountAsync(), Is.EqualTo(1));
+        Assert.That(await context.Payments.CountAsync(), Is.EqualTo(1));
+        Assert.That((await context.Rides.FirstAsync()).AvailableSeats, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task AcceptRide_RideNotFound_ReturnsNotFound()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        using var context = new ApplicationDbContext(options);
+        var controller = new RideBookingsController(context);
+        var dto = new RideBookingRequestDto
+        {
+            RideId = 99,
+            UserId = 1,
+            Seats = 1,
+            PickupLocation = "A",
+            DropLocation = "B",
+            DistanceKm = 5
+        };
+
+        // Act
+        var result = await controller.AcceptRide(dto);
+
+        // Assert
+        Assert.IsInstanceOf<NotFoundObjectResult>(result);
+    }
+}
