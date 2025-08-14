@@ -132,10 +132,9 @@
                                             <div class="card-body d-flex align-items-center">
                                                 <i class="bi bi-credit-card-fill fs-1 text-primary me-3"></i>
                                                 <div>
-                                                    @{ string last4 = !string.IsNullOrEmpty(method.CardNumber) && method.CardNumber.Length > 4 ? method.CardNumber.Substring(method.CardNumber.Length - 4) : method.CardNumber; }
-                                                    <h5 class="mb-1">@method.MethodType @if(!string.IsNullOrEmpty(last4)){<text>**** @last4</text>}</h5>
-                                                    @if(method.ExpiryDate.HasValue){
-                                                        <p class="mb-1 text-muted">Expires @method.ExpiryDate.Value.ToString("MM/yyyy")</p>
+                                                    <h5 class="mb-1">@method.MethodType @if(!string.IsNullOrEmpty(method.Last4)){<text>**** @method.Last4</text>}</h5>
+                                                    @if(!string.IsNullOrEmpty(method.Brand)){
+                                                        <p class="mb-1 text-muted">@method.Brand</p>
                                                     }
                                                 </div>
                                             </div>
@@ -261,10 +260,7 @@
                             <select class="form-select">
                                 @foreach (var method in Model.PaymentMethods)
                                 {
-                                    var last4 = !string.IsNullOrEmpty(method.CardNumber) && method.CardNumber.Length > 4
-                                        ? method.CardNumber.Substring(method.CardNumber.Length - 4)
-                                        : method.CardNumber;
-                                    <option>@method.MethodType @if(!string.IsNullOrEmpty(last4)){<text>**** @last4</text>}</option>
+                                    <option>@method.MethodType @if(!string.IsNullOrEmpty(method.Last4)){<text>**** @method.Last4</text>}</option>
                                 }
                                 <option>Add New Card...</option>
                             </select>
