@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "Payment History";
+}
+
+<div class="container">
+    <h2>Payment History</h2>
+    <table class="table" id="history-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+const userId = 1;
+
+async function loadHistory() {
+    const res = await fetch(`/api/payments/history?userId=${userId}`);
+    const data = await res.json();
+    const tbody = document.querySelector('#history-table tbody');
+    tbody.innerHTML = '';
+    data.forEach(p => {
+        const tr = document.createElement('tr');
+        const date = new Date(p.paymentDate).toLocaleString();
+        tr.innerHTML = `<td>${date}</td><td>${p.amount}</td><td>${p.status}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+loadHistory();
+</script>
+

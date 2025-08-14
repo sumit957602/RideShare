@@ -1,24 +1,65 @@
-@model RideShare_Connect.Models.PaymentManagement.PaymentMethod
 @{
     ViewData["Title"] = "Add Payment Method";
 }
-<h2 class="mb-4">Add Payment Method</h2>
-<form asp-action="AddPaymentMethod" method="post">
-    <div class="mb-3">
-        <label asp-for="MethodType" class="form-label"></label>
-        <input asp-for="MethodType" class="form-control" />
-        <span asp-validation-for="MethodType" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="CardNumber" class="form-label"></label>
-        <input asp-for="CardNumber" class="form-control" />
-        <span asp-validation-for="CardNumber" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="ExpiryDate" class="form-label"></label>
-        <input asp-for="ExpiryDate" class="form-control" type="date" />
-        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
-</form>
+
+<div class="container">
+    <h2>Add Payment Method</h2>
+    <form id="method-form">
+        <div class="mb-3">
+            <label for="methodType" class="form-label">Method Type</label>
+            <input id="methodType" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="cardNumber" class="form-label">Card Number</label>
+            <input id="cardNumber" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label for="expiryDate" class="form-label">Expiry Date</label>
+            <input id="expiryDate" type="date" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+
+    <h3 class="mt-4">Saved Methods</h3>
+    <ul id="methods-list"></ul>
+</div>
+
+<script>
+const userId = 1;
+
+async function loadMethods() {
+    const res = await fetch(`/api/payments/methods?userId=${userId}`);
+    const data = await res.json();
+    const list = document.getElementById('methods-list');
+    list.innerHTML = '';
+    data.forEach(m => {
+        const li = document.createElement('li');
+        const last4 = m.last4 ? ` ****${m.last4}` : '';
+        li.textContent = `${m.methodType}${last4}`;
+        list.appendChild(li);
+    });
+}
+
+document.getElementById('method-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const payload = {
+        userId,
+        methodType: document.getElementById('methodType').value,
+        cardNumber: document.getElementById('cardNumber').value,
+        expiryDate: document.getElementById('expiryDate').value
+    };
+    const res = await fetch('/api/payments/save-method', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+        document.getElementById('method-form').reset();
+        loadMethods();
+    }
+});
+
+loadMethods();
+</script>
+

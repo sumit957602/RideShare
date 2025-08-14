@@ -89,5 +89,17 @@ namespace RideShare_Connect.Controllers
 
             return RedirectToAction(nameof(Finance));
         }
+
+        [HttpGet]
+        public IActionResult TopUpWallet()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult PaymentHistory()
+        {
+            return View();
+        }
     }
 }
