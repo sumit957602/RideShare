@@ -1,4 +1,3 @@
-﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RideShare_Connect.Models.UserManagement;
@@ -18,14 +17,17 @@ namespace RideShare_Connect.Models.PaymentManagement
         [StringLength(50)]
         public string MethodType { get; set; }  // e.g., "Credit Card", "Debit Card", "UPI", "NetBanking"
 
-        [StringLength(16)]
-        [Display(Name = "Card Number")]
-        public string CardNumber { get; set; }  // Optional for UPI/NetBanking
+        [StringLength(100)]
+        public string? PaymentToken { get; set; }
 
-        [DataType(DataType.Date)]
-        public DateTime? ExpiryDate { get; set; }  // Nullable for UPI/NetBanking
+        [StringLength(4)]
+        public string? Last4 { get; set; }
+
+        [StringLength(20)]
+        public string? Brand { get; set; }
 
         // Navigation Property
         public virtual User User { get; set; }
     }
 }
+
