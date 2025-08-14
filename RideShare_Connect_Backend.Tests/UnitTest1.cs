@@ -1,4 +1,4 @@
-namespace RideShare_Connect_Test
+namespace RideShare_Connect_Backend.Tests
 {
     public class Tests
     {
