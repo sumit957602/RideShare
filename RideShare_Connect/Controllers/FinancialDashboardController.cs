@@ -15,9 +15,11 @@ namespace RideShare_Connect.Controllers
     public class FinancialDashboardController : Controller
     {
         private readonly AppDbContext _db;
-        public FinancialDashboardController(AppDbContext db)
+        private readonly IConfiguration _config;
+        public FinancialDashboardController(AppDbContext db, IConfiguration config)
         {
             _db = db;
+            _config = config;
         }
 
         public async Task<IActionResult> Finance()
@@ -57,6 +59,8 @@ namespace RideShare_Connect.Controllers
                 RecentTransactions = paymentHistory.Take(5).ToList(),
                 Profile = profile
             };
+
+            ViewBag.RazorpayKey = _config["PaymentGateway:ApiKey"] ?? "rzp_test_R5NMyugFaCywDS";
 
             return View(model);
         }
