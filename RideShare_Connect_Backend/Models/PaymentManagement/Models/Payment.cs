@@ -34,6 +34,9 @@ namespace RideShare_Connect.Models.PaymentManagement
         [StringLength(20)]
         public string Status { get; set; } // e.g., "Completed", "Pending", "Failed"
 
+        [StringLength(100)]
+        public string? ProviderTransactionId { get; set; }
+
         // Navigation Properties
         public virtual User User { get; set; }
         public virtual RideBooking Booking { get; set; }

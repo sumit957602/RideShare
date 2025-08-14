@@ -8,15 +8,24 @@ namespace RideShare_Connect_Backend.Tests;
 
 public class PaymentServiceTests
 {
+    private class FakeGateway : IPaymentGateway
+    {
+        public Task<PaymentGatewayResult> CreateChargeAsync(PaymentProcessDto dto)
+            => Task.FromResult(new PaymentGatewayResult { TransactionId = "txn_123", Status = "Pending" });
+
+        public Task<string> GetPaymentStatusAsync(string transactionId)
+            => Task.FromResult("Completed");
+    }
+
     [Test]
-    public async Task ProcessPaymentAsync_AddsPaymentWithCompletedStatus()
+    public async Task ProcessPaymentAsync_StoresGatewayTransaction()
     {
         // Arrange
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         using var context = new ApplicationDbContext(options);
-        var service = new PaymentService(context);
+        var service = new PaymentService(context, new FakeGateway());
         var dto = new PaymentProcessDto
         {
             UserId = 1,
@@ -29,26 +38,32 @@ public class PaymentServiceTests
         var result = await service.ProcessPaymentAsync(dto);
 
         // Assert
-        Assert.That(result.Status, Is.EqualTo("Completed"));
+        Assert.That(result.Status, Is.EqualTo("Pending"));
+        Assert.That(result.ProviderTransactionId, Is.EqualTo("txn_123"));
         Assert.That(await context.Payments.CountAsync(), Is.EqualTo(1));
     }
 
     [Test]
-    public async Task ConfirmPaymentAsync_ReturnsNull_WhenPaymentNotFound()
+    public async Task UpdatePaymentStatusAsync_UpdatesStatus()
     {
-        // Arrange
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         using var context = new ApplicationDbContext(options);
-        var service = new PaymentService(context);
-        var dto = new PaymentConfirmDto { PaymentId = 99 };
+        var service = new PaymentService(context, new FakeGateway());
+        var dto = new PaymentProcessDto
+        {
+            UserId = 1,
+            BookingId = 1,
+            Amount = 20m,
+            PaymentMethodId = 1
+        };
 
-        // Act
-        var result = await service.ConfirmPaymentAsync(dto);
+        var payment = await service.ProcessPaymentAsync(dto);
+        await service.UpdatePaymentStatusAsync(payment.ProviderTransactionId!);
 
-        // Assert
-        Assert.That(result, Is.Null);
+        var updated = await context.Payments.FindAsync(payment.Id);
+        Assert.That(updated!.Status, Is.EqualTo("Completed"));
     }
 
     [Test]
@@ -59,7 +74,7 @@ public class PaymentServiceTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         using var context = new ApplicationDbContext(options);
-        var service = new PaymentService(context);
+        var service = new PaymentService(context, new FakeGateway());
         var dto = new AddMoneyDto { UserId = 1, Amount = 50m };
 
         // Act
@@ -79,7 +94,7 @@ public class PaymentServiceTests
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         using var context = new ApplicationDbContext(options);
-        var service = new PaymentService(context);
+        var service = new PaymentService(context, new FakeGateway());
 
         // Act
         var balance = await service.GetWalletBalanceAsync(1);

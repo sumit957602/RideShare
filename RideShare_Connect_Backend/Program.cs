@@ -18,9 +18,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
 builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
-builder.Services.AddScoped<PaymentService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.Configure<PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
+builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

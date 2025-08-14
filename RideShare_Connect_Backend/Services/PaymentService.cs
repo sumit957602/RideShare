@@ -12,14 +12,18 @@ namespace RideShare_Connect.Services
     public class PaymentService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPaymentGateway _gateway;
 
-        public PaymentService(ApplicationDbContext context)
+        public PaymentService(ApplicationDbContext context, IPaymentGateway gateway)
         {
             _context = context;
+            _gateway = gateway;
         }
 
         public async Task<Payment> ProcessPaymentAsync(PaymentProcessDto dto)
         {
+            var result = await _gateway.CreateChargeAsync(dto);
+
             var payment = new Payment
             {
                 UserId = dto.UserId,
@@ -27,12 +31,28 @@ namespace RideShare_Connect.Services
                 Amount = dto.Amount,
                 PaymentMethodId = dto.PaymentMethodId,
                 PaymentDate = DateTime.UtcNow,
-                Status = "Completed"
+                Status = result.Status,
+                ProviderTransactionId = result.TransactionId
             };
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
             return payment;
+        }
+
+        public async Task UpdatePaymentStatusAsync(string providerTransactionId)
+        {
+            var payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.ProviderTransactionId == providerTransactionId);
+
+            if (payment == null || string.IsNullOrEmpty(payment.ProviderTransactionId))
+            {
+                return;
+            }
+
+            var status = await _gateway.GetPaymentStatusAsync(payment.ProviderTransactionId);
+            payment.Status = status;
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Payment?> ConfirmPaymentAsync(PaymentConfirmDto dto)
