@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Razorpay.Api;
 using RideShare_Connect.DTOs;
 
 namespace RideShare_Connect.Services;
@@ -8,32 +10,41 @@ namespace RideShare_Connect.Services;
 public class PaymentGateway : IPaymentGateway
 {
     private readonly PaymentGatewayOptions _options;
+    private readonly RazorpayClient _client;
 
     public PaymentGateway(IOptions<PaymentGatewayOptions> options)
     {
         _options = options.Value;
+        _client = new RazorpayClient(_options.ApiKey, _options.SecretKey);
     }
 
     public Task<PaymentGatewayResult> CreateChargeAsync(PaymentProcessDto dto)
     {
-        // Here you would call the real provider SDK using _options credentials.
+        var options = new Dictionary<string, object>
+        {
+            { "amount", (int)(dto.Amount * 100) }, // Razorpay expects amount in paise
+            { "currency", _options.Currency },
+            { "receipt", $"rcpt_{dto.BookingId}" }
+        };
+
+        Order order = _client.Order.Create(options);
         var result = new PaymentGatewayResult
         {
-            TransactionId = Guid.NewGuid().ToString(),
-            Status = "Pending"
+            TransactionId = order["id"].ToString(),
+            Status = order["status"].ToString() ?? "created"
         };
         return Task.FromResult(result);
     }
 
     public Task<string> GetPaymentStatusAsync(string transactionId)
     {
-        // In a real implementation this would query the provider for the current status.
-        return Task.FromResult("Completed");
+        Order order = _client.Order.Fetch(transactionId);
+        return Task.FromResult(order["status"].ToString());
     }
 
     public Task<CardTokenResult> TokenizeCardAsync(string cardNumber, DateTime expiryDate)
     {
-        // This is a stubbed implementation. A real gateway would call the provider SDK.
+        // Razorpay card tokenization is not available in this demo environment.
         var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
         var brand = cardNumber.StartsWith("4") ? "Visa" :
                     cardNumber.StartsWith("5") ? "Mastercard" : "Unknown";
@@ -46,3 +57,4 @@ public class PaymentGateway : IPaymentGateway
         return Task.FromResult(result);
     }
 }
+
