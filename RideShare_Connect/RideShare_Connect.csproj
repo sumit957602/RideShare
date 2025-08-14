@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RideShare_Connect_Backend\RideShare_Connect_Backend.csproj" />
+    <ProjectReference Include="..\RideShare_Connect_Test\RideShare_Connect_Test.csproj" />
   </ItemGroup>
 
   <ItemGroup>
