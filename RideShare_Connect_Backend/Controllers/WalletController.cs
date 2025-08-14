@@ -8,9 +8,9 @@ namespace RideShare_Connect.Controllers
     [Route("api/wallet")]
     public class WalletController : ControllerBase
     {
-        private readonly PaymentService _paymentService;
+        private readonly IPaymentService _paymentService;
 
-        public WalletController(PaymentService paymentService)
+        public WalletController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
         }

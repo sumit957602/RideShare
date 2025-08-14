@@ -8,9 +8,9 @@ namespace RideShare_Connect.Controllers
     [Route("api/refunds")]
     public class RefundsController : ControllerBase
     {
-        private readonly PaymentService _paymentService;
+        private readonly IPaymentService _paymentService;
 
-        public RefundsController(PaymentService paymentService)
+        public RefundsController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
         }
