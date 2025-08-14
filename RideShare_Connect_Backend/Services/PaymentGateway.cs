@@ -30,4 +30,19 @@ public class PaymentGateway : IPaymentGateway
         // In a real implementation this would query the provider for the current status.
         return Task.FromResult("Completed");
     }
+
+    public Task<CardTokenResult> TokenizeCardAsync(string cardNumber, DateTime expiryDate)
+    {
+        // This is a stubbed implementation. A real gateway would call the provider SDK.
+        var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        var brand = cardNumber.StartsWith("4") ? "Visa" :
+                    cardNumber.StartsWith("5") ? "Mastercard" : "Unknown";
+        var result = new CardTokenResult
+        {
+            Token = token,
+            Last4 = cardNumber[^4..],
+            Brand = brand
+        };
+        return Task.FromResult(result);
+    }
 }
