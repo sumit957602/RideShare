@@ -15,6 +15,9 @@ public class PaymentServiceTests
 
         public Task<string> GetPaymentStatusAsync(string transactionId)
             => Task.FromResult("Completed");
+
+        public Task<CardTokenResult> TokenizeCardAsync(string cardNumber, DateTime expiryDate)
+            => Task.FromResult(new CardTokenResult { Token = "tok_test", Last4 = cardNumber[^4..], Brand = "Visa" });
     }
 
     [Test]
