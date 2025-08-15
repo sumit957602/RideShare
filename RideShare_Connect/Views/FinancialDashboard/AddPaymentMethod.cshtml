@@ -10,6 +10,14 @@
         <form asp-action="AddPaymentMethod" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
+                <label asp-for="MethodType" class="form-label"></label>
+                <select asp-for="MethodType" class="form-select">
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                </select>
+                <span asp-validation-for="MethodType" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
                 <label asp-for="CardholderName" class="form-label"></label>
                 <input asp-for="CardholderName" class="form-control" />
                 <span asp-validation-for="CardholderName" class="text-danger"></span>
@@ -31,7 +39,6 @@
                     <span asp-validation-for="Cvc" class="text-danger"></span>
                 </div>
             </div>
-            <input type="hidden" asp-for="MethodType" value="Card" />
             <button type="submit" class="btn btn-primary">Save Method</button>
             <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
         </form>

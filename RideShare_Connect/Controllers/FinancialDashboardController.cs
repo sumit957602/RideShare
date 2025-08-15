@@ -94,11 +94,20 @@ namespace RideShare_Connect.Controllers
             }
 
             method.UserId = userId;
-            method.MethodType = method.MethodType ?? "Card";
-            if (!string.IsNullOrEmpty(method.CardNumber) && method.CardNumber.Length >= 4)
+            method.MethodType ??= "Credit Card";
+
+            method.PaymentToken = Guid.NewGuid().ToString();
+
+            if (!string.IsNullOrEmpty(method.CardNumber))
             {
-                method.Last4 = method.CardNumber[^4..];
+                var digits = method.CardNumber.Replace(" ", "");
+                if (digits.Length >= 4)
+                {
+                    method.Last4 = digits[^4..];
+                }
             }
+
+            method.Brand = "VISA";
 
             _db.PaymentMethods.Add(method);
             await _db.SaveChangesAsync();
