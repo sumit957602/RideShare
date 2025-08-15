@@ -17,7 +17,7 @@ public class PaymentServiceTests
             => Task.FromResult("Completed");
 
         public Task<CardTokenResult> TokenizeCardAsync(string cardNumber, DateTime expiryDate)
-            => Task.FromResult(new CardTokenResult { Token = "tok_test", Last4 = cardNumber[^4..], Brand = "Visa" });
+            => Task.FromResult(new CardTokenResult { CardTokenNo = "tok_test", CardLast4Digit = cardNumber[^4..], CardBrand = "Visa" });
 
         public Task<PaymentGatewayResult> CreatePaymentLinkAsync(PaymentLinkRequestDto dto)
             => Task.FromResult(new PaymentGatewayResult { TransactionId = "plink_123", Status = "created", ShortUrl = "http://test" });

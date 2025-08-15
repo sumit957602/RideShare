@@ -16,7 +16,7 @@ namespace RideShare_Connect.Models.PaymentManagement
 
         [Required]
         [StringLength(50)]
-        public string MethodType { get; set; }  // e.g., "Credit Card", "Debit Card", "UPI", "NetBanking"
+        public string CardType { get; set; }  // e.g., "Credit Card", "Debit Card", "UPI", "NetBanking"
 
         [Required]
         [StringLength(100)]
@@ -29,20 +29,20 @@ namespace RideShare_Connect.Models.PaymentManagement
         [Required]
         [StringLength(7)]
         [Column(TypeName = "nvarchar(7)")]
-        public string? Expiry { get; set; }
+        public string? ExpiryDate { get; set; }
 
         [Required]
         [StringLength(4)]
-        public string? Cvc { get; set; }
+        public string? CVV { get; set; }
 
         [StringLength(100)]
-        public string? PaymentToken { get; set; }
+        public string? CardTokenNo { get; set; }
 
         [StringLength(4)]
-        public string? Last4 { get; set; }
+        public string? CardLast4Digit { get; set; }
 
         [StringLength(20)]
-        public string? Brand { get; set; }
+        public string? CardBrand { get; set; }
 
         // Navigation Property
         public virtual User User { get; set; }
