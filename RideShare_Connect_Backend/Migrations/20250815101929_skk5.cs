@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RideShare_Connect_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class skk8 : Migration
+    public partial class skk5 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -255,9 +255,14 @@ namespace RideShare_Connect_Backend.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    MethodType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CardType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CardholderName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CardNumber = table.Column<string>(type: "nvarchar(16)", maxLength: 16, nullable: false),
-                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    ExpiryDate = table.Column<string>(type: "nvarchar(7)", maxLength: 7, nullable: false),
+                    CVV = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
+                    CardTokenNo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CardLast4Digit = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
+                    CardBrand = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -511,7 +516,10 @@ namespace RideShare_Connect_Backend.Migrations
                     Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     TxnType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     TxnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -675,7 +683,8 @@ namespace RideShare_Connect_Backend.Migrations
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PaymentMethodId = table.Column<int>(type: "int", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    ProviderTransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {

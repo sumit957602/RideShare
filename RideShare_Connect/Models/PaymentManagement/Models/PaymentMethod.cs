@@ -1,3 +1,4 @@
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using RideShare_Connect.Models.UserManagement;
@@ -47,4 +48,3 @@ namespace RideShare_Connect.Models.PaymentManagement
         public virtual User User { get; set; }
     }
 }
-

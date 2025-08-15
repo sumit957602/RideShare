@@ -18,8 +18,7 @@ namespace RideShare_Connect.Models.VehicleManagement
         public string Email { get; set; }
 
         [Required]
-        [Phone]
-        [StringLength(15)]
+        [RegularExpression(@"^[6-9]\d{9}$", ErrorMessage = "Phone number must be 10 digits and start with 6,7,8, or 9.")]
         public string PhoneNumber { get; set; }
 
         [Required]
