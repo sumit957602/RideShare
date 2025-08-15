@@ -10,12 +10,12 @@
         <form asp-action="AddPaymentMethod" method="post">
             @Html.AntiForgeryToken()
             <div class="mb-3">
-                <label asp-for="MethodType" class="form-label"></label>
-                <select asp-for="MethodType" class="form-select">
+                <label asp-for="CardType" class="form-label"></label>
+                <select asp-for="CardType" class="form-select">
                     <option value="Credit Card">Credit Card</option>
                     <option value="Debit Card">Debit Card</option>
                 </select>
-                <span asp-validation-for="MethodType" class="text-danger"></span>
+                <span asp-validation-for="CardType" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <label asp-for="CardholderName" class="form-label"></label>
@@ -29,14 +29,14 @@
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label asp-for="Expiry" class="form-label"></label>
-                    <input asp-for="Expiry" class="form-control" placeholder="MM/YYYY" />
-                    <span asp-validation-for="Expiry" class="text-danger"></span>
+                    <label asp-for="ExpiryDate" class="form-label"></label>
+                    <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YYYY" />
+                    <span asp-validation-for="ExpiryDate" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label asp-for="Cvc" class="form-label"></label>
-                    <input asp-for="Cvc" class="form-control" />
-                    <span asp-validation-for="Cvc" class="text-danger"></span>
+                    <label asp-for="CVV" class="form-label"></label>
+                    <input asp-for="CVV" class="form-control" />
+                    <span asp-validation-for="CVV" class="text-danger"></span>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Save Method</button>

@@ -21,7 +21,7 @@ public class PaymentGatewayResult
 
 public class CardTokenResult
 {
-    public string Token { get; set; } = string.Empty;
-    public string Last4 { get; set; } = string.Empty;
-    public string Brand { get; set; } = string.Empty;
+    public string CardTokenNo { get; set; } = string.Empty;
+    public string CardLast4Digit { get; set; } = string.Empty;
+    public string CardBrand { get; set; } = string.Empty;
 }

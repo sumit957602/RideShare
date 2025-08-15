@@ -142,9 +142,9 @@
                                             <div class="card-body d-flex align-items-center">
                                                 <i class="bi bi-credit-card-fill fs-1 text-primary me-3"></i>
                                                 <div>
-                                                    <h5 class="mb-1">@method.MethodType @if(!string.IsNullOrEmpty(method.Last4)){<text>**** @method.Last4</text>}</h5>
-                                                    @if(!string.IsNullOrEmpty(method.Brand)){
-                                                        <p class="mb-1 text-muted">@method.Brand</p>
+                                                    <h5 class="mb-1">@method.CardType @if(!string.IsNullOrEmpty(method.CardLast4Digit)){<text>**** @method.CardLast4Digit</text>}</h5>
+                                                    @if(!string.IsNullOrEmpty(method.CardBrand)){
+                                                        <p class="mb-1 text-muted">@method.CardBrand</p>
                                                     }
                                                 </div>
                                             </div>

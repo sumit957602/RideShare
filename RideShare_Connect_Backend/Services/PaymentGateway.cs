@@ -69,9 +69,9 @@ public class PaymentGateway : IPaymentGateway
                     cardNumber.StartsWith("5") ? "Mastercard" : "Unknown";
         var result = new CardTokenResult
         {
-            Token = token,
-            Last4 = cardNumber[^4..],
-            Brand = brand
+            CardTokenNo = token,
+            CardLast4Digit = cardNumber[^4..],
+            CardBrand = brand
         };
         return Task.FromResult(result);
     }

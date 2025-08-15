@@ -9,7 +9,7 @@ namespace RideShare_Connect.DTOs
         public int Id { get; set; }
 
         [StringLength(50)]
-        public string? MethodType { get; set; }
+        public string? CardType { get; set; }
 
         [StringLength(16)]
         public string? CardNumber { get; set; }
