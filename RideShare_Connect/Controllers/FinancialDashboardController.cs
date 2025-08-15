@@ -116,6 +116,27 @@ namespace RideShare_Connect.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> CardDetails(int id)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return RedirectToAction("Login", "UserAccount");
+            }
+            var userId = int.Parse(userIdClaim);
+
+            var method = await _db.PaymentMethods
+                .FirstOrDefaultAsync(pm => pm.Id == id && pm.UserId == userId);
+
+            if (method == null)
+            {
+                return NotFound();
+            }
+
+            return View(method);
+        }
+
+        [HttpGet]
         public IActionResult TopUpWallet()
         {
             return View();
