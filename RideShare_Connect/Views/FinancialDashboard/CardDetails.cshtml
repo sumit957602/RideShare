@@ -1,0 +1,17 @@
+@model RideShare_Connect.Models.PaymentManagement.PaymentMethod
+@{
+    ViewData["Title"] = "Card Details";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Card Details</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Card Type:</strong> @Model.CardType</p>
+            <p><strong>Cardholder Name:</strong> @Model.CardholderName</p>
+            <p><strong>Card Number:</strong> @Model.CardNumber</p>
+            <p><strong>Expiry Date:</strong> @Model.ExpiryDate</p>
+            <a href='@Url.Action("Finance", "FinancialDashboard")' class="btn btn-secondary mt-3">Back</a>
+        </div>
+    </div>
+</div>
