@@ -9,8 +9,10 @@ namespace RideShare_Connect.ViewModels
         public decimal WalletBalance { get; set; }
         public decimal TotalSpentThisMonth { get; set; }
         public decimal TotalSavedOnRides { get; set; }
-        public List<Payment> RecentTransactions { get; set; } = new();
-        public List<Payment> PaymentHistory { get; set; } = new();
+        // Holds the most recent wallet transactions
+        public List<WalletTransaction> RecentTransactions { get; set; } = new();
+        // Complete history of wallet transactions
+        public List<WalletTransaction> TransactionHistory { get; set; } = new();
         public List<PaymentMethod> PaymentMethods { get; set; } = new();
         public UserProfile Profile { get; set; }
     }

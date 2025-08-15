@@ -108,22 +108,25 @@
                             <div class="card">
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">Recent Transactions</h5>
-                                    <ul class="list-group list-group-flush">
-                                        @if (Model.RecentTransactions.Any())
-                                        {
-                                            foreach (var txn in Model.RecentTransactions)
-                                            {
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <span>@txn.PaymentDate.ToString("yyyy-MM-dd") - @txn.PaymentMethod.MethodType</span>
-                                                    <span class="text-danger fw-bold">-₹@txn.Amount.ToString("F2")</span>
-                                                </li>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <li class="list-group-item text-muted">No recent transactions.</li>
-                                        }
-                                    </ul>
+                <ul class="list-group list-group-flush">
+                    @if (Model.RecentTransactions.Any())
+                    {
+                        foreach (var txn in Model.RecentTransactions)
+                        {
+                            var isCredit = txn.TxnType?.ToLower() == "credit";
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>@txn.TxnDate.ToString("yyyy-MM-dd") - @txn.TxnType</span>
+                                <span class="@(isCredit ? "text-success" : "text-danger") fw-bold">
+                                    @(isCredit ? "+" : "-")₹@txn.Amount.ToString("F2")
+                                </span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">No recent transactions.</li>
+                    }
+                </ul>
                                 </div>
                             </div>
                         </div>
@@ -168,39 +171,40 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Transaction ID</th>
-                                                    <th>Date</th>
-                                                    <th>Description</th>
-                                                    <th>Amount</th>
-                                                    <th>Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if (Model.PaymentHistory.Any())
-                                                {
-                                                    foreach (var txn in Model.PaymentHistory)
-                                                    {
-                                                        <tr>
-                                                            <td>TXN@txn.Id</td>
-                                                            <td>@txn.PaymentDate.ToString("yyyy-MM-dd")</td>
-                                                            <td>@txn.PaymentMethod.MethodType</td>
-                                                            <td class="text-danger">-₹@txn.Amount.ToString("F2")</td>
-                                                            <td>
-                                                                <span class="badge bg-success-subtle text-success-emphasis rounded-pill">@txn.Status</span>
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <tr>
-                                                        <td colspan="5" class="text-center text-muted">No transactions found.</td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.TransactionHistory.Any())
+                        {
+                            foreach (var txn in Model.TransactionHistory)
+                            {
+                                var isCredit = txn.TxnType?.ToLower() == "credit";
+                                <tr>
+                                    <td>TXN@txn.Id</td>
+                                    <td>@txn.TxnDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@txn.TxnType</td>
+                                    <td class="@(isCredit ? "text-success" : "text-danger")">
+                                        @(isCredit ? "+" : "-")₹@txn.Amount.ToString("F2")
+                                    </td>
+                                    <td>@txn.Description</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No transactions found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
                                     </div>
                                 </div>
                             </div>
