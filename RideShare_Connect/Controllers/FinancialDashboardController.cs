@@ -94,6 +94,12 @@ namespace RideShare_Connect.Controllers
             }
 
             method.UserId = userId;
+            method.MethodType = method.MethodType ?? "Card";
+            if (!string.IsNullOrEmpty(method.CardNumber) && method.CardNumber.Length >= 4)
+            {
+                method.Last4 = method.CardNumber[^4..];
+            }
+
             _db.PaymentMethods.Add(method);
             await _db.SaveChangesAsync();
 
