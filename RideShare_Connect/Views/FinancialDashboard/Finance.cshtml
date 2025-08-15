@@ -114,11 +114,19 @@
                         foreach (var txn in Model.RecentTransactions)
                         {
                             var isCredit = txn.TxnType?.ToLower() == "credit";
+                            var isSuccessful = txn.Status?.ToLower() == "successful";
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>@txn.TxnDate.ToString("yyyy-MM-dd") - @txn.TxnType</span>
-                                <span class="@(isCredit ? "text-success" : "text-danger") fw-bold">
-                                    @(isCredit ? "+" : "-")₹@txn.Amount.ToString("F2")
-                                </span>
+                                <span>@txn.TxnDate.ToString("yyyy-MM-dd")</span>
+                                @if (isSuccessful)
+                                {
+                                    <span class="@(isCredit ? "text-success" : "text-danger") fw-bold">
+                                        @txn.TxnType @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">@txn.Status</span>
+                                }
                             </li>
                         }
                     }
@@ -188,12 +196,20 @@
                             foreach (var txn in Model.TransactionHistory)
                             {
                                 var isCredit = txn.TxnType?.ToLower() == "credit";
+                                var isSuccessful = txn.Status?.ToLower() == "successful";
                                 <tr>
                                     <td>@txn.TransactionId</td>
                                     <td>@txn.TxnDate.ToString("yyyy-MM-dd")</td>
-                                    <td>@txn.TxnType</td>
-                                    <td class="@(isCredit ? "text-success" : "text-danger")">
-                                        @(isCredit ? "+" : "-")₹@txn.Amount.ToString("F2")
+                                    <td>@(isSuccessful ? txn.TxnType : txn.Status)</td>
+                                    <td class="@(isSuccessful ? (isCredit ? "text-success" : "text-danger") : "")">
+                                        @if (isSuccessful)
+                                        {
+                                            @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                        }
+                                        else
+                                        {
+                                            @txn.Status
+                                        }
                                     </td>
                                     <td>@txn.Description</td>
                                 </tr>
