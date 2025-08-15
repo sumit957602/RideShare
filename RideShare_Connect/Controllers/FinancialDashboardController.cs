@@ -5,6 +5,7 @@ using RideShareConnect.Data;
 using RideShare_Connect.ViewModels;
 using RideShare_Connect.Models.PaymentManagement;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -43,9 +44,14 @@ namespace RideShare_Connect.Controllers
                 .Where(p => p.Status == "Completed" && p.PaymentDate >= startOfMonth)
                 .SumAsync(p => p.Amount);
 
-            var paymentHistory = await paymentQuery
-                .OrderByDescending(p => p.PaymentDate)
-                .ToListAsync();
+            var walletTransactions = new List<WalletTransaction>();
+            if (wallet != null)
+            {
+                walletTransactions = await _db.WalletTransactions
+                    .Where(t => t.WalletId == wallet.Id)
+                    .OrderByDescending(t => t.TxnDate)
+                    .ToListAsync();
+            }
 
             var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
 
@@ -55,8 +61,8 @@ namespace RideShare_Connect.Controllers
                 TotalSpentThisMonth = totalSpent,
                 TotalSavedOnRides = 0,
                 PaymentMethods = await _db.PaymentMethods.Where(pm => pm.UserId == userId).ToListAsync(),
-                PaymentHistory = paymentHistory,
-                RecentTransactions = paymentHistory.Take(5).ToList(),
+                TransactionHistory = walletTransactions,
+                RecentTransactions = walletTransactions.Take(3).ToList(),
                 Profile = profile
             };
 
