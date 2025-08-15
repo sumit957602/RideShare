@@ -36,6 +36,25 @@ public class PaymentGateway : IPaymentGateway
         return Task.FromResult(result);
     }
 
+    public Task<PaymentGatewayResult> CreatePaymentLinkAsync(PaymentLinkRequestDto dto)
+    {
+        var options = new Dictionary<string, object>
+        {
+            { "amount", (int)(dto.Amount * 100) },
+            { "currency", _options.Currency },
+            { "description", dto.Description ?? "Wallet top-up" }
+        };
+
+        PaymentLink link = _client.PaymentLink.Create(options);
+        var result = new PaymentGatewayResult
+        {
+            TransactionId = link["id"].ToString(),
+            Status = link["status"].ToString() ?? "created",
+            ShortUrl = link["short_url"].ToString()
+        };
+        return Task.FromResult(result);
+    }
+
     public Task<string> GetPaymentStatusAsync(string transactionId)
     {
         Order order = _client.Order.Fetch(transactionId);

@@ -33,6 +33,13 @@ namespace RideShare_Connect.Controllers
             return Ok(payment);
         }
 
+        [HttpPost("payment-link")]
+        public async Task<IActionResult> CreatePaymentLink(PaymentLinkRequestDto dto)
+        {
+            var link = await _paymentService.CreatePaymentLinkAsync(dto);
+            return Ok(link);
+        }
+
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory([FromQuery] int userId)
         {
