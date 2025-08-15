@@ -2,64 +2,34 @@
     ViewData["Title"] = "Add Payment Method";
 }
 
-<div class="container">
-    <h2>Add Payment Method</h2>
-    <form id="method-form">
-        <div class="mb-3">
-            <label for="methodType" class="form-label">Method Type</label>
-            <input id="methodType" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label for="cardNumber" class="form-label">Card Number</label>
-            <input id="cardNumber" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label for="expiryDate" class="form-label">Expiry Date</label>
-            <input id="expiryDate" type="date" class="form-control" />
-        </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
-    </form>
-
-    <h3 class="mt-4">Saved Methods</h3>
-    <ul id="methods-list"></ul>
+<div class="container mt-5">
+    <h2 class="mb-4">Add Payment Method</h2>
+    <div class="modal-body p-0">
+        <p class="text-muted small">Your payment information is securely handled by our PCI-compliant payment partner.</p>
+        <form>
+            <div class="mb-3">
+                <label for="cardName" class="form-label">Name on Card</label>
+                <input type="text" class="form-control" id="cardName" placeholder="John Doe">
+            </div>
+            <div class="mb-3">
+                <label for="cardNumber" class="form-label">Card Number</label>
+                <div id="card-element" class="form-control">
+                    <!-- A Stripe/Razorpay Element will be inserted here -->
+                    <span class="text-muted">•••• •••• •••• ••••</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cardExpiry" class="form-label">Expiry</label>
+                    <div id="card-expiry-element" class="form-control"><span class="text-muted">MM / YY</span></div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cardCvc" class="form-label">CVC</label>
+                    <div id="card-cvc-element" class="form-control"><span class="text-muted">•••</span></div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Method</button>
+            <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
 </div>
-
-<script>
-const userId = 1;
-
-async function loadMethods() {
-    const res = await fetch(`/api/payments/methods?userId=${userId}`);
-    const data = await res.json();
-    const list = document.getElementById('methods-list');
-    list.innerHTML = '';
-    data.forEach(m => {
-        const li = document.createElement('li');
-        const last4 = m.last4 ? ` ****${m.last4}` : '';
-        li.textContent = `${m.methodType}${last4}`;
-        list.appendChild(li);
-    });
-}
-
-document.getElementById('method-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const payload = {
-        userId,
-        methodType: document.getElementById('methodType').value,
-        cardNumber: document.getElementById('cardNumber').value,
-        expiryDate: document.getElementById('expiryDate').value
-    };
-    const res = await fetch('/api/payments/save-method', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
-    if (res.ok) {
-        document.getElementById('method-form').reset();
-        loadMethods();
-    }
-});
-
-loadMethods();
-</script>
-
