@@ -89,9 +89,6 @@ namespace RideShare_Connect.Services
                 _context.Wallets.Add(wallet);
             }
 
-            wallet.Balance += dto.Amount;
-            wallet.LastUpdated = DateTime.UtcNow;
-
             var transaction = new WalletTransaction
             {
                 Wallet = wallet,
@@ -105,6 +102,12 @@ namespace RideShare_Connect.Services
             };
 
             _context.WalletTransactions.Add(transaction);
+
+            if (dto.TransactionStatus == "Successful")
+            {
+                wallet.Balance += dto.Amount;
+                wallet.LastUpdated = DateTime.UtcNow;
+            }
 
             await _context.SaveChangesAsync();
 
