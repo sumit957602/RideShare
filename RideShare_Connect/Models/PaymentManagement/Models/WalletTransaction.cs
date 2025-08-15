@@ -27,6 +27,10 @@ namespace RideShare_Connect.Models.PaymentManagement
         [StringLength(255)]
         public string Description { get; set; }
 
+        [Required]
+        [StringLength(100)]
+        public string TransactionId { get; set; }
+
         // Navigation property
         public virtual Wallet Wallet { get; set; }
     }
