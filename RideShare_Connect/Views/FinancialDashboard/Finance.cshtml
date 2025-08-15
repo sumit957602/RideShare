@@ -154,10 +154,9 @@
                                 <div class="col-md-6">
                                     <div class="card h-100 payment-method-card">
                                         <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
-                                            <button class="btn btn-outline-primary mb-2" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                                            <a class="btn btn-outline-primary mb-2" href='@Url.Action("AddPaymentMethod", "FinancialDashboard")'>
                                                 <i class="bi bi-plus-lg"></i> Add New Payment Method
-                                            </button>
-                                            <a class="btn btn-link" href='@Url.Action("AddPaymentMethod", "FinancialDashboard")'>Add on separate page</a>
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -282,48 +281,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" id="proceedPayBtn" class="btn btn-primary">Proceed to Pay</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Payment Method Modal (Gateway Integration) -->
-    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Payment Method</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Your payment information is securely handled by our PCI-compliant payment partner.</p>
-                    <form>
-                        <div class="mb-3">
-                            <label for="cardName" class="form-label">Name on Card</label>
-                            <input type="text" class="form-control" id="cardName" placeholder="John Doe">
-                        </div>
-                        <div class="mb-3">
-                            <label for="cardNumber" class="form-label">Card Number</label>
-                            <div id="card-element" class="form-control">
-                                <!-- A Stripe/Razorpay Element will be inserted here -->
-                                <span class="text-muted">•••• •••• •••• ••••</span>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="cardExpiry" class="form-label">Expiry</label>
-                                <div id="card-expiry-element" class="form-control"><span class="text-muted">MM / YY</span></div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cardCvc" class="form-label">CVC</label>
-                                <div id="card-cvc-element" class="form-control"><span class="text-muted">•••</span></div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Save Method</button>
                 </div>
             </div>
         </div>
