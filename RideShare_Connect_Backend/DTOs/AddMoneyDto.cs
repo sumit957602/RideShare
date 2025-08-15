@@ -14,6 +14,7 @@ namespace RideShare_Connect.DTOs
         public string PaymentMethod { get; set; } = string.Empty;
 
         [Required]
+        [RegularExpression("^(Successful|Failed|Pending)$", ErrorMessage = "transactionStatus should be Successful, Failed or Pending")]
         public string TransactionStatus { get; set; } = string.Empty;
     }
 }

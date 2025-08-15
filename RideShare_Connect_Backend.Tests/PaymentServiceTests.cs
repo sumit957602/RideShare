@@ -81,7 +81,7 @@ public class PaymentServiceTests
             .Options;
         using var context = new ApplicationDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
-        var dto = new AddMoneyDto { UserId = 1, Amount = 50m, PaymentMethod = "UPI", TransactionStatus = "Completed" };
+        var dto = new AddMoneyDto { UserId = 1, Amount = 50m, PaymentMethod = "UPI", TransactionStatus = "Successful" };
 
         // Act
         var result = await service.AddMoneyAsync(dto);
@@ -89,7 +89,7 @@ public class PaymentServiceTests
         // Assert
         Assert.That(result.Balance, Is.EqualTo(50m));
         Assert.That(result.PaymentMethod, Is.EqualTo("UPI"));
-        Assert.That(result.TransactionStatus, Is.EqualTo("Completed"));
+        Assert.That(result.TransactionStatus, Is.EqualTo("Successful"));
         Assert.That(result.TransactionId, Is.Not.Null.And.Not.Empty);
         Assert.That(await context.Wallets.CountAsync(), Is.EqualTo(1));
         Assert.That(await context.WalletTransactions.CountAsync(), Is.EqualTo(1));
