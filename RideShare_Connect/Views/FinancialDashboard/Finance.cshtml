@@ -109,13 +109,20 @@
                                 <div class="card-body">
                                     <h5 class="card-title mb-3">Recent Transactions</h5>
                                     <ul class="list-group list-group-flush">
-                                        @* @foreach (var txn in Model.RecentTransactions)
+                                        @if (Model.RecentTransactions.Any())
                                         {
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>@txn.PaymentDate.ToString("yyyy-MM-dd") - @txn.PaymentMethod.MethodType</span>
-                                                <span class="text-danger fw-bold">-₹@txn.Amount.ToString("F2")</span>
-                                            </li>
-                                        } *@
+                                            foreach (var txn in Model.RecentTransactions)
+                                            {
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <span>@txn.PaymentDate.ToString("yyyy-MM-dd") - @txn.PaymentMethod.MethodType</span>
+                                                    <span class="text-danger fw-bold">-₹@txn.Amount.ToString("F2")</span>
+                                                </li>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <li class="list-group-item text-muted">No recent transactions.</li>
+                                        }
                                     </ul>
                                 </div>
                             </div>
@@ -171,16 +178,27 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @* @foreach (var txn in Model.PaymentHistory)
+                                                @if (Model.PaymentHistory.Any())
+                                                {
+                                                    foreach (var txn in Model.PaymentHistory)
+                                                    {
+                                                        <tr>
+                                                            <td>TXN@txn.Id</td>
+                                                            <td>@txn.PaymentDate.ToString("yyyy-MM-dd")</td>
+                                                            <td>@txn.PaymentMethod.MethodType</td>
+                                                            <td class="text-danger">-₹@txn.Amount.ToString("F2")</td>
+                                                            <td>
+                                                                <span class="badge bg-success-subtle text-success-emphasis rounded-pill">@txn.Status</span>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                }
+                                                else
                                                 {
                                                     <tr>
-                                                        <td>TXN@txn.Id</td>
-                                                        <td>@txn.PaymentDate.ToString("yyyy-MM-dd")</td>
-                                                        <td>@txn.PaymentMethod.MethodType</td>
-                                                        <td class="text-danger">-₹@txn.Amount.ToString("F2")</td>
-                                                        <td><span class="badge bg-success-subtle text-success-emphasis rounded-pill">@txn.Status</span></td>
+                                                        <td colspan="5" class="text-center text-muted">No transactions found.</td>
                                                     </tr>
-                                                } *@
+                                                }
                                             </tbody>
                                         </table>
                                     </div>
