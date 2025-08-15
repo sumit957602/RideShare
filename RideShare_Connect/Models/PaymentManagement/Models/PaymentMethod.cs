@@ -17,6 +17,22 @@ namespace RideShare_Connect.Models.PaymentManagement
         [StringLength(50)]
         public string MethodType { get; set; }  // e.g., "Credit Card", "Debit Card", "UPI", "NetBanking"
 
+        [Required]
+        [StringLength(100)]
+        public string? CardholderName { get; set; }
+
+        [Required]
+        [StringLength(16)]
+        public string? CardNumber { get; set; }
+
+        [Required]
+        [StringLength(5)]
+        public string? Expiry { get; set; }
+
+        [Required]
+        [StringLength(4)]
+        public string? Cvc { get; set; }
+
         [StringLength(100)]
         public string? PaymentToken { get; set; }
 
