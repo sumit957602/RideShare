@@ -1,0 +1,115 @@
+@model RideShare_Connect.Models.RideManagement.Ride
+@{
+    ViewData["Title"] = "Book Ride";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Ride - RideShare Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map { height: 400px; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h2 class="mb-4">Book Ride</h2>
+        <form class="row g-3">
+            <div class="col-md-6">
+                <label for="pickup" class="form-label">Pickup Location</label>
+                <input type="text" id="pickup" class="form-control" placeholder="Enter pickup location" />
+            </div>
+            <div class="col-md-6">
+                <label for="drop" class="form-label">Drop Location</label>
+                <input type="text" id="drop" class="form-control" placeholder="Enter drop location" />
+            </div>
+            <div class="col-md-4">
+                <label for="distance" class="form-label">Distance (km)</label>
+                <input type="text" id="distance" class="form-control" readonly />
+            </div>
+            <div class="col-12">
+                <div id="map"></div>
+            </div>
+            <div class="col-12 text-end">
+                <a asp-action="User" class="btn btn-secondary me-2">Back</a>
+                <button type="submit" class="btn btn-primary">Book Ride</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const map = L.map('map').setView([25.5941, 85.1376], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            let pickupMarker = null;
+            let dropMarker = null;
+            let routeLine = null;
+
+            const pickupInput = document.getElementById('pickup');
+            const dropInput = document.getElementById('drop');
+            const distanceInput = document.getElementById('distance');
+
+            async function geocode(query) {
+                if (!query) return null;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+                const response = await fetch(url);
+                const results = await response.json();
+                if (results.length > 0) {
+                    return [parseFloat(results[0].lat), parseFloat(results[0].lon)];
+                }
+                return null;
+            }
+
+            async function drawRoute(pickupCoords, dropCoords) {
+                const url = `https://router.project-osrm.org/route/v1/driving/${pickupCoords[1]},${pickupCoords[0]};${dropCoords[1]},${dropCoords[0]}?overview=full&geometries=geojson`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                    routeLine = L.polyline(coords, { color: '#ff6600' }).addTo(map);
+                    map.fitBounds(routeLine.getBounds().pad(0.1));
+                    distanceInput.value = (route.distance / 1000).toFixed(2);
+                }
+            }
+
+            async function updateMap() {
+                const pickupValue = pickupInput.value.trim();
+                const dropValue = dropInput.value.trim();
+
+                if (pickupMarker) { map.removeLayer(pickupMarker); pickupMarker = null; }
+                if (dropMarker) { map.removeLayer(dropMarker); dropMarker = null; }
+                if (routeLine) { map.removeLayer(routeLine); routeLine = null; }
+
+                const pickupCoords = await geocode(pickupValue);
+                const dropCoords = await geocode(dropValue);
+                let points = [];
+
+                if (pickupCoords) {
+                    pickupMarker = L.marker(pickupCoords).addTo(map).bindPopup(`<b>Pickup:</b> ${pickupValue}`).openPopup();
+                    points.push(pickupCoords);
+                }
+                if (dropCoords) {
+                    dropMarker = L.marker(dropCoords).addTo(map).bindPopup(`<b>Drop:</b> ${dropValue}`).openPopup();
+                    points.push(dropCoords);
+                }
+                if (pickupCoords && dropCoords) {
+                    await drawRoute(pickupCoords, dropCoords);
+                } else if (points.length === 1) {
+                    map.setView(points[0], 13);
+                }
+            }
+
+            pickupInput.addEventListener('change', updateMap);
+            dropInput.addEventListener('change', updateMap);
+        });
+    </script>
+</body>
+</html>

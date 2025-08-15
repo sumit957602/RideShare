@@ -212,5 +212,19 @@ namespace RideShare_Connect.Controllers
 
             return View(viewModel);
         }
+
+        public async Task<IActionResult> BookRide(int id)
+        {
+            var ride = await _db.Rides
+                .Include(r => r.Driver)
+                .Include(r => r.Vehicle)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            if (ride == null)
+            {
+                return NotFound();
+            }
+
+            return View(ride);
+        }
     }
 }
