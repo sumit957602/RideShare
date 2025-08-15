@@ -9,5 +9,11 @@ namespace RideShare_Connect.DTOs
 
         [Required]
         public decimal Amount { get; set; }
+
+        [Required]
+        public string PaymentMethod { get; set; } = string.Empty;
+
+        [Required]
+        public string TransactionStatus { get; set; } = string.Empty;
     }
 }
