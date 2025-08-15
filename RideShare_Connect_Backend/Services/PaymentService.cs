@@ -75,7 +75,7 @@ namespace RideShare_Connect.Services
             return payment;
         }
 
-        public async Task<Wallet> AddMoneyAsync(AddMoneyDto dto)
+        public async Task<AddMoneyResultDto> AddMoneyAsync(AddMoneyDto dto)
         {
             var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == dto.UserId);
             if (wallet == null)
@@ -92,17 +92,30 @@ namespace RideShare_Connect.Services
             wallet.Balance += dto.Amount;
             wallet.LastUpdated = DateTime.UtcNow;
 
-            _context.WalletTransactions.Add(new WalletTransaction
+            var transaction = new WalletTransaction
             {
                 Wallet = wallet,
                 Amount = dto.Amount,
                 TxnType = "Credit",
                 TxnDate = DateTime.UtcNow,
-                Description = "Wallet top-up"
-            });
+                Description = "Wallet top-up",
+                TransactionId = Guid.NewGuid().ToString(),
+                PaymentMethod = dto.PaymentMethod,
+                Status = dto.TransactionStatus
+            };
+
+            _context.WalletTransactions.Add(transaction);
 
             await _context.SaveChangesAsync();
-            return wallet;
+
+            return new AddMoneyResultDto
+            {
+                UserId = dto.UserId,
+                Balance = wallet.Balance,
+                TransactionId = transaction.TransactionId,
+                PaymentMethod = transaction.PaymentMethod,
+                TransactionStatus = transaction.Status
+            };
         }
 
         public async Task<decimal> GetWalletBalanceAsync(int userId)

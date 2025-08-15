@@ -10,7 +10,7 @@ namespace RideShare_Connect.Services
         Task<Payment> ProcessPaymentAsync(PaymentProcessDto dto);
         Task UpdatePaymentStatusAsync(string providerTransactionId);
         Task<Payment?> ConfirmPaymentAsync(PaymentConfirmDto dto);
-        Task<Wallet> AddMoneyAsync(AddMoneyDto dto);
+        Task<AddMoneyResultDto> AddMoneyAsync(AddMoneyDto dto);
         Task<decimal> GetWalletBalanceAsync(int userId);
         Task<List<Payment>> GetPaymentHistoryAsync(int userId);
         Task<Refund> RequestRefundAsync(RefundRequestDto dto);

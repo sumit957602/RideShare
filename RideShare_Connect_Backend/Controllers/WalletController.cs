@@ -18,8 +18,8 @@ namespace RideShare_Connect.Controllers
         [HttpPost("add-money")]
         public async Task<IActionResult> AddMoney(AddMoneyDto dto)
         {
-            var wallet = await _paymentService.AddMoneyAsync(dto);
-            return Ok(wallet);
+            var result = await _paymentService.AddMoneyAsync(dto);
+            return Ok(result);
         }
 
         [HttpGet("balance")]
