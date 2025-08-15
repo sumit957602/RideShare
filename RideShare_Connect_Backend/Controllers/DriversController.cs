@@ -204,7 +204,7 @@ namespace RideShare_Connect.Api.Controllers
             {
                 DriverId = driverId,
                 CarMaker = dto.CarMaker,
-                Model = dto.Model,
+                Model = dto.CarModel,
                 VehicleType = dto.VehicleType,
                 LicensePlate = dto.LicensePlate,
                 VerificationStatus = "Pending",

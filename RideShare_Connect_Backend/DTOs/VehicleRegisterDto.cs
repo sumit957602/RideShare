@@ -10,7 +10,7 @@ namespace RideShare_Connect.Api.DTOs
 
         [Required]
         [StringLength(50)]
-        public string Model { get; set; }
+        public string CarModel { get; set; }
 
         [Required]
         [StringLength(30)]

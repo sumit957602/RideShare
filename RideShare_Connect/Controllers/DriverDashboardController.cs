@@ -285,7 +285,7 @@ namespace RideShare_Connect.Controllers
         [Authorize(Roles = "Driver")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddVehicle(AddVehicleViewModel model)
+        public async Task<IActionResult> RegisterVehicle(VehicleRegisterDto model)
         {
             var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
@@ -294,7 +294,7 @@ namespace RideShare_Connect.Controllers
             }
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return RedirectToAction("AddVehicle", "DriverDashboard");
             }
 
             try
@@ -303,13 +303,13 @@ namespace RideShare_Connect.Controllers
                 var dto = new VehicleRegisterDto
                 {
                     CarMaker = model.CarMaker,
-                    Model = model.Model,
+                    CarModel = model.CarModel,
                     VehicleType = model.VehicleType,
                     LicensePlate = model.LicensePlate,
                     Year = model.Year
                 };
 
-                var response = await httpClient.PostAsJsonAsync($"api/Drivers/register-vehicle?driverId={userId}", dto);
+                var response = await httpClient.PostAsJsonAsync($"api/Vehicles/register?driverId={userId}", dto);
                 if (response.IsSuccessStatusCode)
                 {
                     return RedirectToAction(nameof(Driver));
@@ -335,7 +335,7 @@ namespace RideShare_Connect.Controllers
                 ModelState.AddModelError(string.Empty, "An error occurred while registering vehicle.");
             }
 
-            return View(model);
+            return RedirectToAction("AddVehicle", "DriverDashboard");
         }
 
         [Authorize(Roles = "Driver")]
