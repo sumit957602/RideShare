@@ -18,5 +18,6 @@ namespace RideShare_Connect.Services
         Task<PaymentMethod> SavePaymentMethodAsync(SavePaymentMethodDto dto);
         Task<PaymentMethod?> UpdatePaymentMethodAsync(PaymentMethodUpdateDto dto);
         Task<bool> DeletePaymentMethodAsync(int id);
+        Task<PaymentGatewayResult> CreatePaymentLinkAsync(PaymentLinkRequestDto dto);
     }
 }

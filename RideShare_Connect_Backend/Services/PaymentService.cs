@@ -212,5 +212,10 @@ namespace RideShare_Connect.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public Task<PaymentGatewayResult> CreatePaymentLinkAsync(PaymentLinkRequestDto dto)
+        {
+            return _gateway.CreatePaymentLinkAsync(dto);
+        }
     }
 }
