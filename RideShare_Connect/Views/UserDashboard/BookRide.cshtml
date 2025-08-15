@@ -27,9 +27,25 @@
                 <label for="drop" class="form-label">Drop Location</label>
                 <input type="text" id="drop" class="form-control" placeholder="Enter drop location" />
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="distance" class="form-label">Distance (km)</label>
                 <input type="text" id="distance" class="form-control" readonly />
+            </div>
+            <div class="col-md-3">
+                <label for="numPersons" class="form-label">No of Person</label>
+                <input type="number" id="numPersons" class="form-control" value="1" min="1" />
+            </div>
+            <div class="col-md-3">
+                <label for="paymentMode" class="form-label">Payment Mode</label>
+                <select id="paymentMode" class="form-select">
+                    <option value="Wallet">Wallet</option>
+                    <option value="Razor Pay">Razor Pay</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="totalFare" class="form-label">Total Fare</label>
+                <input type="text" id="totalFare" class="form-control" readonly />
             </div>
             <div class="col-12">
                 <div id="map"></div>
@@ -55,6 +71,16 @@
             const pickupInput = document.getElementById('pickup');
             const dropInput = document.getElementById('drop');
             const distanceInput = document.getElementById('distance');
+            const numPersonsInput = document.getElementById('numPersons');
+            const totalFareInput = document.getElementById('totalFare');
+            const pricePerSeat = parseFloat('@Model.PricePerSeat.ToString(System.Globalization.CultureInfo.InvariantCulture)');
+
+            function updateFare() {
+                const numPersons = parseInt(numPersonsInput.value) || 0;
+                const distance = parseFloat(distanceInput.value) || 0;
+                const fare = (pricePerSeat * numPersons * distance).toFixed(2);
+                totalFareInput.value = fare;
+            }
 
             async function geocode(query) {
                 if (!query) return null;
@@ -77,6 +103,7 @@
                     routeLine = L.polyline(coords, { color: '#ff6600' }).addTo(map);
                     map.fitBounds(routeLine.getBounds().pad(0.1));
                     distanceInput.value = (route.distance / 1000).toFixed(2);
+                    updateFare();
                 }
             }
 
@@ -109,6 +136,8 @@
 
             pickupInput.addEventListener('change', updateMap);
             dropInput.addEventListener('change', updateMap);
+            numPersonsInput.addEventListener('input', updateFare);
+            updateFare();
         });
     </script>
 </body>
