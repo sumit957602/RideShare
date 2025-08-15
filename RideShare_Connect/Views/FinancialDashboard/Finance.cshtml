@@ -187,7 +187,7 @@
                             {
                                 var isCredit = txn.TxnType?.ToLower() == "credit";
                                 <tr>
-                                    <td>TXN@txn.Id</td>
+                                    <td>@txn.TransactionId</td>
                                     <td>@txn.TxnDate.ToString("yyyy-MM-dd")</td>
                                     <td>@txn.TxnType</td>
                                     <td class="@(isCredit ? "text-success" : "text-danger")">
