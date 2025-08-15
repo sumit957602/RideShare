@@ -26,7 +26,7 @@ namespace RideShare_Connect.Models.PaymentManagement
         public string? CardNumber { get; set; }
 
         [Required]
-        [StringLength(5)]
+        [StringLength(7)]
         public string? Expiry { get; set; }
 
         [Required]

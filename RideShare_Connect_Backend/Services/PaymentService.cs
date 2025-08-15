@@ -159,16 +159,15 @@ namespace RideShare_Connect.Services
             var method = new PaymentMethod
             {
                 UserId = dto.UserId,
-                MethodType = dto.MethodType
+                MethodType = dto.MethodType,
+                CardholderName = dto.CardholderName,
+                CardNumber = dto.CardNumber,
+                Expiry = dto.Expiry,
+                Cvc = dto.Cvc,
+                PaymentToken = Guid.NewGuid().ToString(),
+                Last4 = dto.Last4,
+                Brand = dto.Brand
             };
-
-            if (!string.IsNullOrEmpty(dto.CardNumber) && dto.ExpiryDate.HasValue)
-            {
-                var token = await _gateway.TokenizeCardAsync(dto.CardNumber, dto.ExpiryDate.Value);
-                method.PaymentToken = token.Token;
-                method.Last4 = token.Last4;
-                method.Brand = token.Brand;
-            }
 
             _context.PaymentMethods.Add(method);
             await _context.SaveChangesAsync();
