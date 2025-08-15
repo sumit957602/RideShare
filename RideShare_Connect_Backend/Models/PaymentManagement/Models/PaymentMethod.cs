@@ -28,6 +28,7 @@ namespace RideShare_Connect.Models.PaymentManagement
 
         [Required]
         [StringLength(7)]
+        [Column(TypeName = "nvarchar(7)")]
         public string? Expiry { get; set; }
 
         [Required]
