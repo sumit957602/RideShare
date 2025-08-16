@@ -119,6 +119,64 @@ public class RideBookingsControllerTests
     }
 
     [Test]
+    public async Task AcceptRide_SubsequentBookings_UpdateExistingTransactionSummary()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        using var context = new ApplicationDbContext(options);
+        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
+        var ride = new Ride
+        {
+            Id = 1,
+            DriverId = 1,
+            VehicleId = 1,
+            Origin = "O",
+            Destination = "D",
+            DepartureTime = DateTime.UtcNow.AddHours(1),
+            TotalSeats = 3,
+            AvailableSeats = 3,
+            PricePerSeat = 10m,
+            DistanceKm = 10,
+            Status = "Scheduled"
+        };
+        context.Rides.Add(ride);
+        await context.SaveChangesAsync();
+        var controller = new RideBookingsController(context);
+
+        var cashDto = new RideBookingRequestDto
+        {
+            RideId = 1,
+            UserId = 1,
+            NumPersons = 1,
+            PaymentMode = "Cash",
+            PickupLocation = "A",
+            DropLocation = "B",
+            DistanceKm = 5
+        };
+        await controller.AcceptRide(cashDto);
+
+        var walletDto = new RideBookingRequestDto
+        {
+            RideId = 1,
+            UserId = 1,
+            NumPersons = 1,
+            PaymentMode = "Wallet",
+            PickupLocation = "A2",
+            DropLocation = "B2",
+            DistanceKm = 5
+        };
+        await controller.AcceptRide(walletDto);
+
+        Assert.That(await context.UserTransactionSummaries.CountAsync(), Is.EqualTo(1));
+        var summary = await context.UserTransactionSummaries.FirstAsync();
+        Assert.That(summary.TotalAmount, Is.EqualTo(100));
+        Assert.That(summary.TotalTransactionAmount, Is.EqualTo(50));
+    }
+
+    [Test]
     public async Task AcceptRide_RideNotFound_ReturnsNotFound()
     {
         // Arrange
