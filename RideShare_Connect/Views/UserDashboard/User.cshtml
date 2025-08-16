@@ -274,11 +274,11 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Route</th>
-                                                <th>Driver</th>
+                                                <th>Pickup - Drop</th>
+                                                <th>Vehicle No</th>
                                                 <th>Date & Time</th>
-                                                <th>Price</th>
-                                                <th>Status</th>
+                                                <th>Total Fare</th>
+                                                <th>Payment Mode</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -286,11 +286,11 @@
                                             @foreach (var booking in Model.Bookings)
                                             {
                                                 <tr>
-                                                    <td><strong>@booking.Ride.Origin <i class="bi bi-arrow-right"></i> @booking.Ride.Destination</strong></td>
-                                                    <td>@booking.Ride.Driver.FullName</td>
+                                                    <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
+                                                    <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
-                                                    <td><span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">@booking.Status</span></td>
+                                                    <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
                                                     <td><button class="btn btn-sm btn-outline-danger">Cancel</button></td>
                                                 </tr>
                                             }
