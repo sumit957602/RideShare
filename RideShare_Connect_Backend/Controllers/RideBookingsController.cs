@@ -68,6 +68,16 @@ namespace RideShare_Connect.Api.Controllers
             };
             _context.Payments.Add(payment);
 
+            var transactionSummary = new UserTransactionSummary
+            {
+                RideId = ride.Id,
+                DriverId = ride.DriverId,
+                UserId = dto.UserId,
+                TotalAmount = totalFare,
+                TotalTransactionAmount = dto.PaymentMode == "Cash" ? 0 : totalFare,
+            };
+            _context.UserTransactionSummaries.Add(transactionSummary);
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
