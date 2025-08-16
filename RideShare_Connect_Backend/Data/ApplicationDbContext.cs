@@ -41,6 +41,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
+        public DbSet<UserTransactionSummary> UserTransactionSummaries { get; set; }
 
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Analytics> Analytics { get; set; }
@@ -92,6 +93,24 @@ namespace RideShare_Connect.Api.Data
                 .HasOne(p => p.PaymentMethod)
                 .WithMany()
                 .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.Ride)
+                .WithMany()
+                .HasForeignKey(t => t.RideId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.Driver)
+                .WithMany()
+                .HasForeignKey(t => t.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
