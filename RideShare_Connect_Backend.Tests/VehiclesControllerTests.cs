@@ -27,7 +27,7 @@ public class VehiclesControllerTests
         var dto = new VehicleRegisterDto
         {
             CarMaker = "Toyota",
-            Model = "Camry",
+            CarModel = "Camry",
             VehicleType = "Sedan",
             LicensePlate = "ABC123",
             Year = 2020

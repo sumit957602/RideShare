@@ -34,16 +34,19 @@ namespace RideShare_Connect.Api.Controllers
             if (ride.DepartureTime <= DateTime.UtcNow)
                 return BadRequest("ride past");
 
-            if (ride.AvailableSeats < dto.Seats)
+            if (ride.AvailableSeats < dto.NumPersons)
                 return BadRequest("not enough seats");
 
-            ride.AvailableSeats -= dto.Seats;
+            if (!new[] { "Wallet", "Razor Pay", "Cash" }.Contains(dto.PaymentMode))
+                return BadRequest("invalid payment mode");
+
+            ride.AvailableSeats -= dto.NumPersons;
 
             var booking = new RideBooking
             {
                 RideId = dto.RideId,
                 PassengerId = dto.UserId,
-                BookedSeats = dto.Seats,
+                BookedSeats = dto.NumPersons,
                 PickupLocation = dto.PickupLocation,
                 DropLocation = dto.DropLocation,
                 DistanceKm = dto.DistanceKm,
@@ -52,11 +55,14 @@ namespace RideShare_Connect.Api.Controllers
             };
             _context.RideBookings.Add(booking);
 
+            var totalFare = ride.PricePerSeat * dto.NumPersons * dto.DistanceKm;
+
             var payment = new Payment
             {
                 UserId = dto.UserId,
                 Booking = booking,
-                Amount = ride.PricePerSeat * dto.Seats,
+                Amount = totalFare,
+                PaymentMode = dto.PaymentMode,
                 PaymentDate = DateTime.UtcNow,
                 Status = "Pending"
             };
@@ -65,7 +71,7 @@ namespace RideShare_Connect.Api.Controllers
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return Ok(new { bookingId = booking.Id, paymentId = payment.Id, paymentStatus = payment.Status });
+            return Ok(new { bookingId = booking.Id, paymentId = payment.Id, paymentStatus = payment.Status, totalFare });
         }
     }
 }

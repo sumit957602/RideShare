@@ -29,6 +29,7 @@ namespace RideShare_Connect.Services
                 UserId = dto.UserId,
                 BookingId = dto.BookingId,
                 Amount = dto.Amount,
+                PaymentMode = dto.PaymentMode,
                 PaymentMethodId = dto.PaymentMethodId,
                 PaymentDate = DateTime.UtcNow,
                 Status = result.Status,

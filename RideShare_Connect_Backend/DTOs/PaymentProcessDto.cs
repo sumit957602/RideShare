@@ -15,5 +15,9 @@ namespace RideShare_Connect.DTOs
 
         [Required]
         public int PaymentMethodId { get; set; }
+
+        [Required]
+        [RegularExpression("Wallet|Razor Pay|Cash", ErrorMessage = "Invalid payment mode")]
+        public string PaymentMode { get; set; }
     }
 }

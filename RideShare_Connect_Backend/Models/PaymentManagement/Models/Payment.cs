@@ -1,5 +1,4 @@
 ﻿using RideShare_Connect.Models.RideManagement;
-using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.UserManagement;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -23,6 +22,10 @@ namespace RideShare_Connect.Models.PaymentManagement
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Amount { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string PaymentMode { get; set; }
 
         [ForeignKey("PaymentMethod")]
         public int? PaymentMethodId { get; set; }
