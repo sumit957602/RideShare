@@ -57,6 +57,7 @@
         </form>
     </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const map = L.map('map').setView([25.5941, 85.1376], 13);
@@ -73,6 +74,9 @@
             const distanceInput = document.getElementById('distance');
             const numPersonsInput = document.getElementById('numPersons');
             const totalFareInput = document.getElementById('totalFare');
+            const paymentModeSelect = document.getElementById('paymentMode');
+            const form = document.querySelector('form');
+            const razorpayKey = '@ViewBag.RazorpayKey';
             const pricePerSeat = parseFloat('@Model.PricePerSeat.ToString(System.Globalization.CultureInfo.InvariantCulture)');
 
             function updateFare() {
@@ -138,6 +142,29 @@
             dropInput.addEventListener('change', updateMap);
             numPersonsInput.addEventListener('input', updateFare);
             updateFare();
+
+            form.addEventListener('submit', function (e) {
+                if (paymentModeSelect.value === 'Razor Pay') {
+                    e.preventDefault();
+                    const amount = parseFloat(totalFareInput.value);
+                    if (!amount || amount <= 0) {
+                        return;
+                    }
+                    const options = {
+                        key: razorpayKey,
+                        amount: Math.round(amount * 100),
+                        currency: 'INR',
+                        name: 'RideShare Connect',
+                        description: 'Ride payment',
+                        handler: function (response) {
+                            alert('Payment successful: ' + response.razorpay_payment_id);
+                        },
+                        theme: { color: '#3399cc' }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                }
+            });
         });
     </script>
 </body>

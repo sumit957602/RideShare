@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace RideShare_Connect.Controllers
 {
@@ -18,12 +19,14 @@ namespace RideShare_Connect.Controllers
         private readonly AppDbContext _db;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<UserDashboardController> _logger;
+        private readonly IConfiguration _config;
 
-        public UserDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<UserDashboardController> logger)
+        public UserDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<UserDashboardController> logger, IConfiguration config)
         {
             _db = db;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _config = config;
         }
 
         public IActionResult User()
@@ -233,6 +236,7 @@ namespace RideShare_Connect.Controllers
                 return NotFound();
             }
 
+            ViewBag.RazorpayKey = _config["PaymentGateway:ApiKey"] ?? "rzp_test_R5NMyugFaCywDS";
             return View(ride);
         }
     }
