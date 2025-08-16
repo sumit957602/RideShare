@@ -39,6 +39,8 @@ namespace RideShare_Connect.Controllers
             var bookingsQuery = _db.RideBookings
                 .Include(rb => rb.Ride)
                     .ThenInclude(r => r.Driver)
+                .Include(rb => rb.Ride)
+                    .ThenInclude(r => r.Vehicle)
                 .Where(rb => rb.PassengerId == userId);
 
             var bookings = bookingsQuery
@@ -58,6 +60,12 @@ namespace RideShare_Connect.Controllers
                 .OrderBy(r => r.DepartureTime)
                 .ToList();
 
+            var bookingIds = bookings.Select(b => b.Id).ToList();
+            var paymentModes = _db.Payments
+                .Include(p => p.PaymentMethod)
+                .Where(p => bookingIds.Contains(p.BookingId))
+                .ToDictionary(p => p.BookingId, p => p.PaymentMethod != null ? p.PaymentMethod.CardType : "Cash");
+
             var model = new UserDashboardViewModel
             {
                 Profile = profile,
@@ -66,7 +74,8 @@ namespace RideShare_Connect.Controllers
                 Rating = rating,
                 Bookings = bookings,
                 RecentBookings = bookings.Take(5).ToList(),
-                AvailableRides = availableRides
+                AvailableRides = availableRides,
+                PaymentModes = paymentModes
             };
 
             return View(model);
