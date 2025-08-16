@@ -289,7 +289,7 @@
                                                     <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>₹@Model.TotalSpent</td>
                                                     <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
                                                     <td><button class="btn btn-sm btn-outline-danger">Cancel</button></td>
                                                 </tr>
