@@ -37,7 +37,8 @@ public class PaymentServiceTests
             UserId = 1,
             BookingId = 1,
             Amount = 20m,
-            PaymentMethodId = 1
+            PaymentMethodId = 1,
+            PaymentMode = "Cash"
         };
 
         // Act
@@ -62,7 +63,8 @@ public class PaymentServiceTests
             UserId = 1,
             BookingId = 1,
             Amount = 20m,
-            PaymentMethodId = 1
+            PaymentMethodId = 1,
+            PaymentMode = "Cash"
         };
 
         var payment = await service.ProcessPaymentAsync(dto);

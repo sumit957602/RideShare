@@ -44,7 +44,8 @@ public class RideBookingsControllerTests
         {
             RideId = 1,
             UserId = 1,
-            Seats = 2,
+            NumPersons = 2,
+            PaymentMode = "Cash",
             PickupLocation = "A",
             DropLocation = "B",
             DistanceKm = 5
@@ -58,7 +59,12 @@ public class RideBookingsControllerTests
         Assert.That(ok, Is.Not.Null);
         Assert.That(await context.RideBookings.CountAsync(), Is.EqualTo(1));
         Assert.That(await context.Payments.CountAsync(), Is.EqualTo(1));
+        var payment = await context.Payments.FirstAsync();
+        Assert.That(payment.Amount, Is.EqualTo(100));
+        Assert.That(payment.PaymentMode, Is.EqualTo("Cash"));
         Assert.That((await context.Rides.FirstAsync()).AvailableSeats, Is.EqualTo(1));
+        var totalFare = (decimal)ok.Value!.GetType().GetProperty("totalFare")!.GetValue(ok.Value)!;
+        Assert.That(totalFare, Is.EqualTo(100));
     }
 
     [Test]
@@ -75,7 +81,8 @@ public class RideBookingsControllerTests
         {
             RideId = 99,
             UserId = 1,
-            Seats = 1,
+            NumPersons = 1,
+            PaymentMode = "Wallet",
             PickupLocation = "A",
             DropLocation = "B",
             DistanceKm = 5

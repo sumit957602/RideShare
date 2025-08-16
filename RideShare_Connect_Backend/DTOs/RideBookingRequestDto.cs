@@ -12,7 +12,11 @@ namespace RideShare_Connect.DTOs
 
         [Required]
         [Range(1, 10)]
-        public int Seats { get; set; }
+        public int NumPersons { get; set; }
+
+        [Required]
+        [RegularExpression("Wallet|Razor Pay|Cash", ErrorMessage = "Invalid payment mode")]
+        public string PaymentMode { get; set; }
 
         [Required]
         [StringLength(100)]
