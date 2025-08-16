@@ -45,6 +45,7 @@ namespace RideShareConnect.Data
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
+        public DbSet<UserTransactionSummary> UserTransactionSummaries { get; set; }
 
         // Admin & System Management
         public DbSet<Admin> Admins { get; set; }
@@ -58,7 +59,23 @@ namespace RideShareConnect.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Apply any custom model configurations here.
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.Ride)
+                .WithMany()
+                .HasForeignKey(t => t.RideId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.Driver)
+                .WithMany()
+                .HasForeignKey(t => t.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserTransactionSummary>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
