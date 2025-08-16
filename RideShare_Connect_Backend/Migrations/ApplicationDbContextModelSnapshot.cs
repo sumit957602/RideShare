@@ -232,6 +232,11 @@ namespace RideShare_Connect_Backend.Migrations
                     b.Property<int?>("PaymentMethodId")
                         .HasColumnType("int");
 
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("ProviderTransactionId")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

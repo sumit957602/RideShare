@@ -12,7 +12,7 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250815101929_skk5")]
+    [Migration("20250816113800_skk5")]
     partial class skk5
     {
         /// <inheritdoc />
@@ -234,6 +234,11 @@ namespace RideShare_Connect_Backend.Migrations
 
                     b.Property<int?>("PaymentMethodId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("ProviderTransactionId")
                         .HasMaxLength(100)
