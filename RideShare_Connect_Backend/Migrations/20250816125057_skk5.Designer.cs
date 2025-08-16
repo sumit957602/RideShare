@@ -12,7 +12,7 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250816113800_skk5")]
+    [Migration("20250816125057_skk5")]
     partial class skk5
     {
         /// <inheritdoc />
@@ -350,6 +350,40 @@ namespace RideShare_Connect_Backend.Migrations
                     b.HasIndex("PaymentId");
 
                     b.ToTable("Refunds");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.UserTransactionSummary", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RideId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalTransactionAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("RideId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserTransactionSummaries");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.Wallet", b =>
@@ -1214,6 +1248,33 @@ namespace RideShare_Connect_Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.UserTransactionSummary", b =>
+                {
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RideShare_Connect.Models.RideManagement.Ride", "Ride")
+                        .WithMany()
+                        .HasForeignKey("RideId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RideShare_Connect.Models.UserManagement.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Ride");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.Wallet", b =>

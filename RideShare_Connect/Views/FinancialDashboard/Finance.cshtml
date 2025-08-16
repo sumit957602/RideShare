@@ -120,12 +120,12 @@
                                 @if (isSuccessful)
                                 {
                                     <span class="@(isCredit ? "text-success" : "text-danger") fw-bold">
-                                        @txn.TxnType @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                         @txn.PaymentMethod @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="fw-bold">@txn.Status</span>
+                                    <span class="fw-bold">@txn.Status @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")</span>
                                 }
                             </li>
                         }
@@ -185,7 +185,7 @@
                         <tr>
                             <th>Transaction ID</th>
                             <th>Date</th>
-                            <th>Type</th>
+                            <th>Transction Status</th>
                             <th>Amount</th>
                             <th>Description</th>
                         </tr>
@@ -208,7 +208,7 @@
                                         }
                                         else
                                         {
-                                            @txn.Status
+                                            @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
                                         }
                                     </td>
                                     <td>@txn.Description</td>
