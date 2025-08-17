@@ -12,7 +12,7 @@ using RideShare_Connect.Api.Data;
 namespace RideShare_Connect_Backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250816125057_skk5")]
+    [Migration("20250817080323_skk5")]
     partial class skk5
     {
         /// <inheritdoc />
