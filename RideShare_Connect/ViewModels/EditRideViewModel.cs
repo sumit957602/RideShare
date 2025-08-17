@@ -42,5 +42,6 @@ namespace RideShare_Connect.ViewModels
         public bool IsRecurring { get; set; }
 
         public List<Vehicle> Vehicles { get; set; } = new();
+        public List<string> Riders { get; set; } = new();
     }
 }
