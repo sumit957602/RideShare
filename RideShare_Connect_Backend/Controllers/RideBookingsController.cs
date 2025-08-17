@@ -6,6 +6,7 @@ using RideShare_Connect.Models.PaymentManagement;
 using RideShare_Connect.Models.RideManagement;
 using System.Data;
 using System;
+using System.Linq;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -18,6 +19,48 @@ namespace RideShare_Connect.Api.Controllers
         public RideBookingsController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("driver/{driverId}")]
+        public async Task<IActionResult> GetBookingsByDriver(int driverId)
+        {
+            var rideIds = await _context.Rides
+                .Where(r => r.DriverId == driverId)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            if (!rideIds.Any())
+            {
+                return NotFound("No rides found for the driver");
+            }
+
+            var bookings = await _context.RideBookings
+                .Include(rb => rb.Ride)
+                .Where(rb => rideIds.Contains(rb.RideId))
+                .Select(rb => new RideBookingDetailsDto
+                {
+                    BookingId = rb.Id,
+                    RideId = rb.RideId,
+                    PassengerId = rb.PassengerId,
+                    BookedSeats = rb.BookedSeats,
+                    PickupLocation = rb.PickupLocation,
+                    DropLocation = rb.DropLocation,
+                    DistanceKm = rb.DistanceKm,
+                    BookingTime = rb.BookingTime,
+                    Status = rb.Status,
+                    Origin = rb.Ride.Origin,
+                    Destination = rb.Ride.Destination,
+                    DepartureTime = rb.Ride.DepartureTime,
+                    PricePerSeat = rb.Ride.PricePerSeat
+                })
+                .ToListAsync();
+
+            if (!bookings.Any())
+            {
+                return NotFound("No bookings found for the driver");
+            }
+
+            return Ok(bookings);
         }
 
         [HttpPost("accept")]
