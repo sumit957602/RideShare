@@ -191,15 +191,15 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Passenger</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th></tr></thead>
+                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th></tr></thead>
                                             <tbody>
                                                 @if (Model.AcceptedRideBookings.Any())
                                                 {
                                                     foreach (var booking in Model.AcceptedRideBookings)
                                                     {
                                                         <tr>
-                                                            <td>@(booking.User?.UserProfile?.FullName ?? booking.User?.Email)</td>
-                                                            <td>@booking.Ride.Origin <i class="bi bi-arrow-right"></i> @booking.Ride.Destination</td>
+                                                            <td>@booking.PassengerId</td>
+                                                            <td>@booking.Origin <i class="bi bi-arrow-right"></i> @booking.Destination</td>
                                                             <td>@booking.BookedSeats</td>
                                                             <td>@booking.PickupLocation</td>
                                                             <td>@booking.DropLocation</td>

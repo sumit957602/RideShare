@@ -44,19 +44,44 @@ namespace RideShare_Connect.Controllers
             var ratings = await _db.DriverRatings.Where(r => r.DriverId == userId)
                 .OrderByDescending(r => r.Timestamp)
                 .ToListAsync();
-            var rides = await _db.Rides
+
+            var rideIds = await _db.Rides
                 .Where(r => r.DriverId == userId)
-                .Include(r => r.Vehicle)
-                .OrderByDescending(r => r.DepartureTime)
+                .Select(r => r.Id)
                 .ToListAsync();
-            var acceptedBookings = await _db.RideBookings
-                .Include(rb => rb.Ride)
-                    .ThenInclude(r => r.Vehicle)
-                .Include(rb => rb.User)
-                    .ThenInclude(u => u.UserProfile)
-                .Where(rb => rb.Ride.DriverId == userId && rb.Status == "Accepted")
-                .OrderByDescending(rb => rb.BookingTime)
-                .ToListAsync();
+
+            var rides = new List<Ride>();
+            List<RideBookingDetailsDto> acceptedBookings = new List<RideBookingDetailsDto>();
+
+            if (rideIds.Any())
+            {
+                rides = await _db.Rides
+                    .Where(r => rideIds.Contains(r.Id))
+                    .Include(r => r.Vehicle)
+                    .OrderByDescending(r => r.DepartureTime)
+                    .ToListAsync();
+
+                acceptedBookings = await _db.RideBookings
+                    .Include(rb => rb.Ride)
+                    .Where(rb => rideIds.Contains(rb.RideId))
+                    .Select(rb => new RideBookingDetailsDto
+                    {
+                        BookingId = rb.Id,
+                        RideId = rb.RideId,
+                        PassengerId = rb.PassengerId,
+                        BookedSeats = rb.BookedSeats,
+                        PickupLocation = rb.PickupLocation,
+                        DropLocation = rb.DropLocation,
+                        DistanceKm = rb.DistanceKm,
+                        BookingTime = rb.BookingTime,
+                        Status = rb.Status,
+                        Origin = rb.Ride.Origin,
+                        Destination = rb.Ride.Destination,
+                        DepartureTime = rb.Ride.DepartureTime,
+                        PricePerSeat = rb.Ride.PricePerSeat
+                    })
+                    .ToListAsync();
+            }
             var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
 
             var viewModel = new DriverDashboardViewModel
