@@ -4,7 +4,6 @@ using RideShare_Connect.Api.Data;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.PaymentManagement;
 using RideShare_Connect.Models.RideManagement;
-using System;
 using System.Data;
 
 namespace RideShare_Connect.Api.Controllers
@@ -41,30 +40,6 @@ namespace RideShare_Connect.Api.Controllers
             if (!new[] { "Wallet", "Razor Pay", "Cash" }.Contains(dto.PaymentMode))
                 return BadRequest("invalid payment mode");
 
-            var totalFare = ride.PricePerSeat * dto.NumPersons * dto.DistanceKm;
-
-            if (dto.PaymentMode == "Wallet")
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == dto.UserId);
-                if (wallet == null || wallet.Balance < totalFare)
-                    return BadRequest("You have not sufficient balance in your wallet");
-
-                wallet.Balance -= totalFare;
-                wallet.LastUpdated = DateTime.UtcNow;
-
-                _context.WalletTransactions.Add(new WalletTransaction
-                {
-                    Wallet = wallet,
-                    Amount = totalFare,
-                    TxnType = "Debit",
-                    TxnDate = DateTime.UtcNow,
-                    Description = "Ride booking payment",
-                    TransactionId = Guid.NewGuid().ToString(),
-                    PaymentMethod = "Wallet",
-                    Status = "Completed"
-                });
-            }
-
             ride.AvailableSeats -= dto.NumPersons;
 
             var booking = new RideBooking
@@ -80,6 +55,8 @@ namespace RideShare_Connect.Api.Controllers
             };
             _context.RideBookings.Add(booking);
 
+            var totalFare = ride.PricePerSeat * dto.NumPersons * dto.DistanceKm;
+
             var payment = new Payment
             {
                 UserId = dto.UserId,
@@ -87,7 +64,7 @@ namespace RideShare_Connect.Api.Controllers
                 Amount = totalFare,
                 PaymentMode = dto.PaymentMode,
                 PaymentDate = DateTime.UtcNow,
-                Status = dto.PaymentMode == "Wallet" ? "Completed" : "Pending"
+                Status = "Pending"
             };
             _context.Payments.Add(payment);
 
