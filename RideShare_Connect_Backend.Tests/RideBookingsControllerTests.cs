@@ -281,6 +281,8 @@ public class RideBookingsControllerTests
         var bookings = ok!.Value as IEnumerable<RideBookingDetailsDto>;
         Assert.That(bookings, Is.Not.Null);
         Assert.That(bookings!.Count(), Is.EqualTo(1));
-        Assert.That(bookings!.First().RideId, Is.EqualTo(1));
+        var booking = bookings!.First();
+        Assert.That(booking.RideId, Is.EqualTo(1));
+        Assert.That(booking.TotalFare, Is.EqualTo(50m));
     }
 }

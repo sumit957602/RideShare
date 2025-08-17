@@ -17,5 +17,6 @@ namespace RideShare_Connect.DTOs
         public string Destination { get; set; }
         public DateTime DepartureTime { get; set; }
         public decimal PricePerSeat { get; set; }
+        public decimal TotalFare { get; set; }
     }
 }
