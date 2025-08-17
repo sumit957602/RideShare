@@ -77,7 +77,7 @@
             const totalFareInput = document.getElementById('totalFare');
             const paymentModeSelect = document.getElementById('paymentMode');
             const form = document.querySelector('form');
-            const userId = '@User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)';
+            const userId = '@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)';
             const razorpayKey = '@ViewBag.RazorpayKey';
             const pricePerSeat = parseFloat('@Model.PricePerSeat.ToString(System.Globalization.CultureInfo.InvariantCulture)');
 
