@@ -239,5 +239,36 @@ namespace RideShare_Connect.Controllers
             ViewBag.RazorpayKey = _config["PaymentGateway:ApiKey"] ?? "rzp_test_R5NMyugFaCywDS";
             return View(ride);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BookRide(int id, [FromBody] RideBookingRequestDto dto)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized();
+            }
+
+            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
+            var requestDto = new RideBookingRequestDto
+            {
+                RideId = id,
+                UserId = userId,
+                NumPersons = dto.NumPersons,
+                PaymentMode = dto.PaymentMode,
+                PickupLocation = dto.PickupLocation,
+                DropLocation = dto.DropLocation,
+                DistanceKm = dto.DistanceKm
+            };
+
+            var response = await httpClient.PostAsJsonAsync("api/RideBookings/accept", requestDto);
+            var content = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                return Content(content, "application/json");
+            }
+
+            return StatusCode((int)response.StatusCode, content);
+        }
     }
 }
