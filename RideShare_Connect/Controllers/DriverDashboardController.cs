@@ -49,14 +49,23 @@ namespace RideShare_Connect.Controllers
                 .Include(r => r.Vehicle)
                 .OrderByDescending(r => r.DepartureTime)
                 .ToListAsync();
-            var acceptedBookings = await _db.RideBookings
-                .Include(rb => rb.Ride)
-                    .ThenInclude(r => r.Vehicle)
-                .Include(rb => rb.User)
-                    .ThenInclude(u => u.UserProfile)
-                .Where(rb => rb.Ride.DriverId == userId && rb.Status == "Accepted")
-                .OrderByDescending(rb => rb.BookingTime)
-                .ToListAsync();
+
+            // Fetch all ride IDs for the logged-in driver
+            var rideIds = rides.Select(r => r.Id).ToList();
+
+            // Check if any of the driver's rides have accepted bookings
+            List<RideBooking> acceptedBookings = new List<RideBooking>();
+            if (rideIds.Any())
+            {
+                acceptedBookings = await _db.RideBookings
+                    .Include(rb => rb.Ride)
+                        .ThenInclude(r => r.Vehicle)
+                    .Include(rb => rb.User)
+                        .ThenInclude(u => u.UserProfile)
+                    .Where(rb => rideIds.Contains(rb.RideId) && rb.Status == "Accepted")
+                    .OrderByDescending(rb => rb.BookingTime)
+                    .ToListAsync();
+            }
             var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
 
             var viewModel = new DriverDashboardViewModel
