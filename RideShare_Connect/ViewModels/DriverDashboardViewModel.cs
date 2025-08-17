@@ -10,6 +10,7 @@ namespace RideShare_Connect.ViewModels
         public DriverProfile DriverProfile { get; set; }
         public IEnumerable<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
         public IEnumerable<Ride> CreatedRides { get; set; } = new List<Ride>();
+        public IEnumerable<RideBooking> AcceptedRideBookings { get; set; } = new List<RideBooking>();
         public double AverageRating { get; set; }
         public IEnumerable<DriverRating> RecentRatings { get; set; } = new List<DriverRating>();
     }
