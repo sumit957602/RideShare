@@ -5,6 +5,7 @@ using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.PaymentManagement;
 using RideShare_Connect.Models.RideManagement;
 using System.Data;
+using System;
 
 namespace RideShare_Connect.Api.Controllers
 {
@@ -57,6 +58,31 @@ namespace RideShare_Connect.Api.Controllers
 
             var totalFare = ride.PricePerSeat * dto.NumPersons * dto.DistanceKm;
 
+            Wallet? wallet = null;
+            if (dto.PaymentMode == "Wallet")
+            {
+                wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == dto.UserId);
+                if (wallet == null || wallet.Balance < totalFare)
+                {
+                    await transaction.RollbackAsync();
+                    return BadRequest("You have not sufficient balance in your wallet");
+                }
+
+                wallet.Balance -= totalFare;
+                wallet.LastUpdated = DateTime.UtcNow;
+                _context.WalletTransactions.Add(new WalletTransaction
+                {
+                    Wallet = wallet,
+                    Amount = totalFare,
+                    TxnType = "Debit",
+                    TxnDate = DateTime.UtcNow,
+                    Description = "Ride booking",
+                    TransactionId = Guid.NewGuid().ToString(),
+                    PaymentMethod = "Wallet",
+                    Status = "Completed"
+                });
+            }
+
             var payment = new Payment
             {
                 UserId = dto.UserId,
@@ -64,7 +90,7 @@ namespace RideShare_Connect.Api.Controllers
                 Amount = totalFare,
                 PaymentMode = dto.PaymentMode,
                 PaymentDate = DateTime.UtcNow,
-                Status = "Pending"
+                Status = dto.PaymentMode == "Wallet" ? "Completed" : "Pending"
             };
             _context.Payments.Add(payment);
 
