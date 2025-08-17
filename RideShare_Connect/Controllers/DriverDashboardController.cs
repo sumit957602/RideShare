@@ -332,6 +332,76 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        [HttpGet]
+        public async Task<IActionResult> CompleteRide(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var booking = await _db.RideBookings
+                .Include(rb => rb.Ride)
+                .FirstOrDefaultAsync(rb => rb.Id == id && rb.Ride.DriverId == userId);
+            if (booking == null || booking.Status != "Ongoing")
+            {
+                return NotFound();
+            }
+
+            var dto = new RideBookingDetailsDto
+            {
+                BookingId = booking.Id,
+                RideId = booking.RideId,
+                PassengerId = booking.PassengerId,
+                BookedSeats = booking.BookedSeats,
+                PickupLocation = booking.PickupLocation,
+                DropLocation = booking.DropLocation,
+                DistanceKm = booking.DistanceKm,
+                BookingTime = booking.BookingTime,
+                Status = booking.Status,
+                Origin = booking.Ride.Origin,
+                Destination = booking.Ride.Destination,
+                DepartureTime = booking.Ride.DepartureTime,
+                PricePerSeat = booking.Ride.PricePerSeat
+            };
+
+            return View(dto);
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteRide(int id, bool confirm)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            if (!confirm)
+            {
+                return RedirectToAction(nameof(Driver));
+            }
+
+            var booking = await _db.RideBookings
+                .Include(rb => rb.Ride)
+                .FirstOrDefaultAsync(rb => rb.Id == id && rb.Ride.DriverId == userId);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            booking.Status = "Completed";
+            booking.Ride.Status = "Completed";
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelRide(int id)
