@@ -191,7 +191,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th></tr></thead>
+                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th><th>Total Fare</th></tr></thead>
                                             <tbody>
                                                 @if (Model.AcceptedRideBookings.Any())
                                                 {
@@ -203,12 +203,13 @@
                                                             <td>@booking.BookedSeats</td>
                                                             <td>@booking.PickupLocation</td>
                                                             <td>@booking.DropLocation</td>
+                                                            <td>@( (booking.BookedSeats * booking.PricePerSeat).ToString("C") )</td>
                                                         </tr>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <tr><td colspan="5">No accepted rides.</td></tr>
+                                                    <tr><td colspan="6">No accepted rides.</td></tr>
                                                 }
                                             </tbody>
                                         </table>
