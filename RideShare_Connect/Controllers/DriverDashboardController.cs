@@ -49,6 +49,14 @@ namespace RideShare_Connect.Controllers
                 .Include(r => r.Vehicle)
                 .OrderByDescending(r => r.DepartureTime)
                 .ToListAsync();
+            var acceptedBookings = await _db.RideBookings
+                .Include(rb => rb.Ride)
+                    .ThenInclude(r => r.Vehicle)
+                .Include(rb => rb.User)
+                    .ThenInclude(u => u.UserProfile)
+                .Where(rb => rb.Ride.DriverId == userId && rb.Status == "Accepted")
+                .OrderByDescending(rb => rb.BookingTime)
+                .ToListAsync();
             var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
 
             var viewModel = new DriverDashboardViewModel
@@ -57,6 +65,7 @@ namespace RideShare_Connect.Controllers
                 DriverProfile = driverProfile,
                 Vehicles = vehicles,
                 CreatedRides = rides,
+                AcceptedRideBookings = acceptedBookings,
                 AverageRating = average,
                 RecentRatings = ratings.Take(5)
             };
