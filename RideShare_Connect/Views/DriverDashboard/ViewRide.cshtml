@@ -1,5 +1,6 @@
 @model RideShare_Connect.ViewModels.EditRideViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Linq
 @{
     ViewData["Title"] = "Ride Details";
 }
@@ -237,6 +238,22 @@
                         <div class="col-lg-6">
                             <div id="map"></div>
                         </div>
+                    </div>
+                    <div class="mt-4">
+                        <h5>Riders</h5>
+                        @if (Model.Riders.Any())
+                        {
+                            <ul class="list-group">
+                                @foreach (var rider in Model.Riders)
+                                {
+                                    <li class="list-group-item">@rider</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No bookings yet.</p>
+                        }
                     </div>
                 </div>
             </div>

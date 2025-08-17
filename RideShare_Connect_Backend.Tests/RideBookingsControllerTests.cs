@@ -39,6 +39,8 @@ public class RideBookingsControllerTests
         };
         context.Rides.Add(ride);
         await context.SaveChangesAsync();
+        context.Wallets.Add(new Wallet { UserId = 1, Balance = 200, LastUpdated = DateTime.UtcNow });
+        await context.SaveChangesAsync();
         var controller = new RideBookingsController(context);
         var dto = new RideBookingRequestDto
         {
@@ -97,6 +99,8 @@ public class RideBookingsControllerTests
         };
         context.Rides.Add(ride);
         await context.SaveChangesAsync();
+        context.Wallets.Add(new Wallet { UserId = 1, Balance = 200, LastUpdated = DateTime.UtcNow });
+        await context.SaveChangesAsync();
         var controller = new RideBookingsController(context);
         var dto = new RideBookingRequestDto
         {
@@ -116,6 +120,8 @@ public class RideBookingsControllerTests
         var summary = await context.UserTransactionSummaries.FirstAsync();
         Assert.That(summary.TotalAmount, Is.EqualTo(100));
         Assert.That(summary.TotalTransactionAmount, Is.EqualTo(100));
+        var wallet = await context.Wallets.FirstAsync();
+        Assert.That(wallet.Balance, Is.EqualTo(100));
     }
 
     [Test]
@@ -143,6 +149,8 @@ public class RideBookingsControllerTests
             Status = "Scheduled"
         };
         context.Rides.Add(ride);
+        await context.SaveChangesAsync();
+        context.Wallets.Add(new Wallet { UserId = 1, Balance = 200, LastUpdated = DateTime.UtcNow });
         await context.SaveChangesAsync();
         var controller = new RideBookingsController(context);
 
@@ -174,6 +182,54 @@ public class RideBookingsControllerTests
         var summary = await context.UserTransactionSummaries.FirstAsync();
         Assert.That(summary.TotalAmount, Is.EqualTo(100));
         Assert.That(summary.TotalTransactionAmount, Is.EqualTo(50));
+        var wallet = await context.Wallets.FirstAsync();
+        Assert.That(wallet.Balance, Is.EqualTo(150));
+    }
+
+    [Test]
+    public async Task AcceptRide_WalletInsufficientBalance_ReturnsBadRequest()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+        using var context = new ApplicationDbContext(options);
+        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
+        var ride = new Ride
+        {
+            Id = 1,
+            DriverId = 1,
+            VehicleId = 1,
+            Origin = "O",
+            Destination = "D",
+            DepartureTime = DateTime.UtcNow.AddHours(1),
+            TotalSeats = 3,
+            AvailableSeats = 3,
+            PricePerSeat = 10m,
+            DistanceKm = 10,
+            Status = "Scheduled"
+        };
+        context.Rides.Add(ride);
+        context.Wallets.Add(new Wallet { UserId = 1, Balance = 20, LastUpdated = DateTime.UtcNow });
+        await context.SaveChangesAsync();
+        var controller = new RideBookingsController(context);
+        var dto = new RideBookingRequestDto
+        {
+            RideId = 1,
+            UserId = 1,
+            NumPersons = 2,
+            PaymentMode = "Wallet",
+            PickupLocation = "A",
+            DropLocation = "B",
+            DistanceKm = 5
+        };
+
+        var result = await controller.AcceptRide(dto);
+
+        Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+        Assert.That(await context.RideBookings.CountAsync(), Is.EqualTo(0));
+        Assert.That(await context.Payments.CountAsync(), Is.EqualTo(0));
     }
 
     [Test]
