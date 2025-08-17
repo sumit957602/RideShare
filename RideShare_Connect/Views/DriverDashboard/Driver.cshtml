@@ -203,7 +203,7 @@
                                                             <td>@booking.BookedSeats</td>
                                                             <td>@booking.PickupLocation</td>
                                                             <td>@booking.DropLocation</td>
-                                                            <td>@( (booking.BookedSeats * booking.PricePerSeat).ToString("C") )</td>
+                                                            <td>@( (booking.BookedSeats * booking.PricePerSeat * booking.DistanceKm).ToString("C") )</td>
                                                             <td>
                                                                 <form asp-action="StartRide" asp-route-id="@booking.BookingId" method="post" class="d-inline">
                                                                     @Html.AntiForgeryToken()
