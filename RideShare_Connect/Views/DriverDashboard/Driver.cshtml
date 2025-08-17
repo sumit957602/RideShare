@@ -191,7 +191,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th><th>Total Fare</th></tr></thead>
+                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th><th>Total Fare</th><th>Actions</th></tr></thead>
                                             <tbody>
                                                 @if (Model.AcceptedRideBookings.Any())
                                                 {
@@ -204,12 +204,22 @@
                                                             <td>@booking.PickupLocation</td>
                                                             <td>@booking.DropLocation</td>
                                                             <td>@( (booking.BookedSeats * booking.PricePerSeat).ToString("C") )</td>
+                                                            <td>
+                                                                <form asp-action="StartRide" asp-route-id="@booking.BookingId" method="post" class="d-inline">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="btn btn-sm btn-success me-2">Start Ride</button>
+                                                                </form>
+                                                                <form asp-action="CancelRide" asp-route-id="@booking.BookingId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this ride?');">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Cancel Ride</button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <tr><td colspan="6">No accepted rides.</td></tr>
+                                                    <tr><td colspan="7">No accepted rides.</td></tr>
                                                 }
                                             </tbody>
                                         </table>
