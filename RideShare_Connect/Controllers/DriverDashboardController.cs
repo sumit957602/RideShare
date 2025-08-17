@@ -305,6 +305,60 @@ namespace RideShare_Connect.Controllers
         }
 
         [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StartRide(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var booking = await _db.RideBookings
+                .Include(rb => rb.Ride)
+                .FirstOrDefaultAsync(rb => rb.Id == id && rb.Ride.DriverId == userId);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            booking.Status = "Ongoing";
+            booking.Ride.Status = "Ongoing";
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelRide(int id)
+        {
+            var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdValue) || !int.TryParse(userIdValue, out var userId))
+            {
+                return RedirectToAction("Login", "DriverAccount");
+            }
+
+            var booking = await _db.RideBookings
+                .Include(rb => rb.Ride)
+                .FirstOrDefaultAsync(rb => rb.Id == id && rb.Ride.DriverId == userId);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            booking.Status = "Cancelled";
+            booking.Ride.AvailableSeats += booking.BookedSeats;
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Driver));
+        }
+
+        [Authorize(Roles = "Driver")]
         [HttpGet]
         public IActionResult AddVehicle()
         {
