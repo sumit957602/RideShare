@@ -146,12 +146,6 @@ namespace RideShare_Connect.Controllers
             }
 
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-            var riders = await _db.RideBookings
-                .Include(rb => rb.User)
-                .ThenInclude(u => u.UserProfile)
-                .Where(rb => rb.RideId == id)
-                .Select(rb => rb.User.UserProfile != null ? rb.User.UserProfile.FullName : rb.User.Email)
-                .ToListAsync();
 
             var model = new EditRideViewModel
             {
@@ -165,8 +159,7 @@ namespace RideShare_Connect.Controllers
                 VehicleId = ride.VehicleId,
                 DistanceKm = ride.DistanceKm,
                 IsRecurring = ride.IsRecurring,
-                Vehicles = vehicles,
-                Riders = riders
+                Vehicles = vehicles
             };
 
             return View(model);
@@ -235,12 +228,6 @@ namespace RideShare_Connect.Controllers
             }
 
             var vehicles = await _db.Vehicles.Where(v => v.DriverId == userId).ToListAsync();
-            var riders = await _db.RideBookings
-                .Include(rb => rb.User)
-                .ThenInclude(u => u.UserProfile)
-                .Where(rb => rb.RideId == id)
-                .Select(rb => rb.User.UserProfile != null ? rb.User.UserProfile.FullName : rb.User.Email)
-                .ToListAsync();
 
             var model = new EditRideViewModel
             {
@@ -254,8 +241,7 @@ namespace RideShare_Connect.Controllers
                 VehicleId = ride.VehicleId,
                 DistanceKm = ride.DistanceKm,
                 IsRecurring = ride.IsRecurring,
-                Vehicles = vehicles,
-                Riders = riders
+                Vehicles = vehicles
             };
 
             return View(model);
