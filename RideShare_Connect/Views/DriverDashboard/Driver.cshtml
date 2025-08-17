@@ -238,7 +238,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table">
-                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th><th>Total Fare</th><th>Status</th></tr></thead>
+                                            <thead><tr><th>Passenger ID</th><th>Route</th><th>Seats</th><th>Pickup</th><th>Drop</th><th>Total Fare</th><th>Status</th><th>Actions</th></tr></thead>
                                             <tbody>
                                                 @if (Model.AcceptedRideBookings.Any(b => b.Status == "Ongoing"))
                                                 {
@@ -252,12 +252,19 @@
                                                             <td>@booking.DropLocation</td>
                                                             <td>@( (booking.BookedSeats * booking.PricePerSeat * booking.DistanceKm).ToString("C") )</td>
                                                             <td>@booking.Status</td>
+                                                            <td>
+                                                                <a asp-action="CompleteRide" asp-route-id="@booking.BookingId" class="btn btn-sm btn-success me-2">Complete Ride</a>
+                                                                <form asp-action="CancelRide" asp-route-id="@booking.BookingId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this ride?');">
+                                                                    @Html.AntiForgeryToken()
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Cancel Ride</button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    <tr><td colspan="7">No active rides.</td></tr>
+                                                    <tr><td colspan="8">No active rides.</td></tr>
                                                 }
                                             </tbody>
                                         </table>
