@@ -64,6 +64,47 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(bookings);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetBookingsByUser(int userId)
+        {
+            var rideIds = await _context.RideBookings
+                .Where(rb => rb.PassengerId == userId)
+                .Select(rb => rb.RideId)
+                .ToListAsync();
+
+            if (!rideIds.Any())
+            {
+                return NotFound("No bookings found for the user");
+            }
+
+            var bookings = await _context.RideBookings
+                .Include(rb => rb.Ride)
+                    .ThenInclude(r => r.Driver)
+                .Where(rb => rideIds.Contains(rb.RideId))
+                .Select(rb => new RideBookingDriverDetailsDto
+                {
+                    BookingId = rb.Id,
+                    RideId = rb.RideId,
+                    DriverId = rb.Ride.DriverId,
+                    DriverName = rb.Ride.Driver.FullName,
+                    DriverPhoneNumber = rb.Ride.Driver.PhoneNumber,
+                    BookedSeats = rb.BookedSeats,
+                    PickupLocation = rb.PickupLocation,
+                    DropLocation = rb.DropLocation,
+                    DistanceKm = rb.DistanceKm,
+                    BookingTime = rb.BookingTime,
+                    Status = rb.Status,
+                    Origin = rb.Ride.Origin,
+                    Destination = rb.Ride.Destination,
+                    DepartureTime = rb.Ride.DepartureTime,
+                    PricePerSeat = rb.Ride.PricePerSeat,
+                    TotalFare = rb.Ride.PricePerSeat * rb.BookedSeats * rb.DistanceKm
+                })
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+
         [HttpPost("accept")]
         public async Task<IActionResult> AcceptRide([FromBody] RideBookingRequestDto dto)
         {
