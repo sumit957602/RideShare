@@ -67,7 +67,16 @@ namespace RideShare_Connect.Controllers
             var paymentModes = _db.Payments
                 .Include(p => p.PaymentMethod)
                 .Where(p => bookingIds.Contains(p.BookingId))
-                .ToDictionary(p => p.BookingId, p => p.PaymentMethod != null ? p.PaymentMethod.CardType : "Cash");
+                .OrderByDescending(p => p.PaymentDate)
+                .AsEnumerable()
+                .GroupBy(p => p.BookingId)
+                .ToDictionary(
+                    g => g.Key,
+                    g =>
+                    {
+                        var payment = g.FirstOrDefault();
+                        return payment?.PaymentMethod?.CardType ?? "Cash";
+                    });
 
             var model = new UserDashboardViewModel
             {
