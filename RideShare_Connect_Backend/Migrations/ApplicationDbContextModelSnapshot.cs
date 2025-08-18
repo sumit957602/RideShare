@@ -212,6 +212,79 @@ namespace RideShare_Connect_Backend.Migrations
                     b.ToTable("Commissions");
                 });
 
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.DriverWallet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverId");
+
+                    b.ToTable("DriverWallets");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.DriverWalletTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("DriverWalletId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("TxnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TxnType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverWalletId");
+
+                    b.ToTable("DriverWalletTransactions");
+                });
+
             modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -1197,6 +1270,28 @@ namespace RideShare_Connect_Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.DriverWallet", b =>
+                {
+                    b.HasOne("RideShare_Connect.Models.VehicleManagement.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.DriverWalletTransaction", b =>
+                {
+                    b.HasOne("RideShare_Connect.Models.PaymentManagement.DriverWallet", "DriverWallet")
+                        .WithMany()
+                        .HasForeignKey("DriverWalletId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DriverWallet");
                 });
 
             modelBuilder.Entity("RideShare_Connect.Models.PaymentManagement.Payment", b =>
