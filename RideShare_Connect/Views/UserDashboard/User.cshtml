@@ -81,6 +81,11 @@
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-bs-target="#completed-rides-tab-pane" role="tab" aria-controls="completed-rides-tab-pane" aria-selected="false">
+                                <i class="bi bi-check-circle"></i>Completed Ride
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <a class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings-tab-pane" role="tab" aria-controls="bookings-tab-pane" aria-selected="false">
                                 <i class="bi bi-bookmark-check-fill"></i>Total Bookings
                             </a>
@@ -352,6 +357,50 @@
                                             {
                                                 <tr>
                                                     <td colspan="6" class="text-center text-muted">No cancelled rides</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed Rides Tab -->
+                    <div class="tab-pane fade" id="completed-rides-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Completed Rides</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Route</th>
+                                                <th>Vehicle No</th>
+                                                <th>Date & Time</th>
+                                                <th>Seats</th>
+                                                <th>Total Fare</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var booking in Model.Bookings.Where(b => b.Status == "Completed"))
+                                            {
+                                                <tr>
+                                                    <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
+                                                    <td>@booking.Ride.Vehicle.LicensePlate</td>
+                                                    <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                                    <td>@booking.BookedSeats</td>
+                                                    <td>@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
+                                                    <td>@booking.Status</td>
+                                                </tr>
+                                            }
+                                            @if (!Model.Bookings.Any(b => b.Status == "Completed"))
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No completed rides</td>
                                                 </tr>
                                             }
                                         </tbody>
