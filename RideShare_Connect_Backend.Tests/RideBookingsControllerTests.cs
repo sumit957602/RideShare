@@ -285,4 +285,37 @@ public class RideBookingsControllerTests
         Assert.That(booking.RideId, Is.EqualTo(1));
         Assert.That(booking.TotalFare, Is.EqualTo(50m));
     }
+
+    [Test]
+    public async Task GetBookingsByUser_ReturnsBookingsWithDriverDetails()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        using var context = new ApplicationDbContext(options);
+
+        context.Driver.Add(new Driver { DriverId = 1, Email = "d1@test.com", PasswordHash = "hash", FullName = "Driver1", PhoneNumber = "9123456789" });
+        context.Driver.Add(new Driver { DriverId = 2, Email = "d2@test.com", PasswordHash = "hash", FullName = "Driver2", PhoneNumber = "9123456790" });
+        context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC1", VerificationStatus = "Pending", Year = 2020 });
+        context.Vehicles.Add(new Vehicle { Id = 2, DriverId = 2, CarMaker = "Honda", Model = "Accord", VehicleType = "Sedan", LicensePlate = "ABC2", VerificationStatus = "Pending", Year = 2021 });
+        context.Rides.Add(new Ride { Id = 1, DriverId = 1, VehicleId = 1, Origin = "O1", Destination = "D1", DepartureTime = DateTime.UtcNow.AddHours(1), TotalSeats = 3, AvailableSeats = 3, PricePerSeat = 10m, DistanceKm = 10, Status = "Scheduled" });
+        context.Rides.Add(new Ride { Id = 2, DriverId = 2, VehicleId = 2, Origin = "O2", Destination = "D2", DepartureTime = DateTime.UtcNow.AddHours(1), TotalSeats = 3, AvailableSeats = 3, PricePerSeat = 10m, DistanceKm = 10, Status = "Scheduled" });
+        context.RideBookings.Add(new RideBooking { Id = 1, RideId = 1, PassengerId = 10, BookedSeats = 1, PickupLocation = "A", DropLocation = "B", DistanceKm = 5, BookingTime = DateTime.UtcNow, Status = "Pending" });
+        context.RideBookings.Add(new RideBooking { Id = 2, RideId = 2, PassengerId = 11, BookedSeats = 1, PickupLocation = "C", DropLocation = "D", DistanceKm = 5, BookingTime = DateTime.UtcNow, Status = "Pending" });
+        await context.SaveChangesAsync();
+
+        var controller = new RideBookingsController(context);
+
+        var result = await controller.GetBookingsByUser(10);
+
+        var ok = result as OkObjectResult;
+        Assert.That(ok, Is.Not.Null);
+        var bookings = ok!.Value as IEnumerable<RideBookingDriverDetailsDto>;
+        Assert.That(bookings, Is.Not.Null);
+        Assert.That(bookings!.Count(), Is.EqualTo(1));
+        var booking = bookings!.First();
+        Assert.That(booking.DriverName, Is.EqualTo("Driver1"));
+        Assert.That(booking.DriverPhoneNumber, Is.EqualTo("9123456789"));
+        Assert.That(booking.TotalFare, Is.EqualTo(50m));
+    }
 }
