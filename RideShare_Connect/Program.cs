@@ -23,9 +23,9 @@ builder.Services.AddAuthentication(options =>
 })
     .AddCookie(options =>
     {
-        options.LoginPath = "/Account/Login"; // Redirect unauthenticated users here
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Optional: for unauthorized access
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Match JWT expiration or set longer
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied"; 
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         options.SlidingExpiration = true;
     })
     .AddGoogle(options =>
@@ -41,7 +41,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // You can set your session timeout here
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });

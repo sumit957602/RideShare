@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RideShare_Connect_Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class skk5 : Migration
+    public partial class Initial_migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
