@@ -82,7 +82,7 @@
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings-tab-pane" role="tab" aria-controls="bookings-tab-pane" aria-selected="false">
-                                <i class="bi bi-bookmark-check-fill"></i>My Bookings
+                                <i class="bi bi-bookmark-check-fill"></i>Total Bookings
                             </a>
                         </li>
                         <li class="nav-item">
@@ -300,7 +300,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
+                                                    <td>@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
                                             }
@@ -344,7 +344,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
+                                                    <td>@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
                                             }
@@ -364,7 +364,7 @@
                     <!-- My Bookings Tab -->
                     <div class="tab-pane fade" id="bookings-tab-pane" role="tabpanel" tabindex="0">
                         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                            <h1 class="h2">My Bookings</h1>
+                            <h1 class="h2">Total Bookings</h1>
                         </div>
                         <div class="card">
                             <div class="card-body">
@@ -377,7 +377,6 @@
                                                 <th>Date & Time</th>
                                                 <th>Seats</th>
                                                 <th>Total Fare</th>
-                                                <th>Payment Mode</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -389,8 +388,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@((booking.BookedSeats* booking.Ride.PricePerSeat* booking.DistanceKm).ToString("C"))</td>
-                                                    <td>@(Model.PaymentModes.TryGetValue(booking.Id, out var mode) ? mode : "N/A")</td>
+                                                    <td>@((booking.BookedSeats* booking.Ride.PricePerSeat* booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
                                             }
