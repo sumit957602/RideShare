@@ -71,6 +71,16 @@
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-bs-target="#active-rides-tab-pane" role="tab" aria-controls="active-rides-tab-pane" aria-selected="false">
+                                <i class="bi bi-play-circle"></i>Active Ride
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" data-bs-target="#cancelled-rides-tab-pane" role="tab" aria-controls="cancelled-rides-tab-pane" aria-selected="false">
+                                <i class="bi bi-x-circle"></i>Cancel Ride
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <a class="nav-link" data-bs-toggle="tab" data-bs-target="#bookings-tab-pane" role="tab" aria-controls="bookings-tab-pane" aria-selected="false">
                                 <i class="bi bi-bookmark-check-fill"></i>My Bookings
                             </a>
@@ -263,6 +273,94 @@
                         </div>
                     </div>
 
+                    <!-- Active Rides Tab -->
+                    <div class="tab-pane fade" id="active-rides-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Active Rides</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Route</th>
+                                                <th>Vehicle No</th>
+                                                <th>Date & Time</th>
+                                                <th>Seats</th>
+                                                <th>Total Fare</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var booking in Model.Bookings.Where(b => b.Status == "Ongoing"))
+                                            {
+                                                <tr>
+                                                    <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
+                                                    <td>@booking.Ride.Vehicle.LicensePlate</td>
+                                                    <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                                    <td>@booking.BookedSeats</td>
+                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>@booking.Status</td>
+                                                </tr>
+                                            }
+                                            @if (!Model.Bookings.Any(b => b.Status == "Ongoing"))
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No active rides</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cancelled Rides Tab -->
+                    <div class="tab-pane fade" id="cancelled-rides-tab-pane" role="tabpanel" tabindex="0">
+                        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                            <h1 class="h2">Cancelled Rides</h1>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Route</th>
+                                                <th>Vehicle No</th>
+                                                <th>Date & Time</th>
+                                                <th>Seats</th>
+                                                <th>Total Fare</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var booking in Model.Bookings.Where(b => b.Status == "Cancelled"))
+                                            {
+                                                <tr>
+                                                    <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
+                                                    <td>@booking.Ride.Vehicle.LicensePlate</td>
+                                                    <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                                    <td>@booking.BookedSeats</td>
+                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>@booking.Status</td>
+                                                </tr>
+                                            }
+                                            @if (!Model.Bookings.Any(b => b.Status == "Cancelled"))
+                                            {
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No cancelled rides</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- My Bookings Tab -->
                     <div class="tab-pane fade" id="bookings-tab-pane" role="tabpanel" tabindex="0">
                         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -274,12 +372,13 @@
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Pickup - Drop</th>
+                                                <th>Route</th>
                                                 <th>Vehicle No</th>
                                                 <th>Date & Time</th>
+                                                <th>Seats</th>
                                                 <th>Total Fare</th>
                                                 <th>Payment Mode</th>
-                                                <th>Action</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -289,15 +388,16 @@
                                                     <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                                    <td>₹@Model.TotalSpent</td>
+                                                    <td>@booking.BookedSeats</td>
+                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
                                                     <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
-                                                    <td><button class="btn btn-sm btn-outline-danger">Cancel</button></td>
+                                                    <td>@booking.Status</td>
                                                 </tr>
                                             }
                                             @if (!Model.Bookings.Any())
                                             {
                                                 <tr>
-                                                    <td colspan="6" class="text-center text-muted">No bookings found</td>
+                                                    <td colspan="7" class="text-center text-muted">No bookings found</td>
                                                 </tr>
                                             }
                                         </tbody>
