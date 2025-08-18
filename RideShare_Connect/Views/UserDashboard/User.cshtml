@@ -300,7 +300,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>₹@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
                                             }
@@ -344,7 +344,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>₹@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
                                             }
@@ -389,7 +389,7 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>₹@(booking.BookedSeats * booking.Ride.PricePerSeat)</td>
+                                                    <td>₹@((booking.BookedSeats* booking.Ride.PricePerSeat* booking.DistanceKm).ToString("C"))</td>
                                                     <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
                                                     <td>@booking.Status</td>
                                                 </tr>
