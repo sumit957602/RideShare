@@ -81,6 +81,11 @@ namespace RideShare_Connect.Controllers
                         return payment?.PaymentMethod?.CardType ?? "Cash";
                     });
 
+            var activeRidesCount = bookings.Count(b => b.Status == "Ongoing");
+            var cancelledRidesCount = bookings.Count(b => b.Status == "Cancelled");
+            var completedRidesCount = bookings.Count(b => b.Status == "Completed");
+            var totalBookingsCount = bookings.Count;
+
             var model = new UserDashboardViewModel
             {
                 Profile = profile,
@@ -91,7 +96,11 @@ namespace RideShare_Connect.Controllers
                 Bookings = bookings,
                 RecentBookings = bookings.Take(5).ToList(),
                 AvailableRides = availableRides,
-                PaymentModes = paymentModes
+                PaymentModes = paymentModes,
+                ActiveRidesCount = activeRidesCount,
+                CancelledRidesCount = cancelledRidesCount,
+                CompletedRidesCount = completedRidesCount,
+                TotalBookingsCount = totalBookingsCount
             };
 
             return View(model);

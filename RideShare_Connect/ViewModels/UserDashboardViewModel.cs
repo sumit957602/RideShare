@@ -16,5 +16,9 @@ namespace RideShare_Connect.ViewModels
         public List<RideBooking> RecentBookings { get; set; } = new();
         public List<Ride> AvailableRides { get; set; } = new();
         public Dictionary<int, string> PaymentModes { get; set; } = new();
+        public int ActiveRidesCount { get; set; }
+        public int CancelledRidesCount { get; set; }
+        public int CompletedRidesCount { get; set; }
+        public int TotalBookingsCount { get; set; }
     }
 }
