@@ -6,6 +6,7 @@ using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
 using RideShare_Connect.DTOs;
+using RideShare_Connect.Models.PaymentManagement;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -84,6 +85,18 @@ namespace RideShare_Connect.Controllers
             }
             var average = ratings.Count > 0 ? ratings.Average(r => r.Rating) : 0;
 
+            var wallet = await _db.DriverWallets.FirstOrDefaultAsync(w => w.DriverId == userId);
+            var walletBalance = wallet?.Balance ?? 0m;
+            decimal totalEarnings = 0m;
+            if (wallet != null)
+            {
+                totalEarnings = await _db.DriverWalletTransactions
+                    .Where(t => t.DriverWalletId == wallet.Id &&
+                                t.TxnType.ToLower() == "credit" &&
+                                t.Status.ToLower() == "successful")
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0m;
+            }
+
             var viewModel = new DriverDashboardViewModel
             {
                 Driver = driver,
@@ -92,7 +105,9 @@ namespace RideShare_Connect.Controllers
                 CreatedRides = rides,
                 AcceptedRideBookings = acceptedBookings,
                 AverageRating = average,
-                RecentRatings = ratings.Take(5)
+                RecentRatings = ratings.Take(5),
+                WalletBalance = walletBalance,
+                TotalEarnings = totalEarnings
             };
 
             return View(viewModel);
