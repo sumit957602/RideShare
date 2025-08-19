@@ -97,6 +97,14 @@ namespace RideShare_Connect.Controllers
                     .SumAsync(t => (decimal?)t.Amount) ?? 0m;
             }
 
+            // Calculate overview statistics
+            var vehicleCount = vehicles.Count;
+            var createdRidesCount = rides.Count;
+            var acceptedRidesCount = acceptedBookings.Count(b => b.Status == "Pending");
+            var activeRidesCount = acceptedBookings.Count(b => b.Status == "Ongoing");
+            var cancelledRidesCount = acceptedBookings.Count(b => b.Status == "Cancelled");
+            var totalRidesCount = acceptedBookings.Count;
+
             var viewModel = new DriverDashboardViewModel
             {
                 Driver = driver,
@@ -107,7 +115,13 @@ namespace RideShare_Connect.Controllers
                 AverageRating = average,
                 RecentRatings = ratings.Take(5),
                 WalletBalance = walletBalance,
-                TotalEarnings = totalEarnings
+                TotalEarnings = totalEarnings,
+                VehicleCount = vehicleCount,
+                CreatedRidesCount = createdRidesCount,
+                AcceptedRidesCount = acceptedRidesCount,
+                ActiveRidesCount = activeRidesCount,
+                CancelledRidesCount = cancelledRidesCount,
+                TotalRidesCount = totalRidesCount
             };
 
             return View(viewModel);

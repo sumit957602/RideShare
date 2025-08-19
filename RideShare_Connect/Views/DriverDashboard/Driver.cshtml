@@ -114,6 +114,74 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row g-4 mt-1">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-info-subtle text-info me-3"><i class="bi bi-car-front-fill"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.VehicleCount</h5>
+                                                <p class="text-muted mb-0">My Vehicles</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-secondary-subtle text-secondary me-3"><i class="bi bi-list-ul"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.CreatedRidesCount</h5>
+                                                <p class="text-muted mb-0">Created Rides</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-success-subtle text-success me-3"><i class="bi bi-check-circle-fill"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.AcceptedRidesCount</h5>
+                                                <p class="text-muted mb-0">Accepted Rides</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-primary-subtle text-primary me-3"><i class="bi bi-play-circle-fill"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.ActiveRidesCount</h5>
+                                                <p class="text-muted mb-0">Active Rides</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-danger-subtle text-danger me-3"><i class="bi bi-x-circle-fill"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.CancelledRidesCount</h5>
+                                                <p class="text-muted mb-0">Cancelled Rides</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body d-flex align-items-center">
+                                            <div class="icon bg-dark-subtle text-dark me-3"><i class="bi bi-collection"></i></div>
+                                            <div>
+                                                <h5 class="mb-0">@Model.TotalRidesCount</h5>
+                                                <p class="text-muted mb-0">Total Rides</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="v-pills-profile" role="tabpanel">
                             <h4 class="mb-4">Driver Profile</h4>
