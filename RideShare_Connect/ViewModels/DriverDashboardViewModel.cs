@@ -14,5 +14,7 @@ namespace RideShare_Connect.ViewModels
         public IEnumerable<RideBookingDetailsDto> AcceptedRideBookings { get; set; } = new List<RideBookingDetailsDto>();
         public double AverageRating { get; set; }
         public IEnumerable<DriverRating> RecentRatings { get; set; } = new List<DriverRating>();
+        public decimal WalletBalance { get; set; }
+        public decimal TotalEarnings { get; set; }
     }
 }
