@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Top Up Wallet";
+}
+
+<div class="container">
+    <h2>Top Up Wallet</h2>
+    <p>Balance: ₹<span id="wallet-balance">--</span></p>
+    <form id="topup-form">
+        <div class="mb-3">
+            <label for="topup-amount" class="form-label">Amount</label>
+            <input id="topup-amount" type="number" class="form-control" required />
+        </div>
+        <div class="mb-3">
+            <label for="topup-method" class="form-label">Payment Method</label>
+            <select id="topup-method" class="form-select"></select>
+        </div>
+        <button type="submit" class="btn btn-primary">Top Up</button>
+        <a asp-action="Finance" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+
+<script>
+const DriverId = 1;
+
+async function loadBalance() {
+    const res = await fetch(`/api/wallet/balance?DriverId=${DriverId}`);
+    const data = await res.json();
+    document.getElementById('wallet-balance').textContent = (data.balance ?? data.Balance).toFixed(2);
+}
+
+async function loadMethods() {
+    const res = await fetch(`/api/payments/methods?DriverId=${DriverId}`);
+    const data = await res.json();
+    const select = document.getElementById('topup-method');
+    select.innerHTML = '';
+    data.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        const last4 = m.last4 ? ` ****${m.last4}` : '';
+        opt.textContent = `${m.methodType}${last4}`;
+        select.appendChild(opt);
+    });
+}
+
+document.getElementById('topup-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const amount = parseFloat(document.getElementById('topup-amount').value);
+    const paymentMethodId = parseInt(document.getElementById('topup-method').value);
+
+    const processRes = await fetch('/api/payments/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, bookingId: 0, amount, paymentMethodId })
+    });
+
+    if (processRes.ok) {
+        const payment = await processRes.json();
+        await fetch('/api/payments/confirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentId: payment.id, paymentMethodId })
+        });
+
+        await fetch('/api/wallet/add-money', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, amount })
+        });
+
+        document.getElementById('topup-form').reset();
+        await loadBalance();
+    }
+});
+
+loadBalance();
+loadMethods();
+</script>
+

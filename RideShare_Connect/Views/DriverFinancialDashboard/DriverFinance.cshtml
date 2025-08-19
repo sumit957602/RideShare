@@ -1,0 +1,269 @@
+@model RideShare_Connect.ViewModels.FinanceViewModel
+@{
+    ViewData["Title"] = "Payment & Financial";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/finance.css" asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Header & Navbar from Main Site -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fs-4" href="index.html">
+                <i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../Home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../DriverDashboard/Driver">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Payments & Finance</a>
+                    </li>
+                </ul>
+                <div class="dropdown ms-lg-3">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="@Model.Profile?.ProfilePicture" alt="Profile" width="32" height="32" class="rounded-circle me-2">
+                        <strong>@Model.Profile?.FullName</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="../../DriverDashboard/EditProfile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form asp-controller="DriverAccount" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="dropdown-item">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content: Payments & Financial Management -->
+    <main class="flex-grow-1 py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Left Sidebar Navigation -->
+                <div class="col-lg-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Financials</h5>
+                            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                <button class="nav-link active text-start" id="v-pills-wallet-tab" data-bs-toggle="pill" data-bs-target="#v-pills-wallet" type="button" role="tab" aria-controls="v-pills-wallet" aria-selected="true"><i class="bi bi-pie-chart-fill me-2"></i>Financial Dashboard</button>
+                                <button class="nav-link text-start" id="v-pills-history-tab" data-bs-toggle="pill" data-bs-target="#v-pills-history" type="button" role="tab" aria-controls="v-pills-history" aria-selected="false"><i class="bi bi-clock-history me-2"></i>Transaction History</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content Area -->
+                <div class="col-lg-9">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <!-- Wallet & Financial Reports Dashboard Tab -->
+                        <div class="tab-pane fade show active" id="v-pills-wallet" role="tabpanel" aria-labelledby="v-pills-wallet-tab" tabindex="0">
+                            <h4 class="mb-4">Financial Reports Dashboard</h4>
+                            <div class="card wallet-card mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <p class="mb-0 fs-5">Wallet Balance</p>
+                                            <h2 id="wallet-balance" class="display-5 fw-bold mb-0">₹@Model.WalletBalance.ToString("F2")</h2>
+                                        </div>
+                                        <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#addMoneyModal"><i class="bi bi-plus-circle-fill me-2"></i>Add Money</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p class="text-muted mb-1">Total Spent This Month</p>
+                                            <h3 class="fw-bold">₹@Model.TotalSpentThisMonth.ToString("F2")</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p class="text-muted mb-1">Total Saved on Rides</p>
+                                            <h3 class="fw-bold text-success">₹@Model.TotalSavedOnRides.ToString("F2")</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">Recent Transactions</h5>
+                <ul class="list-group list-group-flush">
+                    @if (Model.RecentTransactions.Any())
+                    {
+                        foreach (var txn in Model.RecentTransactions)
+                        {
+                            var isCredit = txn.TxnType?.ToLower() == "credit";
+                            var isSuccessful = txn.Status?.ToLower() == "successful";
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>@txn.TxnDate.ToString("yyyy-MM-dd")</span>
+                                @if (isSuccessful)
+                                {
+                                    <span class="@(isCredit ? "text-success" : "text-danger") fw-bold">
+                                         @txn.PaymentMethod @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold">@txn.Status @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")</span>
+                                }
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">No recent transactions.</li>
+                    }
+                </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transaction History Tab -->
+                        <div class="tab-pane fade" id="v-pills-history" role="tabpanel" aria-labelledby="v-pills-history-tab" tabindex="0">
+                            <h4 class="mb-4">Full Transaction History</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date</th>
+                            <th>Transction Status</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.TransactionHistory.Any())
+                        {
+                            foreach (var txn in Model.TransactionHistory)
+                            {
+                                var isCredit = txn.TxnType?.ToLower() == "credit";
+                                var isSuccessful = txn.Status?.ToLower() == "successful";
+                                <tr>
+                                    <td>@txn.TransactionId</td>
+                                    <td>@txn.TxnDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@(isSuccessful ? txn.TxnType : txn.Status)</td>
+                                    <td class="@(isSuccessful ? (isCredit ? "text-success" : "text-danger") : "")">
+                                        @if (isSuccessful)
+                                        {
+                                            @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                        }
+                                        else
+                                        {
+                                            @(isCredit ? "+" : "-")@Html.Raw("&#8377;")@txn.Amount.ToString("F2")
+                                        }
+                                    </td>
+                                    <td>@txn.Description</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No transactions found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer from Main Site -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4"><h5><i class="bi bi-car-front-fill me-2" style="color: var(--secondary-color);"></i>RideShare Connect</h5><p>Your trusted platform for safe, comfortable, and affordable shared rides. Building a community, one ride at a time.</p></div>
+                <div class="col-lg-2 col-md-4 col-6"><h5>Quick Links</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">About Us</a></li><li class="mb-2"><a href="#">Contact</a></li></ul></div>
+                <div class="col-lg-3 col-md-4 col-6"><h5>Legal</h5><ul class="list-unstyled"><li class="mb-2"><a href="#">Privacy Policy</a></li><li class="mb-2"><a href="#">Terms of Service</a></li></ul></div>
+                <div class="col-lg-3 col-md-4"><h5>Contact Us</h5><ul class="list-unstyled"><li class="mb-2"><i class="bi bi-geo-alt-fill me-2"></i> 123 Connect Ave, Patna</li><li class="mb-2"><i class="bi bi-envelope-fill me-2"></i> contact@rideshareconnect.com</li></ul></div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.2);"><div class="text-center"><p>&copy; 2025 RideShare Connect. All Rights Reserved.</p></div>
+        </div>
+    </footer>
+
+    <!-- Add Money Modal -->
+    <div class="modal fade" id="addMoneyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Money to Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="addAmount" class="form-label">Amount (₹)</label>
+                            <input type="number" class="form-control" id="addAmount" placeholder="e.g., 500">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" id="proceedPayBtn" class="btn btn-primary">Proceed to Pay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const userId = @Model.Profile?.UserId ?? 0;
+        const razorpayKey = '@ViewBag.RazorpayKey';
+        document.getElementById('proceedPayBtn').addEventListener('click', () => {
+            const amountInput = document.getElementById('addAmount');
+            const amount = parseFloat(amountInput.value);
+            if (!amount || amount <= 0) {
+                return;
+            }
+
+            const options = {
+                key: razorpayKey,
+                amount: Math.round(amount * 100), // convert to paise
+                currency: 'INR',
+                name: 'RideShare Connect',
+                description: 'Wallet top-up',
+                notes: { userId: userId.toString() },
+                handler: function (response) {
+                    alert('Payment successful: ' + response.razorpay_payment_id);
+                },
+                theme: {
+                    color: '#3399cc'
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+    </script>
+</body>
+</html>
