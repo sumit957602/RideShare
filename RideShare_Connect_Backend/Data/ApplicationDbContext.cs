@@ -41,6 +41,7 @@ namespace RideShare_Connect.Api.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<DriverWallet> DriverWallets { get; set; }
         public DbSet<DriverWalletTransaction> DriverWalletTransactions { get; set; }
+        public DbSet<DriverEarning> DriverEarnings { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
         public DbSet<UserTransactionSummary> UserTransactionSummaries { get; set; }
