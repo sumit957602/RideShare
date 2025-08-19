@@ -10,6 +10,7 @@ namespace RideShare_Connect.ViewModels
         public UserProfile Profile { get; set; }
         public int RidesBooked { get; set; }
         public decimal TotalSpent { get; set; }
+        public decimal WalletBalance { get; set; }
         public double Rating { get; set; }
         public List<RideBooking> Bookings { get; set; } = new();
         public List<RideBooking> RecentBookings { get; set; } = new();

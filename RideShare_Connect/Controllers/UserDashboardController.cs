@@ -52,6 +52,9 @@ namespace RideShare_Connect.Controllers
 
             var totalSpent = bookings.Sum(rb => rb.BookedSeats * rb.Ride.PricePerSeat);
 
+            var wallet = _db.Wallets.FirstOrDefault(w => w.UserId == userId);
+            var walletBalance = wallet?.Balance ?? 0;
+
             var rating = _db.DriverRatings
                 .Where(r => r.DriverId == userId)
                 .Average(r => (double?)r.Rating) ?? 0;
@@ -83,6 +86,7 @@ namespace RideShare_Connect.Controllers
                 Profile = profile,
                 RidesBooked = bookings.Count,
                 TotalSpent = totalSpent,
+                WalletBalance = walletBalance,
                 Rating = rating,
                 Bookings = bookings,
                 RecentBookings = bookings.Take(5).ToList(),
