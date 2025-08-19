@@ -22,11 +22,12 @@ namespace RideShare_Connect.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    // [Authorize] // If you uncomment this, you'll need [AllowAnonymous] on Register and Login
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly IConfiguration _configuration; 
+        private readonly IConfiguration _configuration; // Inject IConfiguration
         private readonly IWebHostEnvironment _environment;
         private readonly IEmailService _emailService;
         private readonly IDistributedCache _cache;
@@ -34,7 +35,7 @@ namespace RideShare_Connect.Api.Controllers
         {
             _context = context;
             _passwordHasher = passwordHasher;
-            _configuration = configuration; 
+            _configuration = configuration; // Initialize IConfiguration
             _environment = environment;
             _emailService = emailService;
             _cache = cache;
@@ -46,7 +47,9 @@ namespace RideShare_Connect.Api.Controllers
             public string Otp { get; set; }
         }
 
-     
+        // GET: api/Users
+        // This endpoint would typically require authorization to list all users
+        // [Authorize] // Uncomment this to protect this endpoint
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserSummaryDto>>> GetUsers()
         {
@@ -60,6 +63,9 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(users);
         }
 
+        // GET: api/Users/5
+        // This endpoint would typically require authorization for specific user data
+        // [Authorize] // Uncomment this to protect this endpoint
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUser(int id)
         {
@@ -123,7 +129,8 @@ namespace RideShare_Connect.Api.Controllers
             return Ok(new { Id = registrationId, Message = "An OTP has been sent to your email for verification." });
         }
 
-       
+        // POST: api/Users/register
+        // This endpoint should *not* require authorization as new users won't have a token.
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> RegisterUser(UserRegisterVerifyDto verificationDto)
@@ -188,14 +195,16 @@ namespace RideShare_Connect.Api.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = userDto.Id }, userDto);
         }
 
-        [AllowAnonymous] 
+        // POST: api/Users/login
+        // This endpoint should also *not* require authorization.
+        [AllowAnonymous] // <--- IMPORTANT: Allow unauthenticated access
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login(LoginDto loginDto)
         {
             var normalizedEmail = loginDto.Email?.Trim().ToLower();
 
             var user = await _context.Users
-                                     .Include(u => u.UserProfile)
+                                     .Include(u => u.UserProfile) // Include UserProfile for FullName
                                      .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
 
             if (user == null || string.IsNullOrEmpty(user.PasswordHash))
@@ -210,7 +219,7 @@ namespace RideShare_Connect.Api.Controllers
                 return Unauthorized("Invalid credentials.");
             }
 
-           
+            // --- Generate JWT Token ---
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]);
 
@@ -233,7 +242,7 @@ namespace RideShare_Connect.Api.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
-         
+            // --- End JWT Token Generation ---
 
             var refreshToken = new RefreshToken
             {

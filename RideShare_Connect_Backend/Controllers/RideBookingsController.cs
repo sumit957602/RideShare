@@ -52,7 +52,7 @@ namespace RideShare_Connect.Api.Controllers
                     Destination = rb.Ride.Destination,
                     DepartureTime = rb.Ride.DepartureTime,
                     PricePerSeat = rb.Ride.PricePerSeat,
-                    TotalFare = rb.Ride.PricePerSeat * rb.BookedSeats 
+                    TotalFare = rb.Ride.PricePerSeat * rb.BookedSeats * rb.DistanceKm
                 })
                 .ToListAsync();
 
@@ -141,7 +141,7 @@ namespace RideShare_Connect.Api.Controllers
             };
             _context.RideBookings.Add(booking);
 
-            var totalFare = ride.PricePerSeat * dto.NumPersons ;
+            var totalFare = ride.PricePerSeat * dto.NumPersons * dto.DistanceKm;
 
             Wallet? wallet = null;
             if (dto.PaymentMode == "Wallet")

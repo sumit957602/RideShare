@@ -1,8 +1,6 @@
 ﻿
 @model RideShare_Connect.ViewModels.UserDashboardViewModel
 @using System.Linq
-@using RideShare_Connect.Models.RideManagement
-
 
 @{
     ViewData["Title"] = "User Dashboard";
@@ -139,19 +137,17 @@
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-3">
                                 <div class="stat-card d-flex align-items-center">
-                                    <div class="icon bg-secondary-subtle text-secondary me-3">
-                                        <i class="bi bi-bookmark-check-fill"></i>
+                                    <div class="icon bg-success-subtle text-success me-3">
+                                        <i class="bi bi-cash-stack"></i>
                                     </div>
                                     <div>
-                                        <h5 class="mb-0">@Model.TotalBookingsCount</h5>
-                                        <p class="text-muted mb-0">Total Bookings</p>
+                                        <h5 class="mb-0">₹@Model.TotalSpent</h5>
+                                        <p class="text-muted mb-0">Total Spent</p>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="col-md-3">
                                 <div class="stat-card d-flex align-items-center">
                                     <div class="icon bg-warning-subtle text-warning me-3">
@@ -198,7 +194,17 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="col-md-3">
+                                <div class="stat-card d-flex align-items-center">
+                                    <div class="icon bg-secondary-subtle text-secondary me-3">
+                                        <i class="bi bi-bookmark-check-fill"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">@Model.TotalBookingsCount</h5>
+                                        <p class="text-muted mb-0">Total Bookings</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <h4>Recent Activity</h4>
                         <div class="card">
@@ -309,11 +315,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 text-center">
-                                                    <h4 class="mb-0 text-primary">
-                                                        @((ride.PricePerSeat * ride.DistanceKm).ToString("C"))
-
-
-                                                    </h4>
+                                                    <h4 class="mb-0 text-primary">₹@ride.PricePerSeat</h4>
                                                     <span class="badge bg-success-subtle text-success-emphasis rounded-pill">@ride.AvailableSeats Seats Left</span>
                                                 </div>
                                                 <div class="col-md-2 text-end">
@@ -438,7 +440,6 @@
                                                 <th>Seats</th>
                                                 <th>Total Fare</th>
                                                 <th>Status</th>
-                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -449,18 +450,8 @@
                                                     <td>@booking.Ride.Vehicle.LicensePlate</td>
                                                     <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
                                                     <td>@booking.BookedSeats</td>
-                                                    <td>@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.Ride.DistanceKm).ToString("C"))</td>
+                                                    <td>@((booking.BookedSeats * booking.Ride.PricePerSeat * booking.DistanceKm).ToString("C"))</td>
                                                     <td>@booking.Status</td>
-                                                    <td>
-                                                        <a asp-controller="Review"
-                                                           asp-action="Review"
-                                                           asp-route-rideId="@booking.Ride.Id"
-                                                           asp-route-driverId="@booking.Ride.DriverId"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            Give a review
-                                                        </a>
-
-                                                    </td>
                                                 </tr>
                                             }
                                             @if (!Model.Bookings.Any(b => b.Status == "Completed"))
@@ -479,123 +470,40 @@
                     <!-- My Bookings Tab -->
                     <div class="tab-pane fade" id="bookings-tab-pane" role="tabpanel" tabindex="0">
                         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                            <h1 class="h2">My Bookings</h1>
+                            <h1 class="h2">Total Bookings</h1>
                         </div>
-
-                        @{
-        var scheduled = (Model.Bookings ?? Enumerable.Empty<RideBooking>())
-        .Where(b => string.Equals(b.Status, "Pending", StringComparison.OrdinalIgnoreCase))
-        .OrderByDescending(b => b.BookingTime)
-        .ToList();
-
-        var completed = (Model.Bookings ?? Enumerable.Empty<RideBooking>())
-        .Where(b => string.Equals(b.Status, "Completed", StringComparison.OrdinalIgnoreCase))
-        .OrderByDescending(b => b.BookingTime)
-        .ToList();
-                        }
-
-
-                        <!-- Scheduled Rides -->
-                        <h5 class="mb-3">Scheduled</h5>
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Pickup - Drop</th>
-                                                <th>Vehicle No</th>
-                                                <th>Date & Time</th>
-                                                <th>Total Fare</th>
-                                                <th>Payment Mode</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @if (scheduled.Any())
-                        {
-                                            @foreach (var booking in scheduled)
-                            {
-                                            <tr>
-                                                <td>
-                                                    <strong>
-                                                        @booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation
-                                                    </strong>
-                                                </td>
-                                                <td>@booking.Ride.Vehicle.LicensePlate</td>
-                                                <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                                        <td>
-                                                            @((booking.Ride.PricePerSeat * booking.Ride.DistanceKm).ToString("C"))</td>
-                                                <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-danger">Cancel</button>
-                                                </td>
-                                            </tr>
-                            }
-                        }
-                        else
-                        {
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted">No scheduled bookings found</td>
-                                            </tr>
-                        }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Completed Rides -->
-                        <h5 class="mb-3">Completed</h5>
                         <div class="card">
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Pickup - Drop</th>
+                                                <th>Route</th>
                                                 <th>Vehicle No</th>
                                                 <th>Date & Time</th>
+                                                <th>Seats</th>
                                                 <th>Total Fare</th>
-                                                <th>Payment Mode</th>
-                                                <th>Action</th>
+                                                <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @if (completed.Any())
-                        {
-                                            @foreach (var booking in completed)
-                            {
-                                            <tr>
-                                                <td>
-                                                    <strong>
-                                                        @booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation
-                                                    </strong>
-                                                </td>
-                                                <td>@booking.Ride.Vehicle.LicensePlate</td>
-                                                <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
-                                                        <td>
-                                                            @((booking.Ride.PricePerSeat * booking.Ride.DistanceKm).ToString("C"))</td>
-                                                <td>@(Model.PaymentModes.ContainsKey(booking.Id) ? Model.PaymentModes[booking.Id] : "N/A")</td>
-                                                <td>
-                                                    <a asp-controller="Review"
-                                                       asp-action="Review"
-                                                       asp-route-rideId="@booking.Ride.Id"
-                                                       asp-route-driverId="@booking.Ride.DriverId"
-                                                       class="btn btn-sm btn-outline-primary">
-                                                        Give a review
-                                                    </a>
-
-                                                </td>
-                                            </tr>
-                            }
-                        }
-                        else
-                        {
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted">No completed bookings found</td>
-                                            </tr>
-                        }
+                                            @foreach (var booking in Model.Bookings)
+                                            {
+                                                <tr>
+                                                    <td><strong>@booking.PickupLocation <i class="bi bi-arrow-right"></i> @booking.DropLocation</strong></td>
+                                                    <td>@booking.Ride.Vehicle.LicensePlate</td>
+                                                    <td>@booking.Ride.DepartureTime.ToString("dd MMM yyyy, hh:mm tt")</td>
+                                                    <td>@booking.BookedSeats</td>
+                                                    <td>@((booking.BookedSeats* booking.Ride.PricePerSeat* booking.DistanceKm).ToString("C"))</td>
+                                                    <td>@booking.Status</td>
+                                                </tr>
+                                            }
+                                            @if (!Model.Bookings.Any())
+                                            {
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No bookings found</td>
+                                                </tr>
+                                            }
                                         </tbody>
                                     </table>
                                 </div>
