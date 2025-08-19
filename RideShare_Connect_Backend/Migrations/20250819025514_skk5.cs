@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace RideShare_Connect.Migrations
+namespace RideShare_Connect_Backend.Migrations
 {
     /// <inheritdoc />
     public partial class skk5 : Migration
@@ -74,22 +74,6 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AdminId = table.Column<int>(type: "int", nullable: false),
-                    Action = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LogDescription = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -108,25 +92,44 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditTrails",
+                name: "DriverEarnings",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    AdminId = table.Column<int>(type: "int", nullable: false),
-                    EntityType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    EntityId = table.Column<int>(type: "int", nullable: false),
-                    ChangeSummary = table.Column<string>(type: "nvarchar(2048)", maxLength: 2048, nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    TotalEarnings = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuditTrails", x => x.Id);
+                    table.PrimaryKey("PK_DriverEarnings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AuditTrails_Admins_AdminId",
-                        column: x => x.AdminId,
-                        principalTable: "Admins",
-                        principalColumn: "Id",
+                        name: "FK_DriverEarnings_Driver_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Driver",
+                        principalColumn: "DriverId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DriverPasswordResetTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriverPasswordResetTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DriverPasswordResetTokens_Driver_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Driver",
+                        principalColumn: "DriverId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -178,6 +181,27 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DriverWallets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DriverId = table.Column<int>(type: "int", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriverWallets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DriverWallets_Driver_DriverId",
+                        column: x => x.DriverId,
+                        principalTable: "Driver",
+                        principalColumn: "DriverId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Vehicles",
                 columns: table => new
                 {
@@ -199,11 +223,11 @@ namespace RideShare_Connect.Migrations
                         column: x => x.DriverId,
                         principalTable: "Driver",
                         principalColumn: "DriverId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LoginHistories",
+                name: "LoginHistory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -215,9 +239,30 @@ namespace RideShare_Connect.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LoginHistories", x => x.Id);
+                    table.PrimaryKey("PK_LoginHistory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LoginHistories_Users_UserId",
+                        name: "FK_LoginHistory_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -273,7 +318,7 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RefreshToken",
+                name: "RefreshTokens",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -285,9 +330,9 @@ namespace RideShare_Connect.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RefreshToken", x => x.Id);
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RefreshToken_Users_UserId",
+                        name: "FK_RefreshTokens_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -339,19 +384,18 @@ namespace RideShare_Connect.Migrations
                         name: "FK_UserReports_Admins_HandledByAdminId",
                         column: x => x.HandledByAdminId,
                         principalTable: "Admins",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_UserReports_Users_ReportedUserId",
                         column: x => x.ReportedUserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_UserReports_Users_ReportingUserId",
                         column: x => x.ReportingUserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -417,6 +461,32 @@ namespace RideShare_Connect.Migrations
                         name: "FK_Wallets_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DriverWalletTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DriverWalletId = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    TxnType = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    TxnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DriverWalletTransactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DriverWalletTransactions_DriverWallets_DriverWalletId",
+                        column: x => x.DriverWalletId,
+                        principalTable: "DriverWallets",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -627,35 +697,42 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DocumentReminders",
+                name: "UserTransactionSummaries",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    TransactionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DocumentId = table.Column<int>(type: "int", nullable: false),
+                    RideId = table.Column<int>(type: "int", nullable: false),
                     DriverId = table.Column<int>(type: "int", nullable: false),
-                    ReminderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReminderType = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalTransactionAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DocumentReminders", x => x.Id);
+                    table.PrimaryKey("PK_UserTransactionSummaries", x => x.TransactionId);
                     table.ForeignKey(
-                        name: "FK_DocumentReminders_Driver_DriverId",
+                        name: "FK_UserTransactionSummaries_Driver_DriverId",
                         column: x => x.DriverId,
                         principalTable: "Driver",
                         principalColumn: "DriverId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_DocumentReminders_VehicleDocuments_DocumentId",
-                        column: x => x.DocumentId,
-                        principalTable: "VehicleDocuments",
+                        name: "FK_UserTransactionSummaries_Rides_RideId",
+                        column: x => x.RideId,
+                        principalTable: "Rides",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserTransactionSummaries_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "BookingHistories",
+                name: "BookingHistory",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -666,9 +743,9 @@ namespace RideShare_Connect.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookingHistories", x => x.Id);
+                    table.PrimaryKey("PK_BookingHistory", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BookingHistories_RideBookings_BookingId",
+                        name: "FK_BookingHistory_RideBookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "RideBookings",
                         principalColumn: "Id",
@@ -707,6 +784,7 @@ namespace RideShare_Connect.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     BookingId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMode = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     PaymentMethodId = table.Column<int>(type: "int", nullable: true),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
@@ -719,19 +797,20 @@ namespace RideShare_Connect.Migrations
                         name: "FK_Payments_PaymentMethods_PaymentMethodId",
                         column: x => x.PaymentMethodId,
                         principalTable: "PaymentMethods",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Payments_RideBookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "RideBookings",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Payments_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -758,13 +837,8 @@ namespace RideShare_Connect.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditTrails_AdminId",
-                table: "AuditTrails",
-                column: "AdminId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BookingHistories_BookingId",
-                table: "BookingHistories",
+                name: "IX_BookingHistory_BookingId",
+                table: "BookingHistory",
                 column: "BookingId");
 
             migrationBuilder.CreateIndex(
@@ -773,13 +847,13 @@ namespace RideShare_Connect.Migrations
                 column: "BookingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentReminders_DocumentId",
-                table: "DocumentReminders",
-                column: "DocumentId");
+                name: "IX_DriverEarnings_DriverId",
+                table: "DriverEarnings",
+                column: "DriverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DocumentReminders_DriverId",
-                table: "DocumentReminders",
+                name: "IX_DriverPasswordResetTokens_DriverId",
+                table: "DriverPasswordResetTokens",
                 column: "DriverId");
 
             migrationBuilder.CreateIndex(
@@ -794,14 +868,29 @@ namespace RideShare_Connect.Migrations
                 column: "DriverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LoginHistories_UserId",
-                table: "LoginHistories",
+                name: "IX_DriverWallets_DriverId",
+                table: "DriverWallets",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DriverWalletTransactions_DriverWalletId",
+                table: "DriverWalletTransactions",
+                column: "DriverWalletId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LoginHistory_UserId",
+                table: "LoginHistory",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MaintenanceRecords_VehicleId",
                 table: "MaintenanceRecords",
                 column: "VehicleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PasswordResetTokens_UserId",
@@ -829,8 +918,8 @@ namespace RideShare_Connect.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefreshToken_UserId",
-                table: "RefreshToken",
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -901,6 +990,21 @@ namespace RideShare_Connect.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserTransactionSummaries_DriverId",
+                table: "UserTransactionSummaries",
+                column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserTransactionSummaries_RideId",
+                table: "UserTransactionSummaries",
+                column: "RideId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserTransactionSummaries_UserId",
+                table: "UserTransactionSummaries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserVerifications_UserId",
                 table: "UserVerifications",
                 column: "UserId");
@@ -933,16 +1037,16 @@ namespace RideShare_Connect.Migrations
                 name: "Analytics");
 
             migrationBuilder.DropTable(
-                name: "AuditTrails");
-
-            migrationBuilder.DropTable(
-                name: "BookingHistories");
+                name: "BookingHistory");
 
             migrationBuilder.DropTable(
                 name: "Commissions");
 
             migrationBuilder.DropTable(
-                name: "DocumentReminders");
+                name: "DriverEarnings");
+
+            migrationBuilder.DropTable(
+                name: "DriverPasswordResetTokens");
 
             migrationBuilder.DropTable(
                 name: "DriverProfiles");
@@ -951,16 +1055,22 @@ namespace RideShare_Connect.Migrations
                 name: "DriverRatings");
 
             migrationBuilder.DropTable(
-                name: "LoginHistories");
+                name: "DriverWalletTransactions");
+
+            migrationBuilder.DropTable(
+                name: "LoginHistory");
 
             migrationBuilder.DropTable(
                 name: "MaintenanceRecords");
 
             migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
                 name: "PasswordResetTokens");
 
             migrationBuilder.DropTable(
-                name: "RefreshToken");
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "Refunds");
@@ -978,9 +1088,6 @@ namespace RideShare_Connect.Migrations
                 name: "SystemConfigurations");
 
             migrationBuilder.DropTable(
-                name: "SystemLogs");
-
-            migrationBuilder.DropTable(
                 name: "UserProfiles");
 
             migrationBuilder.DropTable(
@@ -990,13 +1097,19 @@ namespace RideShare_Connect.Migrations
                 name: "UserSettings");
 
             migrationBuilder.DropTable(
+                name: "UserTransactionSummaries");
+
+            migrationBuilder.DropTable(
                 name: "UserVerifications");
+
+            migrationBuilder.DropTable(
+                name: "VehicleDocuments");
 
             migrationBuilder.DropTable(
                 name: "WalletTransactions");
 
             migrationBuilder.DropTable(
-                name: "VehicleDocuments");
+                name: "DriverWallets");
 
             migrationBuilder.DropTable(
                 name: "Payments");
