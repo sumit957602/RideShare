@@ -274,7 +274,7 @@ namespace RideShare_Connect.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-
+                    HttpContext.Session.SetString("jwt", authResponse.Token);
                     // --- Store the JWT token and user claims in a cookie for MVC Authentication ---
                     var claims = new List<Claim>
                     {

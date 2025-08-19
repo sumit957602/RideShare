@@ -1,0 +1,105 @@
+﻿@model RideShare_Connect.ViewModels.SubmitDriverRatingVm
+@{
+    ViewData["Title"] = "Rate your driver";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Rate @Model.DriverName</h5>
+                    <small class="text-muted">
+                        @Model.From → @Model.To
+                        @if (Model.DepartureTime.HasValue)
+                        {
+                            <text> • @Model.DepartureTime.Value.ToString("g")</text>
+                        }
+                    </small>
+                </div>
+
+                <div class="card-body">
+                    <form asp-controller="Review" asp-action="Review" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <input type="hidden" asp-for="RideId" />
+                        <input type="hidden" asp-for="DriverId" />
+
+                        <!-- Rating (stars + hidden field) -->
+                        <div class="mb-3">
+                            <label class="form-label">Your Rating</label>
+                            <div id="starWrap" class="d-flex align-items-center gap-1" style="font-size:1.5rem;cursor:pointer;">
+                                <span data-val="1" class="star">&#9734;</span>
+                                <span data-val="2" class="star">&#9734;</span>
+                                <span data-val="3" class="star">&#9734;</span>
+                                <span data-val="4" class="star">&#9734;</span>
+                                <span data-val="5" class="star">&#9734;</span>
+                            </div>
+                            <input type="hidden" asp-for="Rating" />
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <!-- Review text -->
+                        <div class="mb-3">
+                            <label asp-for="Review" class="form-label">Write a short review (optional)</label>
+                            <textarea asp-for="Review" class="form-control" rows="5" placeholder="Tell others about your ride experience..."></textarea>
+                            <span asp-validation-for="Review" class="text-danger"></span>
+                            <div class="form-text text-end">
+                                <span id="charCount">0</span>/1000
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="UserDashboard" asp-action="User" class="btn btn-outline-secondary">Back</a>
+                            <button type="submit" class="btn btn-primary">Submit review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (TempData["Toast"] is string toast && !string.IsNullOrWhiteSpace(toast))
+            {
+                <div class="alert alert-success mt-3">@toast</div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const stars = document.querySelectorAll('#starWrap .star');
+            const ratingField = document.querySelector('input[name="Rating"]');
+            const reviewBox = document.getElementById('@Html.IdFor(m => m.Review)');
+            const charCount = document.getElementById('charCount');
+
+            const fillStars = (n) => {
+                stars.forEach((s, i) => {
+                    s.textContent = (i < n) ? '★' : '☆';
+                });
+            };
+
+            // initial fill (if model has rating)
+            const initial = parseInt(ratingField.value || '0', 10);
+            if (initial > 0) fillStars(initial);
+
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', () => fillStars(parseInt(star.dataset.val, 10)));
+                star.addEventListener('mouseleave', () => fillStars(parseInt(ratingField.value || '0', 10)));
+                star.addEventListener('click', () => {
+                    ratingField.value = star.dataset.val;
+                    fillStars(parseInt(ratingField.value, 10));
+                });
+            });
+
+            if (reviewBox && charCount) {
+                const updateCount = () => { charCount.textContent = reviewBox.value.length; };
+                reviewBox.addEventListener('input', updateCount);
+                updateCount();
+            }
+        })();
+    </script>
+}

@@ -22,7 +22,7 @@
                 <p><strong>Seats:</strong> @Model.BookedSeats</p>
                 <p><strong>Pickup:</strong> @Model.PickupLocation</p>
                 <p><strong>Drop:</strong> @Model.DropLocation</p>
-                <p><strong>Total Fare:</strong> @( (Model.BookedSeats * Model.PricePerSeat * Model.DistanceKm).ToString("C") )</p>
+                <p><strong>Total Fare:</strong> @( (Model.BookedSeats * Model.PricePerSeat).ToString("C") )</p>
             </div>
         </div>
         <form asp-action="CompleteRide" method="post">

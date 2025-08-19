@@ -45,8 +45,8 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label for="totalFare" class="form-label">Total Fare</label>
-                <input type="text" id="totalFare" class="form-control" readonly />
+                <label hidden for="totalFare" class="form-label">Total Fare</label>
+                <input hidden type="text" id="totalFare" class="form-control" readonly />
             </div>
             <div class="col-12">
                 <div id="map"></div>
@@ -157,7 +157,7 @@
                 if (paymentMode === 'Razor Pay') {
                     const options = {
                         key: razorpayKey,
-                        amount: Math.round(amount * 100),
+                        amount: Math.round(amount),
                         currency: 'INR',
                         name: 'RideShare Connect',
                         description: 'Ride payment',

@@ -62,7 +62,7 @@ namespace RideShare_Connect.Controllers
             var availableRides = _db.Rides
                 .Include(r => r.Driver)
                 .Include(r => r.Vehicle)
-                .Where(r => r.AvailableSeats > 0 && r.DepartureTime >= DateTime.Now)
+                .Where(r => r.AvailableSeats > 0 && r.DepartureTime >= DateTime.Now && r.Status!="Completed")
                 .OrderBy(r => r.DepartureTime)
                 .ToList();
 
