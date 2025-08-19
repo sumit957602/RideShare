@@ -16,5 +16,13 @@ namespace RideShare_Connect.ViewModels
         public IEnumerable<DriverRating> RecentRatings { get; set; } = new List<DriverRating>();
         public decimal WalletBalance { get; set; }
         public decimal TotalEarnings { get; set; }
+
+        // Overview statistics
+        public int VehicleCount { get; set; }
+        public int CreatedRidesCount { get; set; }
+        public int AcceptedRidesCount { get; set; }
+        public int ActiveRidesCount { get; set; }
+        public int CancelledRidesCount { get; set; }
+        public int TotalRidesCount { get; set; }
     }
 }
