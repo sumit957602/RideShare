@@ -3,21 +3,18 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using RideShare_Connect.DTOs;
 using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Collections.Generic;
+using RideShare_Connect.Services;
 
 namespace RideShare_Connect.Controllers
 {
     public class DriverAccountController : Controller
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IDriverAccountService _driverAccountService;
         private readonly ILogger<DriverAccountController> _logger;
-        public DriverAccountController(IHttpClientFactory httpClientFactory, ILogger<DriverAccountController> logger)
+        public DriverAccountController(IDriverAccountService driverAccountService, ILogger<DriverAccountController> logger)
         {
-            _httpClientFactory = httpClientFactory;
+            _driverAccountService = driverAccountService;
             _logger = logger;
         }
 
@@ -35,35 +32,24 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
-            var formData = new MultipartFormDataContent();
-            formData.Add(new StringContent(model.Email), "Email");
-            if (!string.IsNullOrEmpty(model.PhoneNumber))
-                formData.Add(new StringContent(model.PhoneNumber), "PhoneNumber");
-            formData.Add(new StringContent(model.Password), "Password");
-            formData.Add(new StringContent(model.ConfirmPassword), "ConfirmPassword");
-            formData.Add(new StringContent(model.FullName), "FullName");
-            formData.Add(new StringContent(model.LicenseNumber), "LicenseNumber");
-            formData.Add(new StringContent(model.DrivingExperienceYears.ToString()), "DrivingExperienceYears");
-            formData.Add(new StringContent(model.DOB.ToString("o")), "DOB");
             try
             {
-                var response = await httpClient.PostAsync("api/drivers/register", formData);
-                if (response.IsSuccessStatusCode)
-                {
-                    TempData["SuccessMessage"] = "Driver registered successfully! You can now log in.";
-                    return RedirectToAction("Login");
-                }
-                var errorContent = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"API Error: {response.StatusCode} - {errorContent}");
-                _logger.LogError("Driver registration failed for {Email}: {Status} - {Error}", model.Email, response.StatusCode, errorContent);
+                await _driverAccountService.RegisterAsync(model);
+                TempData["SuccessMessage"] = "Driver registered successfully! You can now log in.";
+                return RedirectToAction("Login");
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
             {
-                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
-                _logger.LogError(ex, "HTTP request error during driver registration for {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, ex.Message);
+                _logger.LogWarning(ex, "Driver registration failed for {Email}", model.Email);
+                return View(model);
             }
-            return View(model);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while registering.");
+                _logger.LogError(ex, "Unexpected error during driver registration for {Email}", model.Email);
+                return View(model);
+            }
         }
 
         public IActionResult Login()
@@ -80,59 +66,41 @@ namespace RideShare_Connect.Controllers
             {
                 return View(model);
             }
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                var jsonContent = new StringContent(JsonSerializer.Serialize(model), Encoding.UTF8, "application/json");
-                var response = await httpClient.PostAsync("api/drivers/login", jsonContent);
-                if (response.IsSuccessStatusCode)
+                var authResponse = await _driverAccountService.LoginAsync(model);
+                var claims = new List<Claim>
                 {
-                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-                    if (authResponse == null)
-                    {
-                        ModelState.AddModelError(string.Empty, "Invalid response from server.");
-                    }
-                    else
-                    {
-                        var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
-                            new Claim(ClaimTypes.Email, authResponse.Email),
-                            new Claim("Token", authResponse.Token),
-                            new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver")
-                        };
-                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var authProperties = new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
-                        };
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
-                        if (returnUrl != null && Url.IsLocalUrl(returnUrl))
-                        {
-                            return Redirect(returnUrl);
-                        }
-                        return RedirectToAction("Driver", "DriverDashboard");
-                    }
-                }
-                else
+                    new Claim(ClaimTypes.NameIdentifier, authResponse.UserId.ToString()),
+                    new Claim(ClaimTypes.Email, authResponse.Email),
+                    new Claim("Token", authResponse.Token),
+                    new Claim(ClaimTypes.Role, authResponse.UserType ?? "Driver")
+                };
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    ModelState.AddModelError(string.Empty, $"Login failed: {response.StatusCode} - {errorContent}");
-                    _logger.LogError("Driver login failed for {Email}: {Status} - {Error}", model.Email, response.StatusCode, errorContent);
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
+                };
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                if (returnUrl != null && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
                 }
+                return RedirectToAction("Driver", "DriverDashboard");
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
             {
-                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
-                _logger.LogError(ex, "HTTP request error during driver login for {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, ex.Message);
+                _logger.LogWarning(ex, "Driver login failed for {Email}", model.Email);
+                return View(model);
             }
-            catch (JsonException ex)
+            catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, $"Error parsing API response: {ex.Message}");
-                _logger.LogError(ex, "JSON parsing error during driver login for {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while logging in.");
+                _logger.LogError(ex, "Unexpected error during driver login for {Email}", model.Email);
+                return View(model);
             }
-            return View(model);
         }
 
         public IActionResult ForgotPassword()
@@ -149,25 +117,18 @@ namespace RideShare_Connect.Controllers
                 return View(dto);
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                // Step 1: Request OTP for password reset
-                var response = await httpClient.PostAsJsonAsync("api/drivers/forgot-password", dto);
-                if (response.IsSuccessStatusCode)
-                {
-                    TempData["SuccessMessage"] = "A password reset OTP has been sent to your email. Please check your inbox to continue.";
-                    TempData["UserEmailForReset"] = dto.Email; // Store email to pass to the next view
-                    return RedirectToAction("ResetPassword");
-                }
-                var error = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Error: {error}");
+                await _driverAccountService.ForgotPasswordAsync(dto);
+                TempData["SuccessMessage"] = "A password reset OTP has been sent to your email. Please check your inbox to continue.";
+                TempData["UserEmailForReset"] = dto.Email;
+                return RedirectToAction("ResetPassword");
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
             {
-                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(dto);
             }
-            return View(dto);
         }
 
         public IActionResult ResetPassword()
@@ -194,26 +155,25 @@ namespace RideShare_Connect.Controllers
                 return View(dto);
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                // Step 2: Verify OTP and reset password
-                var response = await httpClient.PostAsJsonAsync("api/drivers/reset-password", dto);
-                if (response.IsSuccessStatusCode)
-                {
-                    TempData["SuccessMessage"] = "Password reset successful. Please log in with your new password.";
-                    return RedirectToAction("Login");
-                }
-                var error = await response.Content.ReadAsStringAsync();
-                ModelState.AddModelError(string.Empty, $"Error: {error}");
-                TempData.Keep("UserEmailForReset"); // Keep email if API call fails
+                await _driverAccountService.ResetPasswordAsync(dto);
+                TempData["SuccessMessage"] = "Password reset successful. Please log in with your new password.";
+                return RedirectToAction("Login");
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
             {
-                ModelState.AddModelError(string.Empty, $"Network error: {ex.Message}");
+                ModelState.AddModelError(string.Empty, ex.Message);
                 TempData.Keep("UserEmailForReset");
+                return View(dto);
             }
-            return View(dto);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while resetting the password.");
+                _logger.LogError(ex, "Unexpected error during driver password reset for {Email}", dto.Email);
+                TempData.Keep("UserEmailForReset");
+                return View(dto);
+            }
         }
     }
 }

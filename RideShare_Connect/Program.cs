@@ -3,18 +3,16 @@ using RideShareConnect.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Identity;
+using RideShare_Connect.Models.AdminManagement;
+using RideShare_Connect.Models.UserManagement;
+using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddHttpClient("RideShareApi", client =>
-{
-    client.BaseAddress = new Uri("https://localhost:7038/");
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -53,13 +51,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         sqlServerOptionsAction: sqlOptions =>
         {
             sqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 5,                              
-                maxRetryDelay: TimeSpan.FromSeconds(10),       
-                errorNumbersToAdd: null);                       
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
         }
     )
 );
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
+builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
+builder.Services.AddScoped<IEmailService, LoggingEmailService>();
+builder.Services.AddScoped<IUserAccountService, UserAccountService>();
+builder.Services.AddScoped<IDriverAccountService, DriverAccountService>();
+builder.Services.AddScoped<IAdminAccountService, AdminAccountService>();
+builder.Services.AddScoped<IRideBookingService, RideBookingService>();
 builder.Services.AddHostedService<VerificationReminderService>();
 
 var app = builder.Build();

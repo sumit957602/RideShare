@@ -7,11 +7,9 @@ using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.ViewModels;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.PaymentManagement;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text.Json;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using RideShare_Connect.Services;
 
 namespace RideShare_Connect.Controllers
 {
@@ -19,12 +17,12 @@ namespace RideShare_Connect.Controllers
     {
         private readonly AppDbContext _db;
         private readonly ILogger<DriverDashboardController> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IDriverAccountService _driverAccountService;
 
-        public DriverDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<DriverDashboardController> logger)
+        public DriverDashboardController(AppDbContext db, IDriverAccountService driverAccountService, ILogger<DriverDashboardController> logger)
         {
             _db = db;
-            _httpClientFactory = httpClientFactory;
+            _driverAccountService = driverAccountService;
             _logger = logger;
         }
 
@@ -486,39 +484,17 @@ namespace RideShare_Connect.Controllers
 
             try
             {
-                var httpClient = _httpClientFactory.CreateClient("RideShareApi");
-                var dto = new VehicleRegisterDto
-                {
-                    CarMaker = model.CarMaker,
-                    CarModel = model.CarModel,
-                    VehicleType = model.VehicleType,
-                    LicensePlate = model.LicensePlate,
-                    Year = model.Year
-                };
-
-                var response = await httpClient.PostAsJsonAsync($"api/Vehicles/register?driverId={userId}", dto);
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Driver));
-                }
-
-                string? apiError;
-                try
-                {
-                    var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-                    apiError = problem?.Detail ?? problem?.Title;
-                }
-                catch (Exception)
-                {
-                    apiError = await response.Content.ReadAsStringAsync();
-                }
-
-                _logger.LogError("Failed to register vehicle: {Error}", apiError);
-                ModelState.AddModelError(string.Empty, string.IsNullOrWhiteSpace(apiError) ? "Failed to register vehicle." : apiError);
+                await _driverAccountService.RegisterVehicleAsync(userId, model);
+                return RedirectToAction(nameof(Driver));
+            }
+            catch (ServiceException ex)
+            {
+                _logger.LogWarning(ex, "Failed to register vehicle for driver {DriverId}", userId);
+                ModelState.AddModelError(string.Empty, ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error registering vehicle");
+                _logger.LogError(ex, "Error registering vehicle for driver {DriverId}", userId);
                 ModelState.AddModelError(string.Empty, "An error occurred while registering vehicle.");
             }
 
