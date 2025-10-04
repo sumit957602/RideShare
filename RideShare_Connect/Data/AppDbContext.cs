@@ -21,6 +21,7 @@ namespace RideShareConnect.Data
         public DbSet<UserSettings> UserSettings { get; set; }
         public DbSet<LoginHistory> LoginHistories { get; set; }
         public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         // Ride Management
         public DbSet<Ride> Rides { get; set; }
@@ -35,6 +36,8 @@ namespace RideShareConnect.Data
         public DbSet<VehicleDocument> VehicleDocuments { get; set; }
         public DbSet<DriverProfile> DriverProfiles { get; set; }
         public DbSet<DriverRating> DriverRatings { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<DriverPasswordResetToken> DriverPasswordResetTokens { get; set; }
         public DbSet<MaintenanceRecord> MaintenanceRecords { get; set; }
         public DbSet<DocumentReminder> DocumentReminders { get; set; }
 
@@ -44,6 +47,7 @@ namespace RideShareConnect.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<DriverWallet> DriverWallets { get; set; }
         public DbSet<DriverWalletTransaction> DriverWalletTransactions { get; set; }
+        public DbSet<DriverEarning> DriverEarnings { get; set; }
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Commission> Commissions { get; set; }
         public DbSet<PaymentMethod> PaymentMethods { get; set; }
@@ -56,10 +60,53 @@ namespace RideShareConnect.Data
         public DbSet<SystemLog> SystemLogs { get; set; }
         public DbSet<Analytics> Analytics { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Vehicle>()
+                .HasOne(v => v.Driver)
+                .WithMany()
+                .HasForeignKey(v => v.DriverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.ReportedUser)
+                .WithMany()
+                .HasForeignKey(ur => ur.ReportedUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.ReportingUser)
+                .WithMany()
+                .HasForeignKey(ur => ur.ReportingUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<UserReport>()
+                .HasOne(ur => ur.HandledByAdmin)
+                .WithMany()
+                .HasForeignKey(ur => ur.HandledByAdminId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Booking)
+                .WithMany()
+                .HasForeignKey(p => p.BookingId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.PaymentMethod)
+                .WithMany()
+                .HasForeignKey(p => p.PaymentMethodId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<UserTransactionSummary>()
                 .HasOne(t => t.Ride)
