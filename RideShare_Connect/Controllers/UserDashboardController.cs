@@ -6,25 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 using RideShare_Connect.DTOs;
-using System.Net.Http;
-using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using RideShare_Connect.Services;
 
 namespace RideShare_Connect.Controllers
 {
     public class UserDashboardController : Controller
     {
         private readonly AppDbContext _db;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IUserAccountService _userAccountService;
+        private readonly IRideBookingService _rideBookingService;
         private readonly ILogger<UserDashboardController> _logger;
         private readonly IConfiguration _config;
 
-        public UserDashboardController(AppDbContext db, IHttpClientFactory httpClientFactory, ILogger<UserDashboardController> logger, IConfiguration config)
+        public UserDashboardController(AppDbContext db, IUserAccountService userAccountService, IRideBookingService rideBookingService, ILogger<UserDashboardController> logger, IConfiguration config)
         {
             _db = db;
-            _httpClientFactory = httpClientFactory;
+            _userAccountService = userAccountService;
+            _rideBookingService = rideBookingService;
             _logger = logger;
             _config = config;
         }
@@ -114,19 +114,16 @@ namespace RideShare_Connect.Controllers
                 return RedirectToAction("Login", "UserAccount");
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                var response = await httpClient.GetAsync($"api/Users/profile?userId={userId}");
-                if (response.IsSuccessStatusCode)
-                {
-                    var userProfile = await response.Content.ReadFromJsonAsync<UserProfileDto>();
-                    return View(userProfile);
-                }
-
-                _logger.LogError("Failed to fetch profile for user {UserId}: {StatusCode}", userId, response.StatusCode);
+                var userProfile = await _userAccountService.GetProfileAsync(userId);
+                return View(userProfile);
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch profile for user {UserId}", userId);
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching profile for user {UserId}", userId);
             }
@@ -153,44 +150,19 @@ namespace RideShare_Connect.Controllers
                 PhoneNumber = profile.PhoneNumber
             };
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             try
             {
-                var response = await httpClient.PutAsJsonAsync($"api/Users/profile?userId={userId}", updateDto);
-                if (!response.IsSuccessStatusCode)
-                {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Error updating profile for user {UserId}: {StatusCode} - {Error}", userId, response.StatusCode, errorContent);
-
-                    try
-                    {
-                        var problemDetails = JsonSerializer.Deserialize<ValidationProblemDetails>(errorContent);
-                        if (problemDetails?.Errors != null)
-                        {
-                            foreach (var key in problemDetails.Errors.Keys)
-                            {
-                                foreach (var error in problemDetails.Errors[key])
-                                {
-                                    ModelState.AddModelError(key, error);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            ModelState.AddModelError(string.Empty, errorContent);
-                        }
-                    }
-                    catch (JsonException)
-                    {
-                        ModelState.AddModelError(string.Empty, errorContent);
-                    }
-
-                    return View(profile);
-                }
+                await _userAccountService.UpdateProfileAsync(userId, updateDto);
             }
-            catch (HttpRequestException ex)
+            catch (ServiceException ex)
             {
-                _logger.LogError(ex, "HTTP request error while updating profile for user {UserId}", userId);
+                _logger.LogWarning(ex, "Validation error while updating profile for user {UserId}", userId);
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(profile);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while updating profile for user {UserId}", userId);
                 ModelState.AddModelError(string.Empty, "An error occurred while updating profile.");
                 return View(profile);
             }
@@ -271,7 +243,6 @@ namespace RideShare_Connect.Controllers
                 return Unauthorized();
             }
 
-            var httpClient = _httpClientFactory.CreateClient("RideShareApi");
             var requestDto = new RideBookingRequestDto
             {
                 RideId = id,
@@ -283,14 +254,21 @@ namespace RideShare_Connect.Controllers
                 DistanceKm = dto.DistanceKm
             };
 
-            var response = await httpClient.PostAsJsonAsync("api/RideBookings/accept", requestDto);
-            var content = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return Content(content, "application/json");
+                var result = await _rideBookingService.BookRideAsync(requestDto);
+                return Json(result);
             }
-
-            return StatusCode((int)response.StatusCode, content);
+            catch (ServiceException ex)
+            {
+                _logger.LogWarning(ex, "Failed to book ride {RideId} for user {UserId}", id, userId);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while booking ride {RideId} for user {UserId}", id, userId);
+                return StatusCode(500, "An unexpected error occurred while booking the ride.");
+            }
         }
     }
 }
