@@ -41,77 +41,30 @@ namespace RideShare_Connect.Controllers
                 return View(model);
             }
 
-            try
+            if (!string.IsNullOrWhiteSpace(model.ConfirmPassword) && model.Password != model.ConfirmPassword)
             {
-                var result = await _userAccountService.SendVerificationOtpAsync(model);
-                TempData["SuccessMessage"] = result.Message ?? "An OTP has been sent to your email. Please check your inbox to verify and complete registration.";
-                TempData["RegistrationId"] = result.Id;
-                return RedirectToAction("VerifyRegistrationOtp");
-            }
-            catch (ServiceException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                _logger.LogWarning(ex, "Error sending registration OTP for {Email}", model.Email);
+                ModelState.AddModelError(nameof(model.ConfirmPassword), "Password and confirmation do not match.");
                 return View(model);
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred while sending the registration OTP.");
-                _logger.LogError(ex, "Unexpected error during registration OTP send for {Email}", model.Email);
-                return View(model);
-            }
-        }
-
-
-        public IActionResult VerifyRegistrationOtp()
-        {
-            if (TempData["RegistrationId"] == null)
-            {
-                TempData["ErrorMessage"] = "Registration process not initiated or expired. Please register again.";
-                return RedirectToAction("Register");
-            }
-
-            TempData.Keep("RegistrationId");
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyRegistrationOtp(string otp)
-        {
-            var registrationId = TempData["RegistrationId"]?.ToString();
-            if (string.IsNullOrEmpty(registrationId))
-            {
-                TempData["ErrorMessage"] = "Registration process expired. Please try again.";
-                return RedirectToAction("Register");
-            }
-
-            var verifyDto = new UserRegisterVerifyDto
-            {
-                RegistrationId = registrationId,
-                Otp = otp
-            };
 
             try
             {
-                await _userAccountService.RegisterUserAsync(verifyDto);
+                await _userAccountService.RegisterUserAsync(model);
                 TempData["SuccessMessage"] = "User registered successfully! You can now log in.";
-                _logger.LogInformation("User registration completed for RegistrationId {RegistrationId}.", registrationId);
+                _logger.LogInformation("User registration completed for {Email}.", model.Email);
                 return RedirectToAction("Login");
             }
             catch (ServiceException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
-                _logger.LogWarning(ex, "Error verifying OTP for RegistrationId {RegistrationId}.", registrationId);
-                TempData["RegistrationId"] = registrationId;
-                return View();
+                _logger.LogWarning(ex, "Error registering user {Email}", model.Email);
+                return View(model);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred during OTP verification.");
-                _logger.LogError(ex, "Unexpected error during OTP verification for RegistrationId {RegistrationId}.", registrationId);
-                TempData["RegistrationId"] = registrationId;
-                return View();
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred during registration.");
+                _logger.LogError(ex, "Unexpected error during registration for {Email}", model.Email);
+                return View(model);
             }
         }
         public IActionResult Login()

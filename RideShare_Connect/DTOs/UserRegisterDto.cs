@@ -19,7 +19,5 @@ namespace RideShare_Connect.DTOs
         public string FullName { get; set; }
 
         public string UserType { get; set; } = "Rider";
-
-        public string? Otp { get; set; }
     }
 }

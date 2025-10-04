@@ -11,7 +11,6 @@ using RideShareConnect.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 
 namespace RideShare_Connect.Services
 {
@@ -23,8 +22,6 @@ namespace RideShare_Connect.Services
         private readonly IDistributedCache _cache;
         private readonly IEmailService _emailService;
         private readonly ILogger<UserAccountService> _logger;
-
-        private record PendingRegistration(UserRegisterDto User, string Otp);
 
         public UserAccountService(
             AppDbContext context,
@@ -42,74 +39,33 @@ namespace RideShare_Connect.Services
             _logger = logger;
         }
 
-        public async Task<RegistrationOtpResponseDto> SendVerificationOtpAsync(UserRegisterDto dto)
+        public async Task RegisterUserAsync(UserRegisterDto dto)
         {
             if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             {
                 throw new ServiceException("User with this email already exists.");
             }
 
+            if (!string.IsNullOrWhiteSpace(dto.ConfirmPassword) && dto.Password != dto.ConfirmPassword)
+            {
+                throw new ServiceException("Password and confirmation do not match.");
+            }
+
             dto.UserType = string.IsNullOrWhiteSpace(dto.UserType) ? "Rider" : dto.UserType;
-
-            var otp = new Random().Next(100000, 999999).ToString();
-            var registrationId = Guid.NewGuid().ToString();
-            var cacheKey = $"Registration-{registrationId}";
-            var pending = new PendingRegistration(dto, otp);
-            var json = JsonSerializer.Serialize(pending);
-
-            await _cache.SetStringAsync(
-                cacheKey,
-                json,
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
-                });
-
-            await _emailService.SendOtpEmailAsync(dto.Email, dto.FullName ?? "New User", otp, "Registration");
-
-            return new RegistrationOtpResponseDto
-            {
-                Id = registrationId,
-                Message = "An OTP has been sent to your email for verification."
-            };
-        }
-
-        public async Task RegisterUserAsync(UserRegisterVerifyDto verificationDto)
-        {
-            var cacheKey = $"Registration-{verificationDto.RegistrationId}";
-            var registrationJson = await _cache.GetStringAsync(cacheKey);
-
-            if (string.IsNullOrEmpty(registrationJson))
-            {
-                throw new ServiceException("Invalid or expired registration.");
-            }
-
-            var pending = JsonSerializer.Deserialize<PendingRegistration>(registrationJson);
-            if (pending == null || pending.Otp != verificationDto.Otp)
-            {
-                throw new ServiceException("Invalid or expired OTP.");
-            }
-
-            var userRegisterDto = pending.User;
-
-            if (await _context.Users.AnyAsync(u => u.Email == userRegisterDto.Email))
-            {
-                throw new ServiceException("User with this email already exists.");
-            }
 
             var newUser = new User
             {
-                Email = userRegisterDto.Email,
-                PhoneNumber = userRegisterDto.PhoneNumber,
-                UserType = userRegisterDto.UserType ?? "Rider",
+                Email = dto.Email,
+                PhoneNumber = dto.PhoneNumber,
+                UserType = dto.UserType ?? "Rider",
                 AccountStatus = "Active",
                 CreatedAt = DateTime.UtcNow
             };
 
-            newUser.PasswordHash = _passwordHasher.HashPassword(newUser, userRegisterDto.Password ?? string.Empty);
+            newUser.PasswordHash = _passwordHasher.HashPassword(newUser, dto.Password ?? string.Empty);
             newUser.UserProfile = new UserProfile
             {
-                FullName = userRegisterDto.FullName,
+                FullName = dto.FullName,
                 Bio = "Default bio message for new users.",
                 ProfilePicture = "https://avatar.iran.liara.run/public/boy?username=Ash",
                 EmergencyContact = "Nan",
@@ -119,7 +75,6 @@ namespace RideShare_Connect.Services
             await _context.SaveChangesAsync();
 
             await _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.UserProfile.FullName);
-            await _cache.RemoveAsync(cacheKey);
         }
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)

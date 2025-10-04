@@ -4,8 +4,7 @@ namespace RideShare_Connect.Services
 {
     public interface IUserAccountService
     {
-        Task<RegistrationOtpResponseDto> SendVerificationOtpAsync(UserRegisterDto dto);
-        Task RegisterUserAsync(UserRegisterVerifyDto verificationDto);
+        Task RegisterUserAsync(UserRegisterDto dto);
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<AuthResponseDto> GoogleSignInAsync(GoogleLoginDto dto);
         Task ForgotPasswordAsync(ForgotPasswordDto dto);
