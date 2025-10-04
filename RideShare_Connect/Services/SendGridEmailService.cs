@@ -16,6 +16,11 @@ namespace RideShare_Connect.Services
         public async Task SendWelcomeEmailAsync(string toEmail, string toName)
         {
             var apiKey = _config["SendGrid:ApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("SendGrid API key is missing or empty. Please configure 'SendGrid:ApiKey'.");
+            }
+
             var client = new SendGridClient(apiKey);
 
             var from = new EmailAddress(_config["SendGrid:SenderEmail"], _config["SendGrid:SenderName"]);
@@ -35,6 +40,11 @@ namespace RideShare_Connect.Services
         public async Task SendOtpEmailAsync(string toEmail, string toName, string otp, string purpose)
         {
             var apiKey = _config["SendGrid:ApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                throw new InvalidOperationException("SendGrid API key is missing or empty. Please configure 'SendGrid:ApiKey'.");
+            }
+
             var client = new SendGridClient(apiKey);
 
             var from = new EmailAddress(_config["SendGrid:SenderEmail"], _config["SendGrid:SenderName"]);
