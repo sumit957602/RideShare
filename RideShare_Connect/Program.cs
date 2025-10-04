@@ -93,7 +93,7 @@ if (string.IsNullOrWhiteSpace(emailApiKey))
 }
 else
 {
-    //builder.Services.AddScoped<IEmailService, BrevoEmailService>();
+    builder.Services.AddScoped<IEmailService, BrevoEmailService>();
 }
 builder.Services.Configure<PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
 builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
