@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using RideShare_Connect.Api.Controllers;
-using RideShare_Connect.Api.Data;
-using RideShare_Connect.Api.DTOs;
+using RideShare_Connect.Controllers.Api;
+using RideShareConnect.Data;
+using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.UserManagement;
-using RideShare_Connect_Backend.Services;
+using RideShare_Connect.Services;
 using System.Linq;
 
 namespace RideShare_Connect_Backend.Tests;
@@ -20,10 +20,10 @@ public class UsersControllerTests
     public async Task GetUsers_ReturnsAllUsers()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         context.Users.AddRange(
             new User { Email = "a@test.com", PasswordHash = "hash", PhoneNumber = "9123456789", UserType = "Rider", AccountStatus = "Active" },
             new User { Email = "b@test.com", PasswordHash = "hash", PhoneNumber = "9234567890", UserType = "Rider", AccountStatus = "Active" }

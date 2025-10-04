@@ -11,7 +11,6 @@ using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Services;
 using System.Text;
-using BackendServices = RideShare_Connect_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,11 +86,10 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
 builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
-builder.Services.AddScoped<IEmailService, LoggingEmailService>();
-builder.Services.AddScoped<BackendServices.IEmailService, BackendServices.SendGridEmailService>();
-builder.Services.Configure<BackendServices.PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
-builder.Services.AddScoped<BackendServices.IPaymentGateway, BackendServices.PaymentGateway>();
-builder.Services.AddScoped<BackendServices.IPaymentService, BackendServices.PaymentService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.Configure<PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
+builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 builder.Services.AddScoped<IDriverAccountService, DriverAccountService>();
 builder.Services.AddScoped<IAdminAccountService, AdminAccountService>();
