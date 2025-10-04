@@ -25,4 +25,8 @@
     <PackageReference Include="Google.Apis.Auth" Version="1.65.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\RideShare_Connect\Models\PaymentManagement\Models\DriverEarning.cs" Link="Models\PaymentManagement\Models\DriverEarning.cs" />
+  </ItemGroup>
+
 </Project>
