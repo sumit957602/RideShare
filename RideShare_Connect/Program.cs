@@ -3,16 +3,25 @@ using RideShareConnect.Data;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 using RideShare_Connect.Models.AdminManagement;
 using RideShare_Connect.Models.UserManagement;
 using RideShare_Connect.Models.VehicleManagement;
 using RideShare_Connect.Services;
+using System.Text;
+using BackendServices = RideShare_Connect_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]!);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -35,6 +44,22 @@ builder.Services.AddAuthentication(options =>
     {
         options.AppId = builder.Configuration["Authentication:Facebook:AppId"]!;
         options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]!;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
     });
 
 builder.Services.AddSession(options =>
@@ -63,11 +88,26 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
 builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
 builder.Services.AddScoped<IEmailService, LoggingEmailService>();
+builder.Services.AddScoped<BackendServices.IEmailService, BackendServices.SendGridEmailService>();
+builder.Services.Configure<BackendServices.PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
+builder.Services.AddScoped<BackendServices.IPaymentGateway, BackendServices.PaymentGateway>();
+builder.Services.AddScoped<BackendServices.IPaymentService, BackendServices.PaymentService>();
 builder.Services.AddScoped<IUserAccountService, UserAccountService>();
 builder.Services.AddScoped<IDriverAccountService, DriverAccountService>();
 builder.Services.AddScoped<IAdminAccountService, AdminAccountService>();
 builder.Services.AddScoped<IRideBookingService, RideBookingService>();
 builder.Services.AddHostedService<VerificationReminderService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://localhost:7221")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -77,13 +117,21 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
