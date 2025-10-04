@@ -204,7 +204,7 @@ namespace RideShare_Connect.Controllers.Api
             var responseDto = new AuthResponseDto
             {
                 Token = tokenString,
-                RefreshToken = refreshToken.Token,
+                //RefreshToken = refreshToken.Token,
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,
@@ -354,7 +354,7 @@ namespace RideShare_Connect.Controllers.Api
             var responseDto = new AuthResponseDto
             {
                 Token = tokenString,
-                RefreshToken = refreshToken.Token,
+                //RefreshToken = refreshToken.Token,
                 UserId = user.Id,
                 Email = user.Email,
                 FullName = user.UserProfile?.FullName,

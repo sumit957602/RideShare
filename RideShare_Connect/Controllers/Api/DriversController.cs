@@ -122,7 +122,7 @@ namespace RideShare_Connect.Controllers.Api
             var response = new AuthResponseDto
             {
                 Token = tokenString,
-                RefreshToken = string.Empty,
+                //RefreshToken = string.Empty,
                 UserId = driver.DriverId,
                 Email = driver.Email,
                 FullName = driver.FullName,

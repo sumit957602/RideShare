@@ -52,7 +52,7 @@ namespace RideShare_Connect.Controllers.Api
                     Destination = rb.Ride.Destination,
                     DepartureTime = rb.Ride.DepartureTime,
                     PricePerSeat = rb.Ride.PricePerSeat,
-                    TotalFare = rb.Ride.PricePerSeat * rb.BookedSeats * rb.DistanceKm
+                    //TotalFare = rb.Ride.PricePerSeat * rb.BookedSeats * rb.DistanceKm
                 })
                 .ToListAsync();
 
