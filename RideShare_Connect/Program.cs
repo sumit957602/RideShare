@@ -86,14 +86,14 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IPasswordHasher<Driver>, PasswordHasher<Driver>>();
 builder.Services.AddScoped<IPasswordHasher<Admin>, PasswordHasher<Admin>>();
-var sendGridApiKey = builder.Configuration["SendGrid:ApiKey"];
-if (string.IsNullOrWhiteSpace(sendGridApiKey))
+var emailApiKey = builder.Configuration["Brevo:ApiKey"] ?? builder.Configuration["SendGrid:ApiKey"];
+if (string.IsNullOrWhiteSpace(emailApiKey))
 {
     builder.Services.AddScoped<IEmailService, LoggingEmailService>();
 }
 else
 {
-    builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+    builder.Services.AddScoped<IEmailService, BrevoEmailService>();
 }
 builder.Services.Configure<PaymentGatewayOptions>(builder.Configuration.GetSection("PaymentGateway"));
 builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
