@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using RideShare_Connect.Api.Controllers;
-using RideShare_Connect.Api.Data;
-using RideShare_Connect.Api.DTOs;
+using RideShare_Connect.Controllers.Api;
+using RideShareConnect.Data;
+using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
-using RideShare_Connect_Backend.Services;
+using RideShare_Connect.Services;
 
 namespace RideShare_Connect_Backend.Tests;
 
@@ -18,10 +18,10 @@ public class DriversControllerTests
     public async Task RegisterDriver_CreatesDriverAndProfile()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
 
         var passwordHasher = new Mock<IPasswordHasher<Driver>>();
         passwordHasher.Setup(h => h.HashPassword(It.IsAny<Driver>(), It.IsAny<string>()))
@@ -56,7 +56,7 @@ public class DriversControllerTests
         // Assert
         var created = result.Result as CreatedAtActionResult;
         Assert.That(created, Is.Not.Null);
-        Assert.That(await context.Driver.CountAsync(), Is.EqualTo(1));
+        Assert.That(await context.Drivers.CountAsync(), Is.EqualTo(1));
         Assert.That(await context.DriverProfiles.CountAsync(), Is.EqualTo(1));
     }
 }

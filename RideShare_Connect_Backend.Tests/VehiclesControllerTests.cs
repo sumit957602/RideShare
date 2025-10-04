@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using RideShare_Connect.Api.Controllers;
-using RideShare_Connect.Api.Data;
-using RideShare_Connect.Api.DTOs;
+using RideShare_Connect.Controllers.Api;
+using RideShareConnect.Data;
+using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.VehicleManagement;
 
 namespace RideShare_Connect_Backend.Tests;
@@ -15,11 +15,11 @@ public class VehiclesControllerTests
     public async Task RegisterVehicle_CreatesVehicle()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        using var context = new AppDbContext(options);
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
         await context.SaveChangesAsync();
 
         var passwordHasher = new Mock<IPasswordHasher<Driver>>();

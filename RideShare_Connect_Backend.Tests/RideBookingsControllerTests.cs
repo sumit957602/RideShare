@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using RideShare_Connect.Api.Controllers;
-using RideShare_Connect.Api.Data;
+using RideShare_Connect.Controllers.Api;
+using RideShareConnect.Data;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Models.RideManagement;
 using RideShare_Connect.Models.PaymentManagement;
@@ -17,12 +17,12 @@ public class RideBookingsControllerTests
     public async Task AcceptRide_ValidRequest_CreatesBookingPaymentAndTransactionSummary()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
-        using var context = new ApplicationDbContext(options);
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        using var context = new AppDbContext(options);
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
         var ride = new Ride
         {
@@ -76,12 +76,12 @@ public class RideBookingsControllerTests
     [Test]
     public async Task AcceptRide_NonCashRequest_UpdatesTransactionSummaryWithTransactionAmount()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
-        using var context = new ApplicationDbContext(options);
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        using var context = new AppDbContext(options);
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
         var ride = new Ride
         {
@@ -124,12 +124,12 @@ public class RideBookingsControllerTests
     [Test]
     public async Task AcceptRide_SubsequentBookings_UpdateExistingTransactionSummary()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
-        using var context = new ApplicationDbContext(options);
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        using var context = new AppDbContext(options);
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
         var ride = new Ride
         {
@@ -188,7 +188,7 @@ public class RideBookingsControllerTests
             .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         using var context = new ApplicationDbContext(options);
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d@test.com", PasswordHash = "hash", FullName = "Driver", PhoneNumber = "9123456789" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC123", VerificationStatus = "Pending", Year = 2020 });
         var ride = new Ride
         {
@@ -262,8 +262,8 @@ public class RideBookingsControllerTests
             .Options;
         using var context = new ApplicationDbContext(options);
 
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d1@test.com", PasswordHash = "hash", FullName = "Driver1", PhoneNumber = "9123456789" });
-        context.Driver.Add(new Driver { DriverId = 2, Email = "d2@test.com", PasswordHash = "hash", FullName = "Driver2", PhoneNumber = "9123456790" });
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d1@test.com", PasswordHash = "hash", FullName = "Driver1", PhoneNumber = "9123456789" });
+        context.Drivers.Add(new Driver { DriverId = 2, Email = "d2@test.com", PasswordHash = "hash", FullName = "Driver2", PhoneNumber = "9123456790" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC1", VerificationStatus = "Pending", Year = 2020 });
         context.Vehicles.Add(new Vehicle { Id = 2, DriverId = 2, CarMaker = "Honda", Model = "Accord", VehicleType = "Sedan", LicensePlate = "ABC2", VerificationStatus = "Pending", Year = 2021 });
         context.Rides.Add(new Ride { Id = 1, DriverId = 1, VehicleId = 1, Origin = "O1", Destination = "D1", DepartureTime = DateTime.UtcNow.AddHours(1), TotalSeats = 3, AvailableSeats = 3, PricePerSeat = 10m, DistanceKm = 10, Status = "Scheduled" });
@@ -294,8 +294,8 @@ public class RideBookingsControllerTests
             .Options;
         using var context = new ApplicationDbContext(options);
 
-        context.Driver.Add(new Driver { DriverId = 1, Email = "d1@test.com", PasswordHash = "hash", FullName = "Driver1", PhoneNumber = "9123456789" });
-        context.Driver.Add(new Driver { DriverId = 2, Email = "d2@test.com", PasswordHash = "hash", FullName = "Driver2", PhoneNumber = "9123456790" });
+        context.Drivers.Add(new Driver { DriverId = 1, Email = "d1@test.com", PasswordHash = "hash", FullName = "Driver1", PhoneNumber = "9123456789" });
+        context.Drivers.Add(new Driver { DriverId = 2, Email = "d2@test.com", PasswordHash = "hash", FullName = "Driver2", PhoneNumber = "9123456790" });
         context.Vehicles.Add(new Vehicle { Id = 1, DriverId = 1, CarMaker = "Toyota", Model = "Camry", VehicleType = "Sedan", LicensePlate = "ABC1", VerificationStatus = "Pending", Year = 2020 });
         context.Vehicles.Add(new Vehicle { Id = 2, DriverId = 2, CarMaker = "Honda", Model = "Accord", VehicleType = "Sedan", LicensePlate = "ABC2", VerificationStatus = "Pending", Year = 2021 });
         context.Rides.Add(new Ride { Id = 1, DriverId = 1, VehicleId = 1, Origin = "O1", Destination = "D1", DepartureTime = DateTime.UtcNow.AddHours(1), TotalSeats = 3, AvailableSeats = 3, PricePerSeat = 10m, DistanceKm = 10, Status = "Scheduled" });

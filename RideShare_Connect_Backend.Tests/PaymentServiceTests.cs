@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using RideShare_Connect.Api.Data;
+using RideShareConnect.Data;
 using RideShare_Connect.DTOs;
 using RideShare_Connect.Services;
 using RideShare_Connect.Models.PaymentManagement;
@@ -27,10 +27,10 @@ public class PaymentServiceTests
     public async Task ProcessPaymentAsync_StoresGatewayTransaction()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
         var dto = new PaymentProcessDto
         {
@@ -53,10 +53,10 @@ public class PaymentServiceTests
     [Test]
     public async Task UpdatePaymentStatusAsync_UpdatesStatus()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
         var dto = new PaymentProcessDto
         {
@@ -78,10 +78,10 @@ public class PaymentServiceTests
     public async Task AddMoneyAsync_CreatesWallet_WhenNoneExists()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
         var dto = new AddMoneyDto { UserId = 1, Amount = 50m, PaymentMethod = "UPI", TransactionStatus = "Successful" };
 
@@ -101,10 +101,10 @@ public class PaymentServiceTests
     [TestCase("Pending")]
     public async Task AddMoneyAsync_DoesNotIncreaseBalance_ForNonSuccessfulStatus(string status)
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
         var dto = new AddMoneyDto { UserId = 1, Amount = 50m, PaymentMethod = "UPI", TransactionStatus = status };
 
@@ -120,10 +120,10 @@ public class PaymentServiceTests
     public async Task GetWalletBalanceAsync_ReturnsZero_WhenWalletMissing()
     {
         // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        using var context = new ApplicationDbContext(options);
+        using var context = new AppDbContext(options);
         var service = new PaymentService(context, new FakeGateway());
 
         // Act
